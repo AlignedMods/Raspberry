@@ -1,7 +1,6 @@
 #include "player.hpp"
 #include "raylib.h"
 #include "game.hpp"
-#include <iostream>
 
 Player::Player() {
 	m_X = 0.0f;
@@ -62,10 +61,6 @@ void Player::CheckCollisions() {
 					m_Velocity.x = 0;
 					m_X = rec.GetX() - rec.GetSize();
 				}
-			}
-
-			if (m_Velocity.y > 0) {
-
 			} else if (m_Velocity.x < 0) {
 				if (m_IsJumping) {
 
@@ -74,7 +69,6 @@ void Player::CheckCollisions() {
 					m_X = rec.GetX() + rec.GetSize();
 				}
 			}
-
 		} else {
 			m_IsOnGround = false;
 		}
