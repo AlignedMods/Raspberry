@@ -5,36 +5,37 @@ workspace "Raspberry"
 		optimize "On"
 		architecture "x86_64"
 
+		kind "WindowedApp"
+		language "C++"
+		includedirs {"include", "src"}
+		
+		-- linking with raylib
+		libdirs {"libs"}
+		links {"raylib", "gdi32", "winmm"}
+
 	filter "configurations:Debug"
 		defines {"R_DEBUG"}
 		symbols "On"
 		architecture "x86_64"
 
-	-- for building the actual game
-	project "Raspberry"
 		kind "ConsoleApp"
 		language "C++"
 		includedirs {"include", "src"}
-		location "build/"
-		files {"src/**.cpp"}
-		removefiles {"src/builder/**.cpp"}
 
 		-- linking with raylib
 		libdirs {"libs"}
-		links {"raylibdll"}
+		links {"raylib", "gdi32", "winmm"}
+
+	-- for building the actual game
+	project "Raspberry"
+		location "build/"
+		files {"src/**.cpp", "src/**.hpp"}
+		removefiles {"src/builder/**.cpp", "src/builder/**.hpp"}
 
 	-- for bulding the map builder
 	project "Raspberry-Builder"
-		kind "ConsoleApp"
-		language "C++"
-		includedirs {"include", "src"}
 		location "build/"
-		files {"src/builder/**.cpp", "src/tile/tile.cpp"}
+		files {"src/builder/**.cpp", "src/builder/**.hpp", "src/tile/tile.cpp", "src/tile/tile.hpp"}
 
 		-- Necessary for certain things like the tile system
 		defines {"BUILDER"}
-
-		--linking with raylib
-		libdirs {"libs"}
-		links {"raylibdll"}
-		

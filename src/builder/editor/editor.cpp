@@ -4,6 +4,7 @@
 #include "raygui.h"
 #include "tile/tile.hpp"
 
+#include <cmath>
 #include <ios>
 #include <iostream>
 #include <fstream>
@@ -52,9 +53,9 @@ void Editor::Update() {
 	}
 
 	if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-		if (!CheckCollisionPointRec({static_cast<float>(GetMouseX()), static_cast<float>(GetMouseY())}, {17 * 64, 0, 4 * 64, 12 * 64})) {
+		if (!CheckCollisionPointRec({(float)(GetMouseX()), (float)(GetMouseY())}, {17 * 64, 0, 4 * 64, 12 * 64})) {
 			// Ignore the following warning (the numbers aren't allowed to be floats since the tile system wouldn't work)
-			m_Tiles.push_back(Tile((TileType)(m_SelectedTile + 1), {static_cast<int>((GetMouseX() + (int)m_Camera.target.x) / 64 / m_Camera.zoom), static_cast<int>((GetMouseY() + (int)m_Camera.target.y) / 64 / m_Camera.zoom)}));
+			m_Tiles.push_back(Tile((TileType)(m_SelectedTile + 1), {std::floor((GetMouseX() + m_Camera.target.x) / 64), std::floor((GetMouseY() + m_Camera.target.y) / 64)}));
 		}
 	}
 }
