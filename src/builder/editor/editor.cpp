@@ -1,13 +1,27 @@
+/*
+* I know this is really undocumented and i will try to add comments soon ^_^
+*
+*
+*
+*
+*
+*
+*
+*
+*
+*
+*
+*
+* no actually though i'm starting to get confused here
+*/
+
 #include "editor.hpp"
 #include "builder/builder.hpp"
 #include "raylib.h"
 #include "raygui.h"
 #include "tile/tile.hpp"
 
-#include <cmath>
-#include <ios>
-#include <iostream>
-#include <fstream>
+#include "pch.hpp"
 
 Editor::Editor(Camera2D& camera)  : m_Camera(camera) {
 	m_SelectedTile = 0;
@@ -31,9 +45,7 @@ void Editor::Update() {
 
 	if (GetMouseWheelMove() > 0) {
 		if (IsKeyDown(KEY_LEFT_CONTROL)) {
-			std::cout << "Resizing!";
-			// I really dont want to implement this yet
-			//m_Camera.zoom = 0.5f;
+			m_Camera.zoom += 0.2f;
 		} else {
 			std::cout << "Scrolling";
 			if (m_SelectedTile == 3) {
@@ -44,18 +56,21 @@ void Editor::Update() {
 		}
 		m_Tiles.push_back(Tile((TileType)(m_SelectedTile + 1), {18.5, 7}, TileArgs::NO_CAMERA));
 	} else if (GetMouseWheelMove() < 0) {
-		if (m_SelectedTile == 0) {
-			m_SelectedTile = 3;
+		if (IsKeyDown(KEY_LEFT_CONTROL)) {
+			m_Camera.zoom -= 0.2f;
 		} else {
-			m_SelectedTile--;
+			if (m_SelectedTile == 0) {
+				m_SelectedTile = 3;
+			} else {
+				m_SelectedTile--;
+			}
 		}
 		m_Tiles.push_back(Tile((TileType)(m_SelectedTile + 1), {18.5, 7}, TileArgs::NO_CAMERA));
 	}
 
 	if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
 		if (!CheckCollisionPointRec({(float)(GetMouseX()), (float)(GetMouseY())}, {17 * 64, 0, 4 * 64, 12 * 64})) {
-			// Ignore the following warning (the numbers aren't allowed to be floats since the tile system wouldn't work)
-			m_Tiles.push_back(Tile((TileType)(m_SelectedTile + 1), {std::floor((GetMouseX() + m_Camera.target.x) / 64), std::floor((GetMouseY() + m_Camera.target.y) / 64)}));
+			m_Tiles.push_back(Tile((TileType)(m_SelectedTile + 1), {std::floor((GetMouseX() + m_Camera.target.x) / 64 / m_Camera.zoom), std::floor((GetMouseY() + m_Camera.target.y) / 64 / m_Camera.zoom)}));
 		}
 	}
 }

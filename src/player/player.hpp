@@ -32,8 +32,8 @@ private:
 
 	Vector2 m_Velocity;
 
-	bool m_IsOnGround;
 	bool m_IsJumping;
+	bool m_IsOnGround;
 
 	Texture2D m_Texture;
 	Level* m_Level = nullptr;

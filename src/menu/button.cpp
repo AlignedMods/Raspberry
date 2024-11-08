@@ -1,8 +1,6 @@
 #include "button.hpp"
 #include "raylib.h"
 
-#include <iostream>
-
 #define TESTING 0
 
 Button::Button(Menu* menu, int x, int y, const char* txt) {

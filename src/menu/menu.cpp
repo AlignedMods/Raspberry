@@ -1,6 +1,7 @@
 #include "menu.hpp"
 #include "game.hpp"
-#include <iostream>
+
+#include "pch.hpp"
 
 Menu::Menu() {
 	m_Button = new Button(this, 500, 300, "Start");

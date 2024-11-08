@@ -2,6 +2,8 @@
 #include "raylib.h"
 #include "game.hpp"
 
+#include "core/core.hpp"
+
 Player::Player() {
 	m_X = 0.0f;
 	m_Y = 0.0f;
@@ -40,39 +42,57 @@ void Player::Update() {
 		Jump();
 	}
 
-
 	CheckCollisions();
 }
 
 void Player::CheckCollisions() {
-	auto tiles = m_Level->GetAllTiles();	
+	auto tiles = m_Level->GetAllTiles();
+
+	// Flags to track different collision states
+	bool isGroundCollision = false;
+	bool isLeftCollision = false;
+	bool isRightCollision = false;	
+
+	Vector2 finalPos = {m_X, m_Y};
 
 	for (auto rec : tiles) {
 		if (CheckCollisionRecs({m_X, m_Y, m_Size, m_Size}, {rec.GetX(), rec.GetY(), rec.GetSize(), rec.GetSize()})) {
+			// Collision from the top
 			if (m_Velocity.y > 0) {
-				m_Y = rec.GetY() - rec.GetSize();
+				Debug("Collision going down!");
+				finalPos.y = rec.GetY() - m_Size;
 				m_Velocity.y = 0;
-				m_IsOnGround = true;
+				isGroundCollision = true;
 				m_IsJumping = false;
-			} else if (m_Velocity.x > 0) {
-				if (m_IsJumping) {
-
-				} else {
-					m_Velocity.x = 0;
-					m_X = rec.GetX() - rec.GetSize();
-				}
-			} else if (m_Velocity.x < 0) {
-				if (m_IsJumping) {
-
-				} else {
-					m_Velocity.x = 0;
-					m_X = rec.GetX() + rec.GetSize();
-				}
 			}
-		} else {
-			m_IsOnGround = false;
 		}
 	}
+
+	m_Y = finalPos.y;
+	m_IsOnGround = isGroundCollision;
+
+	// Check horizontal collisions separately
+	for (auto rec : tiles) {
+		// Only check for horizontal collisions if the player is on the ground (or if that's your intended behavior)
+		if (CheckCollisionRecs({m_X, m_Y, m_Size, m_Size}, {rec.GetX(), rec.GetY(), rec.GetSize(), rec.GetSize()})) {
+			// Going right
+			if (m_Velocity.x > 0 && m_X + m_Size >= rec.GetX()) {
+				Debug("Collision going right!");
+				m_Velocity.x = 0;
+				finalPos.x = rec.GetX() - m_Size;
+				isRightCollision = true;
+			} 
+			// Going left
+			else if (m_Velocity.x < 0 && m_X <= rec.GetX() + rec.GetSize()) {
+				Debug("Collision going left!");
+				m_Velocity.x = 0;
+				finalPos.x = rec.GetX() + rec.GetSize();
+				isLeftCollision = true;
+			}
+		}
+	}
+
+	m_X = finalPos.x;
 }
 
 float Player::GetX() {

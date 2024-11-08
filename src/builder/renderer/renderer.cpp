@@ -4,7 +4,7 @@
 #include "raygui.h"
 #include "tile/tile.hpp"
 
-#include <iostream>
+#include "pch.hpp"
 
 void Renderer::RenderTexture(Texture2D texture, float x, float y) {
 	if (texture.width != texture.height) {

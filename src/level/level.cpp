@@ -2,11 +2,7 @@
 #include "collectables/raspberry.hpp"
 #include "tile/tile.hpp"
 
-#include <fstream>
-#include <iostream>
-#include <memory>
-#include <sstream>
-#include <string>
+#include "pch.hpp"
 
 void Level::AddPlayer() {
 	m_Player = std::make_shared<Player>();

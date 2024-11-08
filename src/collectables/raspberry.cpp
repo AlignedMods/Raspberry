@@ -2,9 +2,7 @@
 #include "raylib.h"
 #include "game.hpp"
 
-#include <cstdlib>
-#include <ctime>
-//#include <iostream>
+#include "pch.hpp"
 
 Raspberry::Raspberry() {
 	std::srand(std::time(0));
