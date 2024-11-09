@@ -4,7 +4,7 @@ cd ..
 
 cd vendor\raylib\
 
-make -j
+make -j -f Makefile-raylib
 
 cd ..\..\
 
