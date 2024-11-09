@@ -1,5 +1,7 @@
 # Raspberry
 
+## **NOTE:** Currently Visual Studio just doesn't work and I don't know why, if you know why feel free to tell me!
+
 ## How to build:
 
 ### **1: Prerequisites**
@@ -14,21 +16,13 @@
 
 To generate the build system you wish run:
 
-    premake5 gmake2
+    cd scripts
+    .\build-make.bat        // For Windows
+    ./build-make.sh         // For Linux
 (for make)
 
 **OR**
 
-    premake5 vs2022
+    cd scripts
+    .\build-vs.bat
 (for visual studio)
-
-And after that run:
-
-    make Raspberry // for building raspberry with make
-    ./Raspberry.sln // for opening the project in visual studio
-
-### **3: Running the game**
-
-**You will probably have to copy the Assets and libs/raylib.dll into the build folder or directory you are running the game from**
-
-    ./build/bin/Release/Raspberry.exe

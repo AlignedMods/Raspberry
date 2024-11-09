@@ -1,5 +1,6 @@
 #include "level.hpp"
 #include "collectables/raspberry.hpp"
+#include "core/core.hpp"
 #include "tile/tile.hpp"
 
 #include "pch.hpp"
@@ -54,6 +55,8 @@ bool Level::LoadLevelFromFile(const char* path) {
 
 		pos += 8;
 	}
+
+	Debug("Sucssesfully loaded level!");
 
 	return true;
 }

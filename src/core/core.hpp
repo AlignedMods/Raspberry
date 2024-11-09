@@ -1,8 +1,6 @@
 #pragma once
 
-#include <cstdarg>
-#include <cstdlib>
-#include <iostream>
+#include "pch.hpp"
 
 inline static void Error(const char* message, int errorCode) {
 	std::cerr << "\n\n\033[1;31mERROR: \033[0m" << message << "\n\n\n";
@@ -12,7 +10,7 @@ inline static void Error(const char* message, int errorCode) {
 template <typename T>
 inline static void Debug(T msg) {
 	#ifdef RDEBUG
-	   std::cout << msg << "\n";
+	   std::cout << "\n\n\033[1;32mDEBUG: \033[0m" << msg << "\n\n\n";
 	#endif
 }
 

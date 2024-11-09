@@ -2,8 +2,6 @@
 #include "raylib.h"
 #include "game.hpp"
 
-#include "core/core.hpp"
-
 Player::Player() {
 	m_X = 0.0f;
 	m_Y = 0.0f;
@@ -59,7 +57,6 @@ void Player::CheckCollisions() {
 		if (CheckCollisionRecs({m_X, m_Y, m_Size, m_Size}, {rec.GetX(), rec.GetY(), rec.GetSize(), rec.GetSize()})) {
 			// Collision from the top
 			if (m_Velocity.y > 0) {
-				Debug("Collision going down!");
 				finalPos.y = rec.GetY() - m_Size;
 				m_Velocity.y = 0;
 				isGroundCollision = true;
@@ -77,14 +74,12 @@ void Player::CheckCollisions() {
 		if (CheckCollisionRecs({m_X, m_Y, m_Size, m_Size}, {rec.GetX(), rec.GetY(), rec.GetSize(), rec.GetSize()})) {
 			// Going right
 			if (m_Velocity.x > 0 && m_X + m_Size >= rec.GetX()) {
-				Debug("Collision going right!");
 				m_Velocity.x = 0;
 				finalPos.x = rec.GetX() - m_Size;
 				isRightCollision = true;
 			} 
 			// Going left
 			else if (m_Velocity.x < 0 && m_X <= rec.GetX() + rec.GetSize()) {
-				Debug("Collision going left!");
 				m_Velocity.x = 0;
 				finalPos.x = rec.GetX() + rec.GetSize();
 				isLeftCollision = true;
