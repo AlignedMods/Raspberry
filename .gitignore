@@ -10,4 +10,4 @@ Makefile
 
 # Excludes
 
-!vendor/*
+!vendor/
