@@ -7,7 +7,3 @@ build/
 
 Makefile
 *.sln
-
-# Excludes
-
-!vendor/
