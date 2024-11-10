@@ -1,0 +1,6 @@
+BasedOnStyle: Webkit
+IndentWidth: 4
+ColumnLimit: 80
+AllowShortFunctionsOnASingleLine: Inline
+DerivePointerAlignment: false
+PointerAlignment: Left

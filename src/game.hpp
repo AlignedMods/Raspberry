@@ -1,24 +1,25 @@
 #pragma once
 
-#include "level/level.hpp"
 #include "graphics/renderer.hpp"
+#include "level/level.hpp"
 
 class Game {
 public:
-	Game();
-	~Game();
+  Game();
+  ~Game();
 
-	void Run();
+  void Run();
 
-	void SetCurrentLevel(Level* level);
-	Level* GetCurrentLevel();
+  void SetCurrentLevel(Level *level);
+  Level *GetCurrentLevel();
 
-	void StartGameplay();
-	
-	static Game* Get();
-	static Renderer* GetRenderer();
+  void StartGameplay();
+
+  static Game *Get();
+  static Renderer *GetRenderer();
+
 private:
-	Level* m_CurrentLevel = nullptr;
+  Level *m_CurrentLevel = nullptr;
 
-	bool m_IsGamePlayRunning = false;
+  bool m_IsGamePlayRunning = false;
 };

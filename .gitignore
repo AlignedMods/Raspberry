@@ -1,9 +1,13 @@
+# Directories
+
 build/
-Makefile
-*.exe
-*.sln
 .vs/
-*.dll
-*.o
-*.a
-*.lib
+
+# Files
+
+Makefile
+*.sln
+
+# Excludes
+
+!vendor/*
