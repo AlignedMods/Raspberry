@@ -1,40 +1,54 @@
 #pragma once
 
+#include "core/core.hpp"
 #include "level/level.hpp"
 #include "raylib.h"
 
+#include <pch.hpp>
+
 enum class Direction {
-	nowhere = 0, Up, Down, Right, Left, DownRight, DownLeft
+    nowhere = 0,
+    Up,
+    Down,
+    Right,
+    Left,
+    DownRight,
+    DownLeft
 };
 
 class Level;
 
 class Player {
 public:
-	Player();
-	void Update();
-	void Draw();
-	float GetX();
-	float GetY();
+    Player();
 
-	void Jump();
-	bool IsTileBelowPlayer();
+    void operator=(const Player& player);
+
+    void Update();
+    void Draw();
+    float GetX();
+    float GetY();
+
+    void Jump();
+    bool IsTileBelowPlayer();
+
 private:
-	void CheckCollisions();
+    void CheckCollisions();
 
-	float m_X;
-	float m_Y;
-	float m_Size;
-	float m_Speed;
+    Vector2 m_Pos;
 
-	const float m_Gravity = 0.5f;
-	const float m_GroundBuffer = 2.0f;
+    float m_Size;
+    float m_Speed;
 
-	Vector2 m_Velocity;
+    CollisionBox m_CollisonBox;
 
-	bool m_IsJumping;
-	bool m_IsOnGround;
+    const float m_Gravity = 0.5f;
 
-	Texture2D m_Texture;
-	Level* m_Level = nullptr;
+    Vector2 m_Velocity;
+
+    bool m_Jumping;
+    bool m_OnGround;
+
+    Texture2D m_Texture;
+    std::shared_ptr<Level> m_Level = nullptr;
 };

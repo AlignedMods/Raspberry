@@ -1,19 +1,26 @@
 #include "game.hpp"
 
+#include "collectables/collectable.hpp"
 #include "core/core.hpp"
+#include "core/random.hpp"
 #include "graphics/renderer.hpp"
 #include "menu/menu.hpp"
 #include "player/player.hpp"
 #include "raylib.h"
 #include "tile/tile.hpp"
 
-static Game* s_Instance = nullptr;
-static Renderer* s_Renderer = nullptr;
+#include <pch.hpp>
+
+using std::make_shared;
+using std::shared_ptr;
+
+static Game* s_Instance;
+static shared_ptr<Renderer> s_Renderer;
 
 Game::Game()
 {
     if (!s_Instance) {
-        s_Renderer = new Renderer();
+        s_Renderer = make_shared<Renderer>();
         s_Instance = this;
     } else {
         Error(
@@ -21,13 +28,10 @@ Game::Game()
             "at the same time!",
             1);
     }
-    SetCurrentLevel(new Level());
+    SetCurrentLevel(make_shared<Level>());
 }
 
-Game::~Game()
-{
-    delete m_CurrentLevel;
-}
+Game::~Game() { }
 
 void Game::Run()
 {
@@ -35,6 +39,8 @@ void Game::Run()
     const int windowHeight = 12 * 64;
 
     InitWindow(windowWidth, windowHeight, "Raspberry");
+
+    Random::Init();
 
     SetTargetFPS(60);
 
@@ -59,7 +65,7 @@ void Game::Run()
             camera.target = { m_CurrentLevel->GetPlayer()->GetX(),
                 m_CurrentLevel->GetPlayer()->GetY() };
 
-            m_CurrentLevel->GetRaspberry()->Update();
+            m_CurrentLevel->GetCollectable().Update();
         }
 
         menu.Update();
@@ -77,11 +83,11 @@ void Game::Run()
                 tile.Draw();
             }
 
-            if (m_CurrentLevel->IsRaspberryFound()) {
+            if (m_CurrentLevel->IsCollectableFound()) {
                 DrawText("Found raspberry", 400, 600, 20, GREEN);
             }
 
-            m_CurrentLevel->GetRaspberry()->Draw();
+            m_CurrentLevel->GetCollectable().Draw();
 
             EndMode2D();
         }
@@ -92,14 +98,14 @@ void Game::Run()
     }
 }
 
-void Game::SetCurrentLevel(Level* level)
+void Game::SetCurrentLevel(shared_ptr<Level> level)
 {
     m_CurrentLevel = level;
 }
 
-Level* Game::GetCurrentLevel()
+shared_ptr<Level> Game::GetCurrentLevel()
 {
-    return m_CurrentLevel;
+    return Game::Get()->m_CurrentLevel;
 }
 
 void Game::StartGameplay()
@@ -108,10 +114,10 @@ void Game::StartGameplay()
 
     m_CurrentLevel->AddPlayer();
 
-    m_CurrentLevel->LoadLevelFromFile("hi.lvl");
+    m_CurrentLevel->AddCollectable();
+    m_CurrentLevel->GetCollectable().InitTextures();
 
-    m_CurrentLevel->AddRaspberry();
-    m_CurrentLevel->GetRaspberry()->InitTextures();
+    m_CurrentLevel->LoadLevelFromFile("hi.lvl");
 }
 
 Game* Game::Get()
@@ -119,7 +125,7 @@ Game* Game::Get()
     return s_Instance;
 }
 
-Renderer* Game::GetRenderer()
+shared_ptr<Renderer> Game::GetRenderer()
 {
     return s_Renderer;
 }

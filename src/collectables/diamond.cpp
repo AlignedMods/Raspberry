@@ -1,28 +1,26 @@
-#include "raspberry.hpp"
+#include "diamond.hpp"
 #include "game.hpp"
 #include "raylib.h"
 
-#include "pch.hpp"
-
-void Raspberry::InitTextures()
+void Diamond::InitTextures()
 {
-    Image image = LoadImage("Assets/collectables/raspberry.png");
+    Image image = LoadImage("Assets/collectables/diamond.png");
 
     m_Texture = LoadTextureFromImage(image);
     UnloadImage(image);
 }
 
-void Raspberry::Update()
+void Diamond::Update()
 {
     OnUpdate();
 }
 
-void Raspberry::OnTouch()
+void Diamond::OnTouch()
 {
     Game::GetCurrentLevel()->SetFound();
 }
 
-void Raspberry::OnUpdate()
+void Diamond::OnUpdate()
 {
     if (CheckCollisionRecs(
             { Game::GetCurrentLevel()->GetPlayer()->GetX(),

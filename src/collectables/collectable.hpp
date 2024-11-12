@@ -1,17 +1,22 @@
 #pragma once
 
 #include "raylib.h"
-#include "tile/tile.hpp"
 
 class Collectable {
 public:
-	virtual void OnTouch() {};
-	virtual void OnUpdate() {};
+    Collectable();
+    ~Collectable();
 
-	TilePos GetTilePos() const;
-	void Draw();
+    virtual void InitTextures();
+
+    virtual void OnTouch();
+    virtual void OnUpdate();
+
+    Vector2 GetTilePos() const;
+    void Update();
+
 protected:
-	TilePos m_Pos;
+    Vector2 m_Pos;
 
-	Texture2D m_Texture;
+    Texture2D m_Texture;
 };

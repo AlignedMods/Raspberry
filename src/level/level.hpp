@@ -1,32 +1,37 @@
 #pragma once
 
+#include "collectables/collectable.hpp"
 #include "player/player.hpp"
-#include "collectables/raspberry.hpp"
+#include "tile/tile.hpp"
+#include <collectables/diamond.hpp>
+#include <collectables/raspberry.hpp>
 
-#include <vector>
-#include <memory>
+#include <pch.hpp>
 
 class Player;
 
 class Level {
 public:
-	void AddPlayer();
-	std::shared_ptr<Player> GetPlayer() const;
+    void AddPlayer();
+    std::shared_ptr<Player> GetPlayer() const;
 
-	void AddTile(Tile tile);
-	std::vector<Tile>& GetAllTiles();
+    void AddTile(Tile tile);
+    std::vector<Tile>& GetAllTiles();
 
-	std::shared_ptr<Raspberry> GetRaspberry() const;
-	void AddRaspberry();
-	void SetFound();
+    void AddCollectable();
+    Collectable& GetCollectable();
 
-	bool IsRaspberryFound();
+    void SetFound();
 
-	bool LoadLevelFromFile(const char* path);
+    bool IsCollectableFound();
+
+    bool LoadLevelFromFile(const char* path);
+
 private:
-	std::shared_ptr<Player> m_Player;
-	std::vector<Tile> m_Tiles;
-	std::shared_ptr<Raspberry> m_Raspberry;
+    std::vector<Tile> m_Tiles;
 
-	bool m_RaspberryFound;
+    Collectable m_Collectable;
+    std::shared_ptr<Player> m_Player;
+
+    bool m_CollectableFound;
 };

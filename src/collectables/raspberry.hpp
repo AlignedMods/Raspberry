@@ -4,10 +4,9 @@
 
 class Raspberry : public Collectable {
 public:
-	Raspberry();
-	void Update();
-	void InitTextures();
+    void Update();
+    virtual void InitTextures() override;
 
-	virtual void OnTouch() override;
-	virtual void OnUpdate() override;
+    virtual void OnTouch() override;
+    virtual void OnUpdate() override;
 };

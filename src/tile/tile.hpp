@@ -1,48 +1,45 @@
 #pragma once
 
+#include "core/core.hpp"
 #include "raylib.h"
 
-enum class TileType {
-	AIR, DIRT, STONE, GRASS, BRICK
-};
+enum class TileType { AIR, DIRT, STONE, GRASS, BRICK };
 
-enum class TileArgs {
-	NORMAL, NO_CAMERA
-};
-
-typedef struct TilePos {
-	float x;
-	float y;
-} TilePos;
+enum class TileArgs { NORMAL, NO_CAMERA };
 
 class Tile {
 public:
-	Tile(TileType tileType, TilePos tilePos);
-	Tile(TileType tileType, TilePos tilePos, TileArgs tileArgs);
+    Tile(TileType tileType, Vector2 tilePos);
+    Tile(TileType tileType, Vector2 tilePos, TileArgs tileArgs);
 
-	void Draw();
-	float GetX();
-	float GetY();
+    void Draw();
+    float GetX();
+    float GetY();
 
-	Texture2D GetTexture();
+    Texture2D GetTexture();
 
-	TilePos GetPos();
-	TileType GetTileType();
+    Vector2 GetPos();
+    TileType GetTileType();
 
-	float GetSize();
+    CollisionBox& GetCollisonBox();
 
-	TileArgs GetTileArgs();
+    float GetSize();
+
+    TileArgs GetTileArgs();
+
 private:
-	TileType m_TileType;
-	TilePos m_TilePos;
-	TilePos m_TileSize;
+    TileType m_TileType;
+    Vector2 m_TilePos;
+    Vector2 m_TileSize;
 
-	TileArgs m_TileArgs;
+    CollisionBox m_CollisonBox;
 
-	Texture2D m_Texture;
+    TileArgs m_TileArgs;
 
-	float m_Size;
+    Texture2D m_Texture;
 
-	float m_X;
-	float m_Y;
+    float m_Size;
+
+    float m_X;
+    float m_Y;
 };

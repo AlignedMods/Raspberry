@@ -2,11 +2,11 @@
 
 cd ..
 
-cd vendor\raylib\
+::cd vendor\raylib\
 
-make -j -f Makefile-raylib
+::make -j -f Makefile-raylib
 
-cd ..\..\
+::cd ..\..\
 
 premake5 gmake2
 make Raspberry

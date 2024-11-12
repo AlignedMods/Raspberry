@@ -1,0 +1,6 @@
+[submodule "vendor"]
+	path = vendor
+	url = https://github.com/AlignedMods/Is-Num
+[submodule "vendor/raylib"]
+	path = vendor/raylib
+	url = https://github.com/raysan5/raylib
