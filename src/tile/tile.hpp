@@ -1,6 +1,9 @@
 #pragma once
 
-#include "core/core.hpp"
+#include "Rectangle.hpp"
+#include "Texture.hpp"
+#include "Vector2.hpp"
+#include "pch.hpp"
 #include "raylib.h"
 
 enum class TileType { AIR, DIRT, STONE, GRASS, BRICK };
@@ -8,38 +11,36 @@ enum class TileType { AIR, DIRT, STONE, GRASS, BRICK };
 enum class TileArgs { NORMAL, NO_CAMERA };
 
 class Tile {
-public:
-    Tile(TileType tileType, Vector2 tilePos);
-    Tile(TileType tileType, Vector2 tilePos, TileArgs tileArgs);
+ public:
+  Tile() = default;
+  Tile(TileType tileType, Vector2 tilePos);
+  Tile(TileType tileType, Vector2 tilePos, TileArgs tileArgs);
 
-    void Draw();
-    float GetX();
-    float GetY();
+  void Draw();
+  float GetX() const;
+  float GetY() const;
 
-    Texture2D GetTexture();
+  Texture& GetTexture();
 
-    Vector2 GetPos();
-    TileType GetTileType();
+  Vector2& GetPos();
+  TileType GetTileType();
 
-    CollisionBox& GetCollisonBox();
+  Rectangle& GetRectangle();
 
-    float GetSize();
+  float GetSize();
 
-    TileArgs GetTileArgs();
+  TileArgs GetTileArgs();
 
-private:
-    TileType m_TileType;
-    Vector2 m_TilePos;
-    Vector2 m_TileSize;
+ private:
+  TileType m_TileType;
+  Vector2 m_Pos;
+  Vector2 m_TileSize;
 
-    CollisionBox m_CollisonBox;
+  Rectangle m_Rectangle;
 
-    TileArgs m_TileArgs;
+  TileArgs m_TileArgs;
 
-    Texture2D m_Texture;
+  Texture m_Texture;
 
-    float m_Size;
-
-    float m_X;
-    float m_Y;
+  float m_Size;
 };

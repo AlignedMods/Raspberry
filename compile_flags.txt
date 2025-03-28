@@ -1,2 +1,5 @@
--Iinclude/
+-Ivendor/raylib/src/
+-Ivendor/raylib-cpp/include/
 -Isrc/
+-Ivendor/box2d/
+-std=c++20

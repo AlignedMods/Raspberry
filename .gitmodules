@@ -7,6 +7,3 @@
 [submodule "vendor/raygui"]
 	path = vendor/raygui
 	url = https://github.com/raysan5/raygui
-[submodule "vendor/box2d"]
-	path = vendor/box2d
-	url = https://github.com/erincatto/box2d

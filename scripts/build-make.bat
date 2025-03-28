@@ -2,14 +2,8 @@
 
 cd ..
 
-::cd vendor\raylib\
-
-::make -j -f Makefile-raylib
-
-::cd ..\..\
-
 premake5 gmake2
-make Raspberry
+make Raspberry config=debug_windows
 
-cd build\bin\Release\
+cd build\bin\Debug\
 start Raspberry.exe

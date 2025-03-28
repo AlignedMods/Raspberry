@@ -10,8 +10,6 @@
 
 ***Make*** or ***Visual Studio***
 
-***Raylib*** (only dynamic for now, for now the code only works on windows and the library is included in the libs folder)
-
 ### **2: Building the source code**
 
 To generate the build system you wish run:

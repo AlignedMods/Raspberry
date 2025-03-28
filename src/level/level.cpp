@@ -1,73 +1,68 @@
 #include "level.hpp"
+
 #include "collectables/collectable.hpp"
 #include "collectables/raspberry.hpp"
 #include "core/core.hpp"
+#include "pch.hpp"
 #include "tile/tile.hpp"
 
-#include "pch.hpp"
-
-void Level::AddPlayer()
-{
-    m_Player = std::make_shared<Player>();
+void Level::AddPlayer() {
+  m_Player = std::make_shared<Player>();
 }
 
-std::shared_ptr<Player> Level::GetPlayer() const
-{
-    return m_Player;
+std::shared_ptr<Player> Level::GetPlayer() const {
+  return m_Player;
 }
 
-void Level::AddTile(Tile tile)
-{
-    m_Tiles.push_back(tile);
+void Level::AddTile(const Tile& tile) {
+  m_Tiles.push_back(tile);
 }
 
-std::vector<Tile>& Level::GetAllTiles()
-{
-    return m_Tiles;
+std::vector<Tile>& Level::GetAllTiles() {
+  return m_Tiles;
 }
 
-void Level::AddCollectable()
-{
-    m_Collectable = Raspberry();
+void Level::AddCollectable() {
+  m_Collectable = Raspberry();
 }
 
-Collectable& Level::GetCollectable()
-{
-    return m_Collectable;
+Collectable& Level::GetCollectable() {
+  return m_Collectable;
 }
 
-void Level::SetFound()
-{
-    m_CollectableFound = true;
+void Level::SetFound() {
+  m_CollectableFound = true;
 }
 
-bool Level::IsCollectableFound()
-{
-    return m_CollectableFound;
+bool Level::IsCollectableFound() {
+  return m_CollectableFound;
 }
 
-bool Level::LoadLevelFromFile(const char* path)
-{
-    std::ifstream file(path);
+bool Level::LoadLevelFromFile(const char* path) {
+  std::ifstream file(path);
 
-    std::stringstream contentsStream;
-    std::string contents;
+  if (!file.good()) {
+    return false;
+  }
 
-    contentsStream << file.rdbuf();
-    contents = contentsStream.str();
+  std::stringstream contentsStream;
+  std::string contents;
 
-    file.close();
+  contentsStream << file.rdbuf();
+  contents = contentsStream.str();
 
-    int pos = 0;
+  file.close();
 
-    while (pos < contents.size()) {
-        AddTile(Tile((TileType)contents.at(pos),
-            { (float)contents.at(pos + 3), (float)contents.at(pos + 4) }));
+  int pos = 0;
 
-        pos += 8;
-    }
+  while (pos < contents.size()) {
+    AddTile(Tile((TileType)contents.at(pos),
+                 {(float)contents.at(pos + 3), (float)contents.at(pos + 4)}));
 
-    Debug("Sucssesfully loaded level!");
+    pos += 8;
+  }
 
-    return true;
+  Debug("Sucssesfully loaded level!");
+
+  return true;
 }

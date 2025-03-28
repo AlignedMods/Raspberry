@@ -1,15 +1,17 @@
 #include "game.hpp"
 
+#include <pch.hpp>
+
 #include "collectables/collectable.hpp"
 #include "core/core.hpp"
 #include "core/random.hpp"
+#include "entity/player.hpp"
 #include "graphics/renderer.hpp"
 #include "menu/menu.hpp"
-#include "player/player.hpp"
-#include "raylib.h"
-#include "tile/tile.hpp"
 
-#include <pch.hpp>
+// Use a c++ wrapper for raylib which purposfully hurts the performance and
+// makes the code more unreadeable 
+#include "raylib-cpp.hpp"
 
 using std::make_shared;
 using std::shared_ptr;
@@ -17,115 +19,124 @@ using std::shared_ptr;
 static Game* s_Instance;
 static shared_ptr<Renderer> s_Renderer;
 
-Game::Game()
-{
-    if (!s_Instance) {
-        s_Renderer = make_shared<Renderer>();
-        s_Instance = this;
-    } else {
-        Error(
-            "Game class already exists!\nThere cannot be multiple game classes "
-            "at the same time!",
-            1);
+Game::Game() {
+  if (!s_Instance) {
+    s_Renderer = make_shared<Renderer>();
+    s_Instance = this;
+  } else {
+    Error(
+        "Game class already exists!\nThere cannot be multiple game classes "
+        "at the same time!",
+        1);
+  }
+  SetCurrentLevel(make_shared<Level>());
+}
+
+Game::~Game() {}
+
+void Game::Run() {
+  // If this macro is specified then we will search for the Assets directory one
+  // directory at a time until we find it
+#ifdef RTRACEASSETS
+  if (!std::filesystem::exists(std::filesystem::current_path() / "Assets")) {
+    while (
+        !std::filesystem::exists(std::filesystem::current_path() / "Assets")) {
+      std::filesystem::current_path(
+          std::filesystem::current_path().parent_path());
     }
-    SetCurrentLevel(make_shared<Level>());
-}
 
-Game::~Game() { }
+    std::cout << "FOUND THE DIRECTORY!\n";
+  }
+#endif
 
-void Game::Run()
-{
-    const int windowWidth = 21 * 64;
-    const int windowHeight = 12 * 64;
+  constexpr int WINDOW_WIDTH = 21 * 64;
+  constexpr int WINDOW_HEIGHT = 12 * 64;
 
-    InitWindow(windowWidth, windowHeight, "Raspberry");
+  raylib::Window window(WINDOW_WIDTH, WINDOW_HEIGHT, "Raspberry");
 
-    Random::Init();
+  Random::Init();
 
-    SetTargetFPS(60);
+  window.SetTargetFPS(60);
 
-    Menu menu;
-    menu.InitFonts();
+  Menu menu;
+  menu.InitFonts();
 
-    // for some reason i have to explictly show the menu
-    menu.Show();
+  // for some reason i have to explictly show the menu
+  menu.Show();
 
-    Camera2D camera = { 0 };
-    camera.zoom = 1.0f;
-    camera.offset = { windowWidth / 2.0f, windowHeight / 2.0f };
-    camera.target = { 0.0f, 0.0f };
-    camera.rotation = 0.0f;
+  raylib::Camera2D camera;
+  camera.zoom = 1.0f;
+  camera.offset = {WINDOW_WIDTH / 2.0f, WINDOW_HEIGHT / 2.0f};
+  camera.target = {0.0f, 0.0f};
+  camera.rotation = 0.0f;
 
-    while (!WindowShouldClose()) {
-        if (m_IsGamePlayRunning) {
-            menu.Hide();
+  while (!window.ShouldClose()) {
+    if (m_IsGamePlayRunning) {
+      menu.Hide();
 
-            m_CurrentLevel->GetPlayer()->Update();
+      m_CurrentLevel->GetPlayer()->OnUpdate();
 
-            camera.target = { m_CurrentLevel->GetPlayer()->GetX(),
-                m_CurrentLevel->GetPlayer()->GetY() };
+      camera.target = {m_CurrentLevel->GetPlayer()->GetX() * 64,
+                       m_CurrentLevel->GetPlayer()->GetY() * 64};
 
-            m_CurrentLevel->GetCollectable().Update();
-        }
-
-        menu.Update();
-
-        BeginDrawing();
-
-        ClearBackground(WHITE);
-
-        if (m_IsGamePlayRunning) {
-            BeginMode2D(camera);
-
-            m_CurrentLevel->GetPlayer()->Draw();
-
-            for (Tile tile : m_CurrentLevel->GetAllTiles()) {
-                tile.Draw();
-            }
-
-            if (m_CurrentLevel->IsCollectableFound()) {
-                DrawText("Found raspberry", 400, 600, 20, GREEN);
-            }
-
-            m_CurrentLevel->GetCollectable().Draw();
-
-            EndMode2D();
-        }
-
-        menu.Draw();
-
-        EndDrawing();
+      m_CurrentLevel->GetCollectable().Update();
     }
+
+    menu.Update();
+
+    window.BeginDrawing();
+
+    window.ClearBackground(WHITE);
+
+    window.DrawFPS();
+
+    if (m_IsGamePlayRunning) {
+      camera.BeginMode();
+
+      for (auto& tile : m_CurrentLevel->GetAllTiles()) {
+        tile.Draw();
+      }
+
+      m_CurrentLevel->GetPlayer()->OnRender();
+
+      if (m_CurrentLevel->IsCollectableFound()) {
+        DrawText("Found raspberry", 400, 600, 20, GREEN);
+      }
+
+      m_CurrentLevel->GetCollectable().Draw();
+
+      camera.EndMode();
+    }
+
+    menu.Draw();
+
+    window.EndDrawing();
+  }
 }
 
-void Game::SetCurrentLevel(shared_ptr<Level> level)
-{
-    m_CurrentLevel = level;
+void Game::SetCurrentLevel(shared_ptr<Level> level) {
+  m_CurrentLevel = level;
 }
 
-shared_ptr<Level> Game::GetCurrentLevel()
-{
-    return Game::Get()->m_CurrentLevel;
+shared_ptr<Level> Game::GetCurrentLevel() {
+  return Game::Get()->m_CurrentLevel;
 }
 
-void Game::StartGameplay()
-{
-    m_IsGamePlayRunning = true;
+void Game::StartGameplay() {
+  m_IsGamePlayRunning = true;
 
-    m_CurrentLevel->AddPlayer();
+  m_CurrentLevel->AddPlayer();
 
-    m_CurrentLevel->AddCollectable();
-    m_CurrentLevel->GetCollectable().InitTextures();
+  m_CurrentLevel->AddCollectable();
+  m_CurrentLevel->GetCollectable().InitTextures();
 
-    m_CurrentLevel->LoadLevelFromFile("hi.lvl");
+  m_CurrentLevel->LoadLevelFromFile("hi.lvl");
 }
 
-Game* Game::Get()
-{
-    return s_Instance;
+Game* Game::Get() {
+  return s_Instance;
 }
 
-shared_ptr<Renderer> Game::GetRenderer()
-{
-    return s_Renderer;
+shared_ptr<Renderer> Game::GetRenderer() {
+  return s_Renderer;
 }
