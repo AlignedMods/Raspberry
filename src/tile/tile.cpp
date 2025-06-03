@@ -1,90 +1,100 @@
 #include "tile.hpp"
+#include <map>
+#include <string>
 
+#include "core/core.hpp"
 #include "raylib.h"
+#include "utils/types.hpp"
 #ifdef BUILDER
 #include "builder/builder.hpp"
 #else
 #include "game.hpp"
 #endif
 
-Tile::Tile(TileType tileType, Vector2 tilePos) {
-  m_TileType = tileType;
-  m_Pos = tilePos;
+bool loadedTextures = false;
 
-  m_TileArgs = TileArgs::NORMAL;
+static std::map<std::string, Texture> textures = {};
 
-  if (m_TileType == TileType::STONE) {
-    m_Texture = LoadTexture("Assets/stone.png");
-  } else if (m_TileType == TileType::DIRT) {
-    m_Texture = LoadTexture("Assets/dirt.png");
-  } else if (m_TileType == TileType::GRASS) {
-    m_Texture = LoadTexture("Assets/grass.png");
-  } else if (m_TileType == TileType::BRICK) {
-    m_Texture = LoadTexture("Assets/brick.png");
-  }
+Tile::Tile(std::string type, Vec2d position) {
+    if (!loadedTextures) {
+        textures["Stone"] = LoadTexture("Assets/stone.png");
+        textures["Dirt"] = LoadTexture("Assets/dirt.png");
+        textures["Grass"] = LoadTexture("Assets/grass.png");
+        textures["Brick"] = LoadTexture("Assets/brick.png");
+        textures["Grasspatch"] = LoadTexture("Assets/grass_patch.png");
+        
+        loadedTextures = true;
+    }
 
-  m_Size = 1.0f;
+    this->type = type;
+    m_Position = position;
 
-  m_Rectangle = {m_Pos.x, m_Pos.y, m_Size, m_Size};
+    this->args = TileArgs::NORMAL;
+
+    size = 1.0f;
+
+    texture = textures.at(type);
+
+    m_ZOrder = 1.0f;
 }
 
-Tile::Tile(TileType tileType, Vector2 tilePos, TileArgs tileArgs) {
-  m_TileType = tileType;
-  m_Pos = tilePos;
+Tile::Tile(std::string type, Vec2d position, TileArgs args) {
+    if (!loadedTextures) {
+        textures["Stone"] = LoadTexture("Assets/stone.png");
+        textures["Dirt"] = LoadTexture("Assets/dirt.png");
+        textures["Grass"] = LoadTexture("Assets/grass.png");
+        textures["Brick"] = LoadTexture("Assets/brick.png");
+        textures["Grasspatch"] = LoadTexture("Assets/grass_patch.png");
+        
+        loadedTextures = true;
+    }
 
-  m_TileArgs = tileArgs;
+    this->type = type;
+    m_Position = position;
 
-  if (m_TileType == TileType::STONE) {
-    m_Texture = LoadTexture("Assets/stone.png");
-  } else if (m_TileType == TileType::DIRT) {
-    m_Texture = LoadTexture("Assets/dirt.png");
-  } else if (m_TileType == TileType::GRASS) {
-    m_Texture = LoadTexture("Assets/grass.png");
-  } else if (m_TileType == TileType::BRICK) {
-    m_Texture = LoadTexture("Assets/brick.png");
-  }
+    this->args = args;
 
-  m_Size = 1.0f;
+    size = 1.0f;
 
-  m_Rectangle = {m_Pos.x, m_Pos.y, m_Size, m_Size};
+    texture = textures.at(type);
+
+    m_ZOrder = 0.5f;
 }
 
-void Tile::Draw() {
+void Tile::OnRender() {
 #ifdef BUILDER
-  Builder::GetRenderer()->RenderTexture(m_Texture, m_Pos.x * 64, m_Pos.y * 64);
+    Builder::GetRenderer()->RenderTexture(texture, m_Position.x * 64, m_Position.y * 64);
 #else
-  Game::GetRenderer()->RenderTexture(m_Texture, m_Pos.x * 64, m_Pos.y * 64);
+    Game::GetRenderer()->RenderTexture(texture, m_Position.x * 64, m_Position.y * 64);
+
+    //Debug("Hello from instance!");
 #endif
 }
 
 float Tile::GetX() const {
-  return m_Pos.x;
+    return m_Position.x;
 }
 
 float Tile::GetY() const {
-  return m_Pos.y;
+    return m_Position.y;
 }
 
 Texture& Tile::GetTexture() {
-  return m_Texture;
+    return texture;
 }
 
 float Tile::GetSize() {
-  return m_Size;
+    return size;
 }
 
-Vector2& Tile::GetPos() {
-  return m_Pos;
+Vec2d& Tile::GetPos() {
+    return m_Position;
 }
 
-Rectangle& Tile::GetRectangle() {
-  return m_Rectangle;
-}
-
-TileType Tile::GetTileType() {
-  return m_TileType;
+std::string Tile::GetTileType() {
+    return type;
 }
 
 TileArgs Tile::GetTileArgs() {
-  return m_TileArgs;
+    return args;
 }

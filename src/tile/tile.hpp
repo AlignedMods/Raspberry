@@ -1,29 +1,27 @@
 #pragma once
 
-#include "Rectangle.hpp"
-#include "Texture.hpp"
-#include "Vector2.hpp"
-#include "pch.hpp"
+#include "core/instance.hpp"
 #include "raylib.h"
+#include "utils/types.hpp"
 
-enum class TileType { AIR, DIRT, STONE, GRASS, BRICK };
+#include "pch.hpp"
 
 enum class TileArgs { NORMAL, NO_CAMERA };
 
-class Tile {
+class Tile : public Instance {
  public:
   Tile() = default;
-  Tile(TileType tileType, Vector2 tilePos);
-  Tile(TileType tileType, Vector2 tilePos, TileArgs tileArgs);
+  Tile(std::string type, Vec2d tilePos);
+  Tile(std::string type, Vec2d tilePos, TileArgs tileArgs);
 
-  void Draw();
+  virtual void OnRender() override;
   float GetX() const;
   float GetY() const;
 
   Texture& GetTexture();
 
-  Vector2& GetPos();
-  TileType GetTileType();
+  Vec2d& GetPos();
+  std::string GetTileType();
 
   Rectangle& GetRectangle();
 
@@ -32,15 +30,12 @@ class Tile {
   TileArgs GetTileArgs();
 
  private:
-  TileType m_TileType;
-  Vector2 m_Pos;
-  Vector2 m_TileSize;
+  std::string type;
+  Vec2d tileSize;
 
-  Rectangle m_Rectangle;
+  TileArgs args;
 
-  TileArgs m_TileArgs;
+  Texture texture;
 
-  Texture m_Texture;
-
-  float m_Size;
+  float size;
 };

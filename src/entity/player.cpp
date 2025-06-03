@@ -2,147 +2,169 @@
 
 #include "player.hpp"
 
-#include <optional>
+#include <algorithm>
 
-#include "Vector2.hpp"
 #include "core/core.hpp"
+#include "entity/entity.hpp"
 #include "game.hpp"
 #include "raylib.h"
-#include "raymath.h"
-#include "tile/tile.hpp"
+#include "utils/types.hpp"
 
 Player::Player() {
-  m_Pos.x = 0.0f;
-  m_Pos.y = 0.0f;
+  m_Position.x = 0.0f;
+  m_Position.y = 0.0f;
 
-  m_Speed = 0.02;
+  m_Acceleration = 1;
 
-  m_Jumping = false;
+  m_State = EntityState::Idle;
 
-  m_Velocity = raylib::Vector2(0.0f, 0.0f);
+  m_Velocity.Zero();
 
   m_Level = Game::Get()->GetCurrentLevel();
 
-  m_Rectangle = {m_Pos.x, m_Pos.y, 1.0f, 1.0f};
+  m_Textures["IdleFront"] = LoadTexture("Assets/entity/player_front.png");
+  m_Textures["RunningFrontLeft"] = LoadTexture("Assets/entity/player_front_walk_left.png");
+  m_Textures["RunningFrontRight"] = LoadTexture("Assets/entity/player_front_walk_right.png");
+
+  m_Textures["IdleBack"] = LoadTexture("Assets/entity/player_back.png");
+  m_Textures["RunningBackLeft"] = LoadTexture("Assets/entity/player_back_walk_left.png");
+  m_Textures["RunningBackRight"] = LoadTexture("Assets/entity/player_back_walk_right.png");
+
+  m_Textures["IdleLeft"] = LoadTexture("Assets/entity/player_left.png");
+  m_Textures["RunningLeftUp"] = LoadTexture("Assets/entity/player_left_walk_up.png");
+  m_Textures["RunningLeftDown"] = LoadTexture("Assets/entity/player_left_walk_down.png");
+
+  m_Texture = m_Textures.at("IdleFront");
+
+  Debug("Player made!");
+
+  m_ZOrder = 0.0f;
 }
 
 void Player::OnUpdate() {
-  if (!m_OnGround) {
-    m_Velocity.y += m_Gravity;
-  }
-
-  m_Pos.x += m_Velocity.x;
-  m_Pos.y += m_Velocity.y;
-
-  m_Rectangle = {m_Pos.x, m_Pos.y, 1.0f, 1.0f};
-
-  if (IsKeyDown(KEY_D)) {
-    m_Velocity.x += m_Speed;
-  } else if (IsKeyDown(KEY_A)) {
-    m_Velocity.x -= m_Speed;
-  } else if (IsKeyDown(KEY_S)) {
-    m_Velocity.y += m_Speed;
-  } else if (IsKeyDown(KEY_W)) {
-    m_Velocity.y -= m_Speed;
-  } else {
-    if (m_Velocity.x < 0.0f) {
-      m_Velocity.x += m_Speed;
-    } else if (m_Velocity.x > 0.0f) {
-      m_Velocity.x -= m_Speed;
+    if (m_State == EntityState::Freefalling) {
+        m_Velocity.y += m_Gravity;
     }
-  }
 
-  if (IsKeyDown(KEY_SPACE)) {
-    Debug("Jump!");
-    Jump();
-  }
+    if (IsKeyDown(KEY_W)) {
+        m_State = EntityState::Running;
+        m_Direction = Direction::Up;
 
-  CheckCollisions();
+        m_Velocity.y = std::max(m_Velocity.y - m_Acceleration, -10.0f);
+    }
+
+    if (IsKeyDown(KEY_S)) {
+        m_State = EntityState::Running;
+        m_Direction = Direction::Down;
+        m_Velocity.y = std::min(m_Velocity.y + m_Acceleration, 10.0f);
+    }
+
+    if (IsKeyDown(KEY_D)) {
+        m_State = EntityState::Running;
+        m_Direction = Direction::Right;
+        m_Velocity.x = std::min(m_Velocity.x + m_Acceleration, 10.0f);
+    } 
+
+    if (IsKeyDown(KEY_A)) {
+        m_State = EntityState::Running;
+        m_Direction = Direction::Left;
+        m_Velocity.x = std::max(m_Velocity.x - m_Acceleration, -10.0f);
+    }
+
+    if (IsKeyUp(KEY_W)) {
+        if (m_Velocity.y < 0.0f) {
+            m_Velocity.y = std::min(m_Velocity.y + m_Acceleration * 2, 0.0f);
+        }
+    }
+    
+    if (IsKeyUp(KEY_S)) {
+        if (m_Velocity.y > 0.0f) {
+            m_Velocity.y = std::max(m_Velocity.y - m_Acceleration * 2, 0.0f);
+        }
+    }
+
+    if (IsKeyUp(KEY_A)) {
+        if (m_Velocity.x < 0.0f) {
+            m_Velocity.x = std::min(m_Velocity.x + m_Acceleration * 2, 0.0f);
+        }
+    }
+    if (IsKeyUp(KEY_D)) {
+        if (m_Velocity.x > 0.0f) {
+            m_Velocity.x = std::max(m_Velocity.x - m_Acceleration * 2, 0.0f);
+        }
+    }
+
+    if (IsKeyUp(KEY_W) && IsKeyUp(KEY_S) && IsKeyUp(KEY_A) && IsKeyUp(KEY_D)) {
+        m_State = EntityState::Idle;
+    }
+
+    m_Position.x += m_Velocity.x;
+    m_Position.y += m_Velocity.y;
+
+    CheckCollisions();
+}
+
+void Player::UpdateTextures() {
+    m_Anim++;
+
+    if (m_Direction == Direction::Down) {
+        m_Texture = m_Textures.at("IdleFront");
+
+        if (m_State == EntityState::Running && m_Velocity.y > 0.0f) {
+            if (m_Anim % 5 > 2.5) {
+                m_Texture = m_Textures.at("RunningFrontLeft");
+            } else {
+                m_Texture = m_Textures.at("RunningFrontRight");
+            }
+        }
+    }
+
+    if (m_Direction == Direction::Up) {
+        m_Texture = m_Textures.at("IdleBack");
+        m_TextureFlip = false;
+
+        if (m_State == EntityState::Running) {
+            if (m_Anim % 5 > 2.5) {
+                m_Texture = m_Textures.at("RunningBackLeft");
+            } else {
+                m_Texture = m_Textures.at("RunningBackRight");
+            }
+        }
+    }
+
+    if (m_Direction == Direction::Left) {
+        
+        m_Texture = m_Textures.at("IdleLeft");
+        m_TextureFlip = false;
+
+        if (m_State == EntityState::Running && m_Velocity.x < 0.0f) {
+            Debug("Funny");
+            
+            if (m_Anim % 5 > 2.5) {
+                m_Texture = m_Textures.at("RunningLeftUp");
+            } else {
+                m_Texture = m_Textures.at("RunningLeftDown");
+            }
+        }
+    }
+
+    
 }
 
 void Player::CheckCollisions() {
-  auto& tiles = m_Level->GetAllTiles();
+    bool collision = false;
 
-  // Flags to track different collision states
-  bool isGroundCollision = false;
-
-  Vector2 finalPos = {m_Pos.x, m_Pos.y};
-
-  for (auto& tile : tiles) {
-    if (CheckCollisionRecs(m_Rectangle, tile.GetRectangle())) {
-      Rectangle& rec = tile.GetRectangle();
-      // Calculate overlap on each axis
-      float overlapX =
-          std::min(m_Rectangle.x + m_Rectangle.width, rec.x + rec.width) -
-          std::max(m_Rectangle.x, rec.x);
-      float overlapY =
-          std::min(m_Rectangle.y + m_Rectangle.height, rec.y + rec.height) -
-          std::max(m_Rectangle.y, rec.y);
-
-      // Resolve the collision based on the smallest overlap
-      if (overlapX < overlapY) {
-        // Horizontal collision
-        if (m_Rectangle.x < rec.x) {
-          Debug("Collision from right!");
-          m_Velocity.x = 0.0f;
-          finalPos.x = rec.x - rec.width;
-        } else {
-          Debug("Collision from left!");
-          m_Velocity.x = 0.0f;
-          finalPos.x = rec.x + rec.width;
+    for (auto& tile : m_Level->GetAllTiles()) {
+        if ((m_Position.x + 64 > tile->GetX() * 64 && m_Position.x < tile->GetX() * 64 + 64) && (m_Position.y + 64 > tile->GetY() * 64 && m_Position.y < tile->GetY() * 64 + 64)) {
+            collision = true;
         }
-      } else {
-        // Vertical collision
-        if (m_Rectangle.y < rec.y) {
-          Debug("Collision from up!");
-          m_Velocity.y = 0.0f;
-          finalPos.y = rec.y - rec.height;
-          isGroundCollision = true;
-          m_Jumping = false;
-        } else {
-          Debug("Collision from down!");
-          m_Velocity.y = 0.0f;
-          finalPos.y = rec.y + rec.height;
-        }
-      }
     }
 
-    m_Pos.y = finalPos.y;
-    m_OnGround = isGroundCollision;
-
-    m_Pos.x = finalPos.x;
-  }
-}
-
-void Player::OnRender() {
-  DrawRectangle(m_Pos.x * 64, m_Pos.y * 64, 1.0f * 64, 1.0f * 64, RED);
-
-  std::stringstream tempStr;
-
-  tempStr << "Drawing player at: " << m_Pos.x << ", " << m_Pos.y;
-
-  // Debug(tempStr.str());
-}
-
-void Player::Jump() {
-  if (m_OnGround && !m_Jumping) {
-    // This value is exponential
-    m_Velocity.y -= 0.3f;
-    m_Jumping = true;
-    m_OnGround = false;
-  }
-}
-
-std::optional<Tile> Player::GetTileBelowPlayer() {
-  auto& tiles = m_Level->GetAllTiles();
-
-  for (auto& tile : tiles) {
-    if (Vector2Equals(
-            {tile.GetPos().x, tile.GetPos().y},
-            Vector2Add({m_Pos.x, std::ceil(m_Pos.y)}, {0.0f, 1.0f}))) {
-      return tile;
+    if (collision) {
+        
     }
-  }
+}
 
-  return std::nullopt;
+void Player::OnRender() {\
+    Game::GetRenderer()->RenderEntity(m_Texture, m_Position, m_TextureFlip);
 }

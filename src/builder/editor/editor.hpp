@@ -7,7 +7,7 @@
 class Editor {
 public:
 	Editor(Camera2D& camera);
-	Editor(char* level);
+	Editor(Camera2D& camera, std::filesystem::path level);
 
 	void Update();
 	void Draw();

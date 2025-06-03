@@ -3,22 +3,22 @@
 #include "raylib.h"
 
 class Collectable {
- public:
-  Collectable();
-  ~Collectable();
+public:
+    Collectable();
+    ~Collectable();
 
-  virtual void InitTextures();
+    virtual void InitTextures();
 
-  virtual void OnTouch();
-  virtual void OnUpdate();
+    virtual void OnTouch();
+    virtual void OnUpdate();
 
-  Vector2& GetTilePos();
-  void Update();
+    Vector2& GetTilePos();
+    void Update();
 
-  void Draw();
+    void Draw();
 
- protected:
-  Vector2 m_Pos;
+protected:
+    Vector2 m_Pos;
 
-  Texture m_Texture;
+    Texture m_Texture;
 };

@@ -4,32 +4,34 @@
 
 #include "entity/entity.hpp"
 #include "level/level.hpp"
+#include "raylib.h"
 #include "tile/tile.hpp"
 
 class Level;
 
 class Player : public Entity {
- public:
-  Player();
+public:
+    Player();
 
-  void operator=(const Player& player);
+    void operator=(const Player& player);
 
-  virtual void OnRender() override;
-  virtual void OnUpdate() override;
+    virtual void OnRender() override;
+    virtual void OnUpdate() override;
 
-  void Jump();
-  std::optional<Tile> GetTileBelowPlayer();
+    void UpdateTextures();
 
- private:
-  void CheckCollisions();
+    std::optional<Tile> GetTileBelowPlayer();
 
- private:
-  float m_Speed;
+private:
+    void CheckCollisions();
 
-  const float m_Gravity = 0.02f;
+    float m_Acceleration;
 
-  bool m_Jumping;
-  bool m_OnGround;
+    const float m_Gravity = 0.02f;
 
-  std::shared_ptr<Level> m_Level = nullptr;
+    bool m_OnGround;
+
+    std::shared_ptr<Level> m_Level = nullptr;
+
+    std::map<std::string, Texture> m_Textures = {};
 };

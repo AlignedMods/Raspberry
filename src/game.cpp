@@ -1,7 +1,5 @@
 #include "game.hpp"
 
-#include <pch.hpp>
-
 #include "collectables/collectable.hpp"
 #include "core/core.hpp"
 #include "core/random.hpp"
@@ -9,15 +7,28 @@
 #include "graphics/renderer.hpp"
 #include "menu/menu.hpp"
 
-// Use a c++ wrapper for raylib which purposfully hurts the performance and
-// makes the code more unreadeable 
-#include "raylib-cpp.hpp"
+#include "raylib.h"
+#include "utils/types.hpp"
+
+#include "gui/raspGui.hpp"
+
+#include <pch.hpp>
 
 using std::make_shared;
 using std::shared_ptr;
 
 static Game* s_Instance;
 static shared_ptr<Renderer> s_Renderer;
+
+bool sorted = false;
+
+bool CompareZOrder(std::shared_ptr<Instance> a, std::shared_ptr<Instance> b) {
+    return (a->m_ZOrder < b->m_ZOrder);
+}
+
+void Callback() {
+    Debug("Clicked");
+}
 
 Game::Game() {
   if (!s_Instance) {
@@ -30,9 +41,88 @@ Game::Game() {
         1);
   }
   SetCurrentLevel(make_shared<Level>());
+
+  SetTraceLogLevel(LOG_WARNING);
 }
 
 Game::~Game() {}
+
+void Game::Loop(Menu& menu, Camera2D& camera) {
+    Button button = Button(Vec2d(0.25f, 0.25f), Vec2d(0.5f, 0.5f), "funny", true, []() {Debug("hi");});
+
+    while (!WindowShouldClose()) {
+        if (m_isGamePlayRunning) {
+            m_Time += 0.0167f;
+
+            while (GetTime() - m_LastTime > 0.05f) {
+                Tick();
+
+                m_LastTime += 0.05f;
+            }
+        
+            menu.Hide();
+
+            m_CurrentLevel->GetPlayer()->OnUpdate();
+
+            //m_CurrentLevel->GetPlayer()->UpdateTextures();
+        
+            camera.target = {m_CurrentLevel->GetPlayer()->GetX(),
+                            m_CurrentLevel->GetPlayer()->GetY()};
+        
+            m_CurrentLevel->GetCollectable().Update();
+        }
+
+        button.OnUpdate();
+    
+        menu.Update();
+    
+        BeginDrawing();
+
+        button.OnRender();
+    
+        ClearBackground(WHITE);
+    
+        DrawFPS(5, 5);
+    
+        if (m_isGamePlayRunning) {
+            BeginMode2D(camera);
+
+            for (auto instance : m_CurrentLevel->GetInstances()) {
+                if (!sorted) {
+                    std::sort(m_CurrentLevel->GetInstances().begin(), m_CurrentLevel->GetInstances().end(), CompareZOrder);
+                    sorted = true;
+                }
+                
+                if (instance->m_ZOrder < 0.0f) {
+                    instance->OnRender();
+                }
+
+                instance->OnRender();
+            }
+      
+            //DrawRectangle(80, 90, 70, 200, BLACK);
+      
+            //m_CurrentLevel->GetPlayer()->Render();
+      
+            if (m_CurrentLevel->IsCollectableFound()) {
+                DrawText("Found raspberry", 400, 600, 20, GREEN);
+            }
+      
+            m_CurrentLevel->GetCollectable().Draw();
+      
+            EndMode2D();
+        }
+    
+        menu.Draw();
+    
+        EndDrawing();
+    }
+}
+
+// NOTE: a tick is basically a 20th of a second aka 3 frames.
+void Game::Tick() {
+    m_CurrentLevel->GetPlayer()->UpdateTextures();
+}
 
 void Game::Run() {
   // If this macro is specified then we will search for the Assets directory one
@@ -45,73 +135,37 @@ void Game::Run() {
           std::filesystem::current_path().parent_path());
     }
 
-    std::cout << "FOUND THE DIRECTORY!\n";
+    Debug("FOUND THE DIRECTORY!");
   }
 #endif
 
-  constexpr int WINDOW_WIDTH = 21 * 64;
-  constexpr int WINDOW_HEIGHT = 12 * 64;
+    constexpr static int WINDOW_WIDTH = 21 * 64;
+    constexpr static int WINDOW_HEIGHT = 12 * 64;
+  
+    InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Raspberry");
+  
+    m_LastTime = GetTime();
+  
+    Random::Init();
+  
+    SetTargetFPS(60);
 
-  raylib::Window window(WINDOW_WIDTH, WINDOW_HEIGHT, "Raspberry");
+    //ToggleBorderlessWindowed();
+    SetExitKey(KEY_F9);
+  
+    Menu menu;
+    menu.InitFonts();
+  
+    // for some reason i have to explictly show the menu
+    menu.Show();
+  
+    Camera2D camera;
+    camera.zoom = 1.0f;
+    camera.offset = {WINDOW_WIDTH / 2.0f, WINDOW_HEIGHT / 2.0f};
+    camera.target = {0.0f, 0.0f};
+    camera.rotation = 0.0f;
 
-  Random::Init();
-
-  window.SetTargetFPS(60);
-
-  Menu menu;
-  menu.InitFonts();
-
-  // for some reason i have to explictly show the menu
-  menu.Show();
-
-  raylib::Camera2D camera;
-  camera.zoom = 1.0f;
-  camera.offset = {WINDOW_WIDTH / 2.0f, WINDOW_HEIGHT / 2.0f};
-  camera.target = {0.0f, 0.0f};
-  camera.rotation = 0.0f;
-
-  while (!window.ShouldClose()) {
-    if (m_IsGamePlayRunning) {
-      menu.Hide();
-
-      m_CurrentLevel->GetPlayer()->OnUpdate();
-
-      camera.target = {m_CurrentLevel->GetPlayer()->GetX() * 64,
-                       m_CurrentLevel->GetPlayer()->GetY() * 64};
-
-      m_CurrentLevel->GetCollectable().Update();
-    }
-
-    menu.Update();
-
-    window.BeginDrawing();
-
-    window.ClearBackground(WHITE);
-
-    window.DrawFPS();
-
-    if (m_IsGamePlayRunning) {
-      camera.BeginMode();
-
-      for (auto& tile : m_CurrentLevel->GetAllTiles()) {
-        tile.Draw();
-      }
-
-      m_CurrentLevel->GetPlayer()->OnRender();
-
-      if (m_CurrentLevel->IsCollectableFound()) {
-        DrawText("Found raspberry", 400, 600, 20, GREEN);
-      }
-
-      m_CurrentLevel->GetCollectable().Draw();
-
-      camera.EndMode();
-    }
-
-    menu.Draw();
-
-    window.EndDrawing();
-  }
+    Loop(menu, camera);
 }
 
 void Game::SetCurrentLevel(shared_ptr<Level> level) {
@@ -123,14 +177,18 @@ shared_ptr<Level> Game::GetCurrentLevel() {
 }
 
 void Game::StartGameplay() {
-  m_IsGamePlayRunning = true;
+    if (m_isGamePlayRunning) {
+        return;
+    }
 
-  m_CurrentLevel->AddPlayer();
+    m_isGamePlayRunning = true;
 
-  m_CurrentLevel->AddCollectable();
-  m_CurrentLevel->GetCollectable().InitTextures();
+    m_CurrentLevel->AddPlayer();
 
-  m_CurrentLevel->LoadLevelFromFile("hi.lvl");
+    m_CurrentLevel->AddCollectable();
+    m_CurrentLevel->GetCollectable().InitTextures();
+
+    m_CurrentLevel->LoadLevelFromFile("hi.lvl");
 }
 
 Game* Game::Get() {

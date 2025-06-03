@@ -2,7 +2,6 @@
 #include "core/core.hpp"
 #include "raylib.h"
 #include "raygui.h"
-#include "tile/tile.hpp"
 
 #include "pch.hpp"
 
@@ -17,13 +16,18 @@ void Renderer::RenderTexture(Texture2D texture, float x, float y) {
 	}
 }
 
-bool Renderer::RenderButton(Rectangle bounds, const char* txt) {
-	return GuiButton(bounds, txt);
+bool Renderer::RenderButton(Vec2d position, Vec2d size, std::string text) {
+	return GuiButton(Rectangle(GetScreenWidth() * position.x, GetScreenHeight() * position.y,
+                        GetScreenWidth() * size.x, GetScreenHeight() * position.y), text.c_str());
 }
 
-void Renderer::RenderTile(TileType tileType, int x, int y) {
+void Renderer::RenderTextBox(Rectangle bounds, char* txt) {
+    GuiTextBox(bounds, txt, GuiGetStyle(DEFAULT, TEXT_SIZE), true);
+}
+
+void Renderer::RenderTile(std::string tileType, int x, int y) {
 }
 
 void Renderer::RenderText(const char* txt, int x, int y) {
-	GuiLabel(Rectangle{static_cast<float>(x), static_cast<float>(y), 21 * 64, 40}, txt);
+	GuiLabel(Rectangle{static_cast<float>(x), static_cast<float>(y), 21 * 64, 70}, txt);
 }

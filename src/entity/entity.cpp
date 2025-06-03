@@ -1,27 +1,20 @@
 #include "entity/entity.hpp"
-
-void Entity::Move(const Vector2& pos) {
-  if (m_Pos.x > pos.x) {
-    m_Velocity.x -= 0.1;
-  } else if (m_Pos.x < pos.x) {
-    m_Velocity.x += 0.1;
-  }
-
-  if (m_Pos.y > pos.y) {
-    m_Velocity.y -= 0.1;
-  } else if (m_Pos.y < pos.y) {
-    m_Velocity.y += 0.1;
-  }
-}
+#include "game.hpp"
+#include "raylib.h"
+#include "utils/types.hpp"
 
 float Entity::GetX() {
-  return m_Pos.x;
+  return m_Position.x;
 }
 
 float Entity::GetY() {
-  return m_Pos.y;
+  return m_Position.y;
 }
 
-Vector2& Entity::GetPos() {
-  return m_Pos;
+Vec2d& Entity::GetPos() {
+  return m_Position;
+}
+
+void Entity::OnRender() {
+    Game::Get()->GetRenderer()->RenderTexture(LoadTexture("Assets/grass.png"), m_Position.x, m_Position.y);
 }

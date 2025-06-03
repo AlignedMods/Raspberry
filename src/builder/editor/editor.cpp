@@ -16,15 +16,76 @@
 */
 
 #include "editor.hpp"
+#include <stdexcept>
 #include "builder/builder.hpp"
+#include "core/core.hpp"
 #include "raylib.h"
 #include "raygui.h"
+#include "raymath.h"
+#include "rlgl.h"
+#include "utils/types.hpp"
 #include "tile/tile.hpp"
 
 #include "pch.hpp"
 
+std::map<char, std::string> tiles = {
+    {0, "Stone"},
+    {1, "Dirt"},
+    {2, "Grass"},
+    {3, "Brick"},
+    {4, "Grasspatch"}
+};
+
+std::map<std::string, char> tilesToBinary = {
+    {"Stone", 0},
+    {"Dirt", 1},
+    {"Grass", 2},
+    {"Brick", 3},
+    {"Grasspatch", 4}
+};
+
 Editor::Editor(Camera2D& camera)  : m_Camera(camera) {
 	m_SelectedTile = 0;
+}
+
+Editor::Editor(Camera2D& camera, std::filesystem::path path)  : m_Camera(camera) {
+	m_SelectedTile = 0;
+
+    std::ifstream file(path, std::ios::binary);
+
+    std::stringstream contentsStream;
+    std::string contents;
+
+    contentsStream << file.rdbuf();
+    contents = contentsStream.str();
+
+    file.close();
+
+    int pos = 0;
+
+    while (pos < contents.size()) {
+
+        // (tiles.at(contents.at(pos)),
+        //{(float)contents.at(pos + 3), (float)contents.at(pos + 4)})
+
+        //Debug(contents.size());
+
+        try {
+            m_Tiles.push_back(Tile(tiles.at(contents.at(pos)), {static_cast<float>(contents.at(pos + 3)), static_cast<float>(contents.at(pos + 4))}));
+        } catch (std::out_of_range) {
+            std::stringstream msg;
+
+            msg << "Something went wrong at position: " << pos << ", which has a value of: " << contents.at(pos) << "!";
+
+            Debug(msg.str());
+            
+            
+        }
+
+        pos += 8;
+    }
+
+    Debug("Sucssesfully loaded level!");
 }
 
 void Editor::Update() {
@@ -32,14 +93,16 @@ void Editor::Update() {
 		m_Camera.target = {m_Camera.target.x, m_Camera.target.y - 10.0f};
 	} else if (IsKeyDown(KEY_S)) {
 		m_Camera.target = {m_Camera.target.x, m_Camera.target.y + 10.0f};
-	} else if (IsKeyDown(KEY_A)) {
+	}
+    
+    if (IsKeyDown(KEY_A)) {
 		m_Camera.target = {m_Camera.target.x - 10.0f, m_Camera.target.y};
 	} else if (IsKeyDown(KEY_D)) {
 		m_Camera.target = {m_Camera.target.x + 10.0f, m_Camera.target.y};
 	}
 
 	if (!m_IsCurrentDrawn) {
-		m_Tiles.push_back(Tile((TileType)(m_SelectedTile + 1), {18.5, 7}, TileArgs::NO_CAMERA));
+		m_Tiles.push_back(Tile(tiles.at(m_SelectedTile), {18.5, 7}, TileArgs::NO_CAMERA));
 		m_IsCurrentDrawn = true;
 	}
 
@@ -47,30 +110,41 @@ void Editor::Update() {
 		if (IsKeyDown(KEY_LEFT_CONTROL)) {
 			m_Camera.zoom += 0.2f;
 		} else {
-			std::cout << "Scrolling";
-			if (m_SelectedTile == 3) {
-				m_SelectedTile = 0;
-			} else {
-				m_SelectedTile++;
-			}
+			m_SelectedTile = std::min(m_SelectedTile + 1, static_cast<int>(tiles.size()) - 1);
+
+            //Debug(m_SelectedTile);
 		}
-		m_Tiles.push_back(Tile((TileType)(m_SelectedTile + 1), {18.5, 7}, TileArgs::NO_CAMERA));
+		m_Tiles.push_back(Tile(tiles.at(m_SelectedTile), {18.5, 7}, TileArgs::NO_CAMERA));
 	} else if (GetMouseWheelMove() < 0) {
 		if (IsKeyDown(KEY_LEFT_CONTROL)) {
 			m_Camera.zoom -= 0.2f;
 		} else {
 			if (m_SelectedTile == 0) {
-				m_SelectedTile = 3;
+				m_SelectedTile = 4;
 			} else {
 				m_SelectedTile--;
 			}
 		}
-		m_Tiles.push_back(Tile((TileType)(m_SelectedTile + 1), {18.5, 7}, TileArgs::NO_CAMERA));
+		m_Tiles.push_back(Tile(tiles.at(m_SelectedTile), {18.5, 7}, TileArgs::NO_CAMERA));
 	}
 
-	if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+	if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
 		if (!CheckCollisionPointRec({(float)(GetMouseX()), (float)(GetMouseY())}, {17 * 64, 0, 4 * 64, 12 * 64})) {
-			m_Tiles.push_back(Tile((TileType)(m_SelectedTile + 1), {std::floor((GetMouseX() + m_Camera.target.x) / 64 / m_Camera.zoom), std::floor((GetMouseY() + m_Camera.target.y) / 64 / m_Camera.zoom)}));
+            bool canPlace = true;
+
+			for (Tile tile : m_Tiles) {
+				if (Vector2Equals(tile.GetPos().ToRaylibVector(), {std::floor((GetMouseX() + m_Camera.target.x) / 64 / m_Camera.zoom), std::floor((GetMouseY() + m_Camera.target.y) / 64 / m_Camera.zoom)})) {
+					Debug("no place block");
+                    canPlace = false;
+                }
+			}
+
+            if (canPlace) {
+                Debug("Place Block");
+                m_Tiles.push_back(Tile(tiles.at(m_SelectedTile), {std::floor((GetMouseX() + m_Camera.target.x) / 64 / m_Camera.zoom), std::floor((GetMouseY() + m_Camera.target.y) / 64 / m_Camera.zoom)}));
+            }
+
+            canPlace = true;
 		}
 	}
 }
@@ -78,7 +152,7 @@ void Editor::Update() {
 void Editor::Draw() {
 	for (Tile tile : m_Tiles) {
 		if (tile.GetTileArgs() != TileArgs::NO_CAMERA) {
-			tile.Draw();
+			tile.OnRender();
 		}
 	}
 }
@@ -91,24 +165,24 @@ void Editor::DrawMenu() {
 
 	for (Tile tile : m_Tiles) {
 		if (tile.GetTileArgs() == TileArgs::NO_CAMERA) {
-			tile.Draw();
+			tile.OnRender();
 		}
 	}
 
 	Builder::GetRenderer()->RenderText("Current Tile: ", 8.5 * 64, 5 * 64);
-	if (Builder::GetRenderer()->RenderButton({19 * 64, 10.9 * 64, 120, 64}, "Export")) {
+	if (Builder::GetRenderer()->RenderButton(Vec2d(0.5, 0.5), Vec2d(0.25, 0.25), "Export")) {
 		std::ofstream file("hi.lvl", std::ios::binary);
 
 		// for exporting the level
 		for (Tile tile : m_Tiles) {
 			if (tile.GetTileArgs() != TileArgs::NO_CAMERA) {
 				// puts the tiletype stored as a char in the file
-				file << (char)tile.GetTileType();
+				file << tilesToBinary.at(tile.GetTileType());
 				// tS stands for tile separator and it separated the tiletype and position
 				file << "tS";
 				// puts the position in the file
-				file << (char)tile.GetPos().x;
-				file << (char)tile.GetPos().y;
+				file << static_cast<char>(tile.GetPos().x);
+				file << static_cast<char>(tile.GetPos().y);
 				// rSP stands for raspberry separator and is used to separate tiles
 				file << "rSP";
 			}

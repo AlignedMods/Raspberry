@@ -1,7 +1,9 @@
 #pragma once
 
-#include "button.hpp"
+#include "gui/raspGui.hpp"
 #include "raylib.h"
+
+#include "pch.hpp"
 
 class Button;
 
@@ -16,10 +18,12 @@ public:
 
 	Font& GetFont();
 
+    void AddButton(std::shared_ptr<Button> button);
+
 	void Hide();
 	void Show();
 private:
-	Button* m_Button;
+	std::vector<std::shared_ptr<Button>> m_Buttons;
 	Font m_Font;
 
 	bool m_Hidden;
