@@ -1,6 +1,7 @@
 -Ivendor/raylib/src/
 -Ivendor/raylib-cpp/include/
 -Ivendor/raygui/src/
+
 -Isrc/
--Ivendor/box2d/
--std=c++20
+
+-std=c++23

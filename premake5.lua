@@ -1,65 +1,37 @@
-workspace("Raspberry")
-configurations({ "Release", "Debug" })
-platforms({ "Windows", "Linux" })
+workspace "Raspberry"
+	configurations { "Debug", "Release" }
+	platforms { "Windows", "Linux" }
 
-filter("configurations:Release")
-optimize("On")
-architecture("x86_64")
+	includedirs { "src/" }
 
-kind("WindowedApp")
-language("C++")
-cppdialect("C++20")
+	filter "configurations:Release"
+		optimize "On"
+		kind "WindowedApp"
 
--- linking with raylib
-libdirs({ "vendor/raylib/src/" })
-links({ "raylib" })
+	filter "configurations:Debug"
+		symbols "On"
+		kind "ConsoleApp"
 
-filter("configurations:Debug")
-defines({ "RDEBUG", "RTRACEASSETS" })
-language("C++")
-cppdialect("C++20")
-symbols("On")
-architecture("x86_64")
+	project "raylib"
+		language "C"
+		cdialect "C99"
+		kind "StaticLib"
+		location "build/"
 
-kind("ConsoleApp")
+		files { "vendor/raylib/src/*.c", "vendor/raylib/src/*.h" }
 
--- linking with raylib
-libdirs({ "vendor/raylib/src/" })
-links({ "raylib" })
+		includedirs { "vendor/raylib/src", "vendor/raylib/src/external/glfw/include" }
 
--- Windows requires some extra dependencies to compile with raylib
-filter("platforms:Windows")
-links({ "winmm", "gdi32" })
+		defines { "SUPPRESS_DEF_PLATFORM", "PLATFORM_DESKTOP", "GRAPHICS_API_OPENGL_33", "SUPPORT_CUSTOM_FRAME_CONTROL" }
 
--- for building the actual game
-project("Raspberry")
-location("build/")
-files({ "src/**.cpp", "src/**.hpp" })
-removefiles({ "src/builder/**.cpp", "src/builder/**.hpp" })
+		filter "platforms:Windows"
+			links { "opengl32", "shell32", "gdi32", "winmm" }
 
-includedirs({ "vendor/raylib/src/", "vendor/raylib-cpp/include/", "src" })
+		filter "platforms:Linux"
+			defines { "_GLFW_X11" }
+			links { "GL", "X11", "m", "pthread", "dl" }
 
-pchheader("pch.hpp")
-
--- I hate visual studio
-pchsource("src/pchsource.cpp")
-
--- for bulding the map builder
-project("Raspberry-Builder")
-location("build/")
-files({
-	"src/builder/**.cpp",
-	"src/builder/**.hpp",
-	"src/tile/tile.cpp",
-	"src/tile/tile.hpp",
-	"src/utils/types.cpp",
-	--"src/core/tinyfiledialogs.cpp",
-	--"src/core/tinyfiledialogs.h",
-})
-
-includedirs({ "vendor/raylib/src/", "vendor/raylib-cpp/include/", "src", "vendor/raygui/src/" })
-
-pchheader("pch.hpp")
-
--- Necessary for certain things like the tile system
-defines({ "BUILDER" })
+		-- submodules
+		include "src/blueberry"
+		include "src/raspberry"
+		--require "src/shared"
