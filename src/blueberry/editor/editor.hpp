@@ -23,6 +23,7 @@ private:
 	int m_SelectedTile;
 	char* m_LoadedData;
 	std::vector<Tile> m_Tiles;
+	Tile m_CurrentTile;
 
 	std::string m_Name;
 

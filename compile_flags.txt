@@ -1,6 +1,4 @@
 -Ivendor/raylib/src/
--Ivendor/raylib-cpp/include/
--Ivendor/raygui/src/
 
 -Isrc/
 

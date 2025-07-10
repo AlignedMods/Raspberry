@@ -105,6 +105,7 @@ void Editor::Update() {
 
 	if (!m_IsCurrentDrawn) {
 		//m_Tiles.push_back(Tile(tiles.at(m_SelectedTile), {18.5, 7}));
+		m_CurrentTile = Tile(tiles.at(m_SelectedTile), {18, 7});
 		m_IsCurrentDrawn = true;
 	}
 
@@ -118,6 +119,7 @@ void Editor::Update() {
 		}
 
 		//m_Tiles.push_back(Tile(tiles.at(m_SelectedTile), {18.5, 7}, TileArgs::NO_CAMERA));
+		m_CurrentTile = Tile(tiles.at(m_SelectedTile), {18, 7});
 	} else if (GetMouseWheelMove() < 0) {
 		if (IsKeyDown(KEY_LEFT_CONTROL)) {
 			m_Camera.zoom -= 0.2f;
@@ -129,6 +131,7 @@ void Editor::Update() {
 			}
 		}
 		//m_Tiles.push_back(Tile(tiles.at(m_SelectedTile), {18.5, 7}, TileArgs::NO_CAMERA));
+		m_CurrentTile = Tile(tiles.at(m_SelectedTile), {18, 7});
 	}
 
 	if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
@@ -146,8 +149,8 @@ void Editor::Update() {
             if (canPlace) {
                 Debug(std::floor((GetMouseX() + m_Camera.target.x) / 64 / m_Camera.zoom));
                 m_Tiles.push_back(Tile(tiles.at(m_SelectedTile),
-					{(uint16_t)std::floor((GetMouseX() + m_Camera.target.x) / 64 / m_Camera.zoom),
-					 (uint16_t)std::floor((GetMouseY() + m_Camera.target.y) / 64 / m_Camera.zoom)}));
+					{(int16_t)std::floor((GetMouseX() + m_Camera.target.x) / 64 / m_Camera.zoom),
+					 (int16_t)std::floor((GetMouseY() + m_Camera.target.y) / 64 / m_Camera.zoom)}));
             }
 
             canPlace = true;
@@ -168,7 +171,7 @@ void Editor::ExportLevel() {
 
 	// Header
 	
-	m_Name = "death below";
+	m_Name = "okay so blah blah i am a person who is personing and i like people lol this name is very long!";
 
 	file << "RSP";
 	file << static_cast<uint8_t>(m_Name.size());
@@ -177,19 +180,21 @@ void Editor::ExportLevel() {
 
 	// for exporting the level
 	for (Tile tile : m_Tiles) {
-		//if (tile.GetTileArgs() != TileArgs::NO_CAMERA) {
-			// puts the tiletype stored as a char in the file
-			file << tilesToBinary.at(tile.GetType());
-			// tS stands for tile separator and it separated the tiletype and position
-			file << "tS";
-			// puts the position in the file
-			
-			file << static_cast<char>(tile.GetPosition().x);
-			file << static_cast<char>(tile.GetPosition().y);
-			// rSP stands for raspberry separator and is used to separate tiles
-			file << "rSP";
-		}
-	//}
+		// identify the object as a tile
+		file << "tile";
+
+		// puts the tiletype stored as a char in the file
+		file << tilesToBinary.at(tile.GetType());
+
+		// put the x position (must put as little endian or else it's gonna put it as text)
+		// for example 7 becomes 0x36 but it should be 0x07 0x00
+		file << static_cast<int8_t>(tile.GetPosition().x & 0xff);
+		file << static_cast<int8_t>((tile.GetPosition().x >> 8) & 0xff);
+		
+		// put the y position (must put as little endian)
+		file << static_cast<int8_t>(tile.GetPosition().y & 0xff);
+		file << static_cast<int8_t>((tile.GetPosition().y >> 8) & 0xff);
+	}
 
 	file.close();
 }
@@ -200,11 +205,13 @@ void Editor::DrawMenu() {
 
 	GuiPanel({17 * 64, 0, 4 * 64, 12 * 64}, "Info");
 
-	for (Tile tile : m_Tiles) {
+	//for (Tile tile : m_Tiles) {
 		//if (tile.GetTileArgs() == TileArgs::NO_CAMERA) {
-			tile.OnRender();
+			//tile.OnRender();
 		//}
-	}
+	//}
+	
+	m_CurrentTile.OnRender();
 
 	Renderer.RenderText("Current Tile: ", 8.5 * 64, 5 * 64);
 	if (Renderer.RenderButton({19 * 64, 10.9 * 64, 120, 64}, "Export")) {

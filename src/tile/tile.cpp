@@ -1,12 +1,11 @@
 #include "tile.hpp"
-#include "blueberry/renderer/renderer.hpp"
-#include "shared/log.hpp"
-#include "shared/types.hpp"
+#include "core/log.hpp"
+#include "renderer/renderer.hpp"
+#include "core/types.hpp"
 
-#include <map>
-#include <string>
+#include <unordered_map>
 
-static std::map<std::string, Texture> textures;
+static std::unordered_map<std::string, Texture> textures;
 static bool loaded = false;
 
 Tile::Tile(const std::string& type, const TilePosition& position) {
@@ -14,7 +13,6 @@ Tile::Tile(const std::string& type, const TilePosition& position) {
 	m_Position = position;
 
 	if (!loaded) {
-		Debug("pee");
 		textures["Stone"] = LoadTexture("Assets/stone.png");
         textures["Dirt"] = LoadTexture("Assets/dirt.png");
         textures["Grass"] = LoadTexture("Assets/grass.png");
@@ -24,11 +22,11 @@ Tile::Tile(const std::string& type, const TilePosition& position) {
 		loaded = true;
 	}
 
-	m_Texture = textures.at(type);
+	m_Texture = textures.at(m_Type);
 }
 
 void Tile::OnRender() {
-	Renderer.RenderTexture(m_Texture, m_Position.RaylibVector().x * 64.0f, m_Position.RaylibVector().y * 64.0f);
+	Renderer.RenderTexture(m_Texture, m_Position.RaylibVector().x, m_Position.RaylibVector().y);
 }
 
 TilePosition Tile::GetPosition() {

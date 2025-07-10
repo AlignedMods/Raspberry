@@ -11,6 +11,7 @@ workspace "Raspberry"
 	filter "configurations:Debug"
 		symbols "On"
 		kind "ConsoleApp"
+		defines { "RDEBUG" }
 
 	project "raylib"
 		language "C"
@@ -31,7 +32,7 @@ workspace "Raspberry"
 			defines { "_GLFW_X11" }
 			links { "GL", "X11", "m", "pthread", "dl" }
 
-		-- submodules
-		include "src/blueberry"
-		include "src/raspberry"
-		--require "src/shared"
+	-- submodules
+	--include "src/blueberry"
+	include "src/"
+	--require "src/shared"

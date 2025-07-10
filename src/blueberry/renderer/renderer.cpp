@@ -9,6 +9,7 @@ void s_Renderer::RenderTexture(Texture2D texture, float x, float y) {
 	if (texture.width != texture.height) {
 		Error("Textures must be square!", -2);
 	} else if (texture.width != 16) {
+		Debug(texture.width);
 		Error("Textures must be 16x16!", -3);
 	} else {
 		DrawTextureEx(texture, {x, y}, 0.0f, 4.0f, WHITE);
