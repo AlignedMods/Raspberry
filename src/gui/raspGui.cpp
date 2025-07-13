@@ -55,6 +55,10 @@ void GuiColor(ColorOptions option, uint32_t color) {
 }
 
 // Basic drawing functions
+void RectangluarRectangle(Rectangle bounds, uint32_t fillColor) {
+	OutlinedRectangle(bounds, 0, fillColor, 0x12345678);
+}
+
 void OutlinedRectangle(Rectangle bounds, int outline, uint32_t fillColor, uint32_t outlineColor) {
 	OutlinedRoundedRectangle(bounds, outline, 0.0f, fillColor, outlineColor);
 }
@@ -66,11 +70,11 @@ void OutlinedRoundedRectangle(Rectangle bounds, int outline, float roundness, ui
 		// Draw outline
 		::DrawRectangleRounded({actual.x - outline / 2.0f, actual.y - outline / 2.0f,
 								actual.width + outline, actual.height + outline}, 
-								roundness, 50, GetColor(outlineColor));
+								roundness, 25, GetColor(outlineColor));
 	}
 
 	// Draw actual rectangle
-	::DrawRectangleRounded(actual, roundness, 50, GetColor(fillColor));
+	::DrawRectangleRounded(actual, roundness, 25, GetColor(fillColor));
 }
 
 void Text(Rectangle bounds, const char* text) {
@@ -103,16 +107,16 @@ bool Button(Rectangle bounds, const char* text) {
 	if (CheckCollisionPointRec(mousePos, actual)) {
 		// button is clicked
 		if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
-			OutlinedRectangle(bounds, 4, g_Info.Clicked_Fill, g_Info.Clicked_Outline);
+			OutlinedRoundedRectangle(bounds, 4, 0.2f, g_Info.Clicked_Fill, g_Info.Clicked_Outline);
 		} else {
-			OutlinedRectangle(bounds, 4, g_Info.Hovered_Fill, g_Info.Hovered_Outline);
+			OutlinedRoundedRectangle(bounds, 4, 0.2f, g_Info.Hovered_Fill, g_Info.Hovered_Outline);
 		}
 
 		if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
 			clicked = true;
 		}
 	} else {
-		OutlinedRectangle(bounds, 4, g_Info.Default_Fill, g_Info.Default_Outline);
+		OutlinedRoundedRectangle(bounds, 4, 0.2f, g_Info.Default_Fill, g_Info.Default_Outline);
 	}
 
 	Text(bounds, text);

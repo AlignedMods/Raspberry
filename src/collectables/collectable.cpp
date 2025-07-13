@@ -15,7 +15,7 @@ Collectable::~Collectable() {
 }
 
 void Collectable::OnRender() {
-  Renderer.RenderTexture(m_Texture, m_Pos.x * 64, m_Pos.y * 64);
+	Renderer.RenderTexture(m_Texture, m_Pos.x * 64, m_Pos.y * 64, WHITE);
 }
 
 Vector2& Collectable::GetTilePos() {

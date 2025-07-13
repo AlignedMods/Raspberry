@@ -4,19 +4,12 @@
 #include "core/log.hpp"
 #include "menu/menu.hpp"
 #include "gui/raspGui.hpp"
+#include "registry.hpp"
 
 #include "raylib.h"
-
-#include <memory>
-
-using std::make_shared;
-using std::shared_ptr;
+#include "rlgl.h"
 
 static s_Game* s_Instance;
-
-void Callback() {
-    Debug("Clicked");
-}
 
 s_Game::s_Game() {
   if (!s_Instance) {
@@ -32,7 +25,7 @@ s_Game::s_Game() {
 
 s_Game::~s_Game() {}
 
-void s_Game::Loop(Camera2D& camera) {
+void s_Game::Loop() {
     //Button button = Button(Vec2d(0.25f, 0.25f), Vec2d(0.5f, 0.5f), "funny", true, []() {Debug("hi");});
 	
 	double currentTime = 0.0;
@@ -40,30 +33,48 @@ void s_Game::Loop(Camera2D& camera) {
 	double updateDrawTime = 0.0;
 	double waitTime = 0.0;
 
+	m_Camera.target = { 0.0f, 0.0f };
+	m_Camera.offset = { GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
+	m_Camera.rotation = 0.0f;
+	m_Camera.zoom = 1.0f;
+
+	m_EditorCamera.target = { 0.0f, 0.0f };
+	m_EditorCamera.offset = { 0.0f, 0.0f };
+	m_EditorCamera.rotation = 0.0f;
+	m_EditorCamera.zoom = 1.0f;
+
+	Registry.AddTile("Dirt", LoadTexture("Assets/dirt.png"));
+	Registry.AddTile("Stone", LoadTexture("Assets/stone.png"));
+	Registry.AddTile("Brick", LoadTexture("Assets/brick.png"));
+
     while (!WindowShouldClose()) {
 		PollInputEvents();
 
-		camera.offset = {GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f};
+		while (GetTime() - m_LastTime > 0.05f) {
+			m_LastTime += GetTime() - m_LastTime;
 
-        if (m_isGamePlayRunning) {
+			Tick();
+		}
+
+        if (m_GameRunning) {
+			m_Camera.offset = { GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
+
 			m_CurrentLevel.OnUpdate();
 
-            while (GetTime() - m_LastTime > 0.05f) {
-                m_LastTime += GetTime() - m_LastTime;
-
-                Tick();
-            }
-        
-            camera.target = {m_CurrentLevel.GetPlayer().GetX(),
-                            m_CurrentLevel.GetPlayer().GetY()};
+            m_Camera.target = {m_CurrentLevel.GetPlayer().GetX() * 64.0f - 32.0f,
+                            m_CurrentLevel.GetPlayer().GetY() * 64.0f - 32.0f};
         }
+
+		if (m_EditorRunning) {
+			m_Editor->OnUpdate();
+		}
 
         BeginDrawing();
 
         ClearBackground(WHITE);
     
-        if (m_isGamePlayRunning) {
-            BeginMode2D(camera);
+        if (m_GameRunning) {
+            BeginMode2D(m_Camera);
 
 			m_CurrentLevel.OnRender();
       
@@ -73,16 +84,25 @@ void s_Game::Loop(Camera2D& camera) {
       
             EndMode2D();
         }
-    
-        //menu.Draw();
 
-		if (!m_isGamePlayRunning) {
-			if (RaspGui::Button({0.3f, 0.35f, 0.4f, 0.3f}, "Play")) {
+		if (m_EditorRunning) {
+			m_Editor->OnRender();
+		}
+    
+		// neither the game nor editor are running
+		if (!m_GameRunning && !m_EditorRunning) {
+			if (RaspGui::Button({0.05f, 0.65f, 0.2f, 0.1f}, "Play")) {
 				StartGameplay();
+			}
+
+			if (RaspGui::Button({0.05f, 0.8f, 0.2f, 0.1f}, "Editor")) {
+				StartEditor();
 			}
 
 			RaspGui::Label({0.1f, 0.05f, 0.8f, 0.2f}, "Welcome to raspberry!");
 		}
+
+		DrawText(TextFormat("FPS: %.1f", m_CurrentFPS), 10, 10, 20, BLACK);
     
         EndDrawing();
 
@@ -107,7 +127,11 @@ void s_Game::Loop(Camera2D& camera) {
 
 // NOTE: a tick is basically a 20th of a second.
 void s_Game::Tick() {
-	m_CurrentLevel.Tick();
+	if (m_GameRunning) {
+		m_CurrentLevel.Tick();
+	}
+
+	m_CurrentFPS = 1.0f / deltaTime;
 }
 
 void s_Game::Run() {
@@ -135,25 +159,10 @@ void s_Game::Run() {
     m_LastTime = GetTime();
   
     Random::Init();
-  
-    //SetTargetFPS(60);
 
-    //ToggleBorderlessWindowed();
     SetExitKey(KEY_F9);
-  
-    //Menu menu;
-    //menu.InitFonts();
-  
-    // for some reason i have to explictly show the menu
-    //menu.Show();
-  
-    Camera2D camera;
-    camera.zoom = 1.0f;
-    camera.offset = {WINDOW_WIDTH / 2.0f, WINDOW_HEIGHT / 2.0f};
-    camera.target = {0.0f, 0.0f};
-    camera.rotation = 0.0f;
 
-    Loop(camera);
+	Loop();
 }
 
 void s_Game::SetCurrentLevel(const Level& level) {
@@ -164,12 +173,22 @@ Level& s_Game::GetCurrentLevel() {
 	return m_CurrentLevel;
 }
 
+void s_Game::StartEditor() {
+	if (m_EditorRunning || m_GameRunning) {
+		return;
+	}
+
+	m_EditorRunning = true;
+
+	m_Editor = new Editor(m_EditorCamera);
+}
+
 void s_Game::StartGameplay() {
-    if (m_isGamePlayRunning) {
+    if (m_GameRunning || m_EditorRunning) {
         return;
     }
 
-    m_isGamePlayRunning = true;
+    m_GameRunning = true;
 
     m_CurrentLevel.LoadLevelFromFile("hi.lvl");
 

@@ -12,6 +12,7 @@ public:
 	Tile(const std::string& type, const TilePosition& position);
 
 	void OnRender();
+	void OnRender(uint32_t flag);
 	// returning this by value is intentional (returning by value is half the size lols)
 	TilePosition GetPosition();
 	std::string& GetType();

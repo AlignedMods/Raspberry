@@ -25,6 +25,7 @@ Rectangle GetRealSize(Rectangle bounds);
 void GuiColor(ColorOptions option, uint32_t color);
 
 // Basic Drawing
+void RectangluarRectangle(Rectangle bounds, uint32_t fillColor);
 void OutlinedRectangle(Rectangle bounds, int outline, uint32_t fillColor, uint32_t outlineColor);
 void OutlinedRoundedRectangle(Rectangle bounds, int outline, float roundness, uint32_t fillColor, uint32_t outlineColor);
 void Text(Rectangle bounds, const char* text);

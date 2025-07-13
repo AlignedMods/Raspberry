@@ -2,31 +2,21 @@
 #include "core/log.hpp"
 #include "renderer/renderer.hpp"
 #include "core/types.hpp"
-
-#include <unordered_map>
-
-static std::unordered_map<std::string, Texture> textures;
-static bool loaded = false;
+#include "registry.hpp"
 
 Tile::Tile(const std::string& type, const TilePosition& position) {
 	m_Type = type;
 	m_Position = position;
 
-	if (!loaded) {
-		textures["Stone"] = LoadTexture("Assets/stone.png");
-        textures["Dirt"] = LoadTexture("Assets/dirt.png");
-        textures["Grass"] = LoadTexture("Assets/grass.png");
-        textures["Brick"] = LoadTexture("Assets/brick.png");
-        textures["Grasspatch"] = LoadTexture("Assets/grass_patch.png");
-
-		loaded = true;
-	}
-
-	m_Texture = textures.at(m_Type);
+	m_Texture = Registry.GetTileTexture(type);
 }
 
 void Tile::OnRender() {
-	Renderer.RenderTexture(m_Texture, m_Position.RaylibVector().x, m_Position.RaylibVector().y);
+	OnRender(0xffffffff);
+}
+
+void Tile::OnRender(uint32_t flag) {
+	Renderer.RenderTexture(m_Texture, m_Position.RaylibVector().x, m_Position.RaylibVector().y, GetColor(flag));
 }
 
 TilePosition Tile::GetPosition() {

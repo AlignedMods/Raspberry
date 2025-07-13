@@ -5,20 +5,6 @@
 
 #include "raylib.h"
 
-enum class EntityState {
-    Running,
-    Jumping,
-    Freefalling,
-    Idle
-};
-
-enum class Direction {
-    Up,
-    Down,
-    Right,
-    Left
-};
-
 class Entity {
 public:
 	virtual ~Entity() {}
@@ -35,11 +21,13 @@ protected:
 	Vector2 m_Velocity;
 	Vector2 m_Position;
 
-	EntityState m_State;
+	bool m_Walking;
+	bool m_Falling;
+
+	int m_Direction;
 
 	Texture m_Texture;
 
 	int m_Anim = 0;
-	Direction m_Direction = Direction::Down;
 	bool m_TextureFlip = false;
 };

@@ -6,8 +6,6 @@
 #include "entity/player.hpp"
 #include "tile/tile.hpp"
 
-#include "box2d/box2d.h"
-
 #include <memory>
 #include <vector>
 #include <filesystem>
