@@ -5,6 +5,7 @@
 #include "game.hpp"
 #include "renderer/renderer.hpp"
 #include "core/types.hpp"
+#include "core/log.hpp"
 
 #include "raylib.h"
 #include "raymath.h"
@@ -14,8 +15,6 @@
 Player::Player() {
 	m_Position.x = 0.0f;
 	m_Position.y = 0.0f;
-
-	m_Acceleration = 1;
 }
 
 void Player::InitTextures() {
@@ -34,34 +33,81 @@ Player Player::operator=(const Player& other) {
 	return other;
 }
 
+// phyics
 void Player::OnUpdate() {
 	m_Walking = false;
+
+	m_WalkSpeed.x = Approach(0.0f, m_WalkSpeed.x, 50.0f * Game.deltaTime);
+	m_DashSpeed.x = Approach(0.0f, m_DashSpeed.x, 50.0f * Game.deltaTime);
 
 	if (IsKeyDown(KEY_D)) {
 		m_Walking = true;
 		m_Direction = 1;
-		m_Velocity.x = std::min(320.0f, m_Velocity.x + 80.0f);
+		m_WalkSpeed.x = 5.0f;
 	}
 
 	if (IsKeyDown(KEY_A)) {
 		m_Walking = true;
 		m_Direction = 0;
-		m_Velocity.x = std::max(-320.0f, m_Velocity.x - 80.0f);
+		m_WalkSpeed.x = -5.0f;
 	}
 
-	if (!m_Walking) {
-		if (m_Velocity.x > 0.0f) {
-			m_Velocity.x = std::max(0.0f, m_Velocity.x - 70.0f);
-		}
+	// Decrease the cooldowns
+	m_JumpCooldown -= Game.deltaTime;
 
-		if (m_Velocity.x < 0.0f) {
-			m_Velocity.x = std::min(0.0f, m_Velocity.x + 70.0f);
+	m_Dashing = false;
+
+	if (IsKeyDown(KEY_E)) {
+		if (GetTime() - m_TimeSinceDash > 3.0) {
+			if (m_Direction) {
+				Log(LogLevel::Info, "right");
+				m_DashSpeed.x = 20.0f;
+			} else {
+				Log(LogLevel::Info, "left");
+				m_DashSpeed.x = -20.0f;
+			}
+
+			m_Dashing = true;
+			m_TimeSinceDash += 3.0;
 		}
 	}
 
-	m_Position = Vector2Add(Vector2Scale(m_Velocity, Game.deltaTime), m_Position);
+	m_Velocity.x = m_WalkSpeed.x + m_DashSpeed.x;
 
-    CheckCollisions();
+	if (m_Grounded) {
+		m_CoyoteTimeCounter = 0.15;
+	} else {
+		m_CoyoteTimeCounter -= Game.deltaTime;
+	}
+
+	if (IsKeyPressed(KEY_SPACE)) {
+		if (m_CoyoteTimeCounter > 0.0) {
+			m_Velocity.y = -9.0f;
+			m_Grounded = false;
+		}
+
+		m_JumpCooldown += 0.5f * Game.deltaTime;
+	}
+
+	m_Velocity.y += m_Gravity * Game.deltaTime;
+
+	m_Position.x += m_Velocity.x * Game.deltaTime;
+	CheckCollisionsH();
+
+	m_Position.y += m_Velocity.y * Game.deltaTime;
+	CheckCollisionsV();
+}
+
+float Player::Approach(float end, float current, float interval) {
+	float val = current;
+
+	if (end > current) {
+		val = std::min(current + interval, end);
+	} else {
+		val = std::max(current - interval, end);
+	}
+
+	return val;
 }
 
 void Player::UpdateTextures() {
@@ -92,20 +138,42 @@ void Player::UpdateTextures() {
 	}
 }
 
-void Player::CheckCollisions() {
-    bool collision = false;
-
+void Player::CheckCollisionsH() {
 	Level& level = Game.GetCurrentLevel();
 
     for (auto& tile : level.GetAllTiles()) {
-        //if ((m_Position.x + 64 > tile->GetPosition().x * 64 && m_Position.x < tile->GetPosition().x * 64 + 64)
-			//&& (m_Position.y + 64 > tile->GetPosition().y * 64 && m_Position.y < tile->GetPosition().y * 64 + 64)) {
-            //collision = true;
-        //}
-    }
+		if (CheckCollisionRecs({m_Position.x, m_Position.y + 0.1f, 1.0f, 0.9f},
+							   {tile.GetPosition().RaylibVector().x, tile.GetPosition().RaylibVector().y, 1.0f, 1.0f})) 
+		{
+			if (m_Velocity.x > 0) {
+				m_Position.x = tile.GetPosition().RaylibVector().x - 1.0f;
+			} else if (m_Velocity.x < 0) {
+				m_Position.x = tile.GetPosition().RaylibVector().x + 1.0f;
+			}
 
-    if (collision) {
-        
+			m_Velocity.x = 0;
+		}
+    }
+}
+
+void Player::CheckCollisionsV() {
+	Level& level = Game.GetCurrentLevel();
+
+	m_Grounded = false;
+
+    for (auto& tile : level.GetAllTiles()) {
+		if (CheckCollisionRecs({m_Position.x, m_Position.y + 0.1f, 1.0f, 0.9f},
+							   {tile.GetPosition().RaylibVector().x, tile.GetPosition().RaylibVector().y, 1.0f, 1.0f})) 
+		{
+			if (m_Velocity.y > 0) {
+				m_Position.y = tile.GetPosition().RaylibVector().y - 1.0f;
+				m_Grounded = true;
+			} else if (m_Velocity.y < 0) {
+				m_Position.y = tile.GetPosition().RaylibVector().y + 1.0f;
+			}
+
+			m_Velocity.y = 0;
+		}
     }
 }
 

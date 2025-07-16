@@ -5,6 +5,8 @@
 
 #include "raylib.h"
 
+#include <format>
+
 Collectable::Collectable() {
   m_Pos = Random::Vec2(0, 25);
 }

@@ -32,3 +32,11 @@ void s_Registry::AddTile(const std::string& name, const Texture& texture) {
 	RegisterTile(name);
 	AddTileTexture(name, texture);
 }
+
+bool s_Registry::DoesTileExist(const std::string& name) {
+	if (!m_TileNameToID.contains(name)) {
+		return false;
+	}
+
+	return m_TileTextures.contains(m_TileNameToID.at(name));
+}

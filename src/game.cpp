@@ -34,18 +34,19 @@ void s_Game::Loop() {
 	double waitTime = 0.0;
 
 	m_Camera.target = { 0.0f, 0.0f };
-	m_Camera.offset = { GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
+	m_Camera.offset = { GetScreenWidth() / 2.0f - 64.0f, GetScreenHeight() / 2.0f - 64.0f };
 	m_Camera.rotation = 0.0f;
 	m_Camera.zoom = 1.0f;
 
 	m_EditorCamera.target = { 0.0f, 0.0f };
-	m_EditorCamera.offset = { 0.0f, 0.0f };
+	m_EditorCamera.offset = { GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
 	m_EditorCamera.rotation = 0.0f;
 	m_EditorCamera.zoom = 1.0f;
 
 	Registry.AddTile("Dirt", LoadTexture("Assets/dirt.png"));
 	Registry.AddTile("Stone", LoadTexture("Assets/stone.png"));
-	Registry.AddTile("Brick", LoadTexture("Assets/brick.png"));
+	Registry.AddTile("Brick", LoadTexture("Assets/blue_brick.png"));
+	Registry.AddTile("Sand", LoadTexture("Assets/sand.png"));
 
     while (!WindowShouldClose()) {
 		PollInputEvents();
@@ -56,22 +57,47 @@ void s_Game::Loop() {
 			Tick();
 		}
 
-        if (m_GameRunning) {
-			m_Camera.offset = { GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
+		// neither the game nor editor are running
+		if (!m_GameRunning && !m_EditorRunning) {
+			if (RaspGui::Button({0.05f, 0.65f, 0.2f, 0.1f}, "Play")) {
+				StartGameplay();
+			}
 
-			m_CurrentLevel.OnUpdate();
+			if (RaspGui::Button({0.05f, 0.8f, 0.2f, 0.1f}, "Editor")) {
+				StartEditor();
+			}
+
+			RaspGui::Label({0.1f, 0.05f, 0.8f, 0.2f}, "Welcome to raspberry!");
+		}
+
+        if (m_GameRunning) {
+			m_Camera.offset = { GetScreenWidth() / 2.0f - 64.0f, GetScreenHeight() / 2.0f - 64.0f };
+
+			if (!m_PauseMenu) {
+				m_CurrentLevel.OnUpdate();
+			}
 
             m_Camera.target = {m_CurrentLevel.GetPlayer().GetX() * 64.0f - 32.0f,
                             m_CurrentLevel.GetPlayer().GetY() * 64.0f - 32.0f};
+
+			if (IsKeyPressed(KEY_ESCAPE)) {
+				m_PauseMenu = true;
+			}
+
+			if (m_PauseMenu) {
+				if (RaspGui::Button({0.3f, 0.1f, 0.4f, 0.15f}, "Continue")) {
+					m_PauseMenu = false;
+				}
+			}
         }
 
 		if (m_EditorRunning) {
+			m_EditorCamera.offset = { GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
 			m_Editor->OnUpdate();
 		}
 
-        BeginDrawing();
-
-        ClearBackground(WHITE);
+		// begin rendering
+		Renderer.Begin();
     
         if (m_GameRunning) {
             BeginMode2D(m_Camera);
@@ -88,25 +114,11 @@ void s_Game::Loop() {
 		if (m_EditorRunning) {
 			m_Editor->OnRender();
 		}
-    
-		// neither the game nor editor are running
-		if (!m_GameRunning && !m_EditorRunning) {
-			if (RaspGui::Button({0.05f, 0.65f, 0.2f, 0.1f}, "Play")) {
-				StartGameplay();
-			}
 
-			if (RaspGui::Button({0.05f, 0.8f, 0.2f, 0.1f}, "Editor")) {
-				StartEditor();
-			}
-
-			RaspGui::Label({0.1f, 0.05f, 0.8f, 0.2f}, "Welcome to raspberry!");
-		}
-
+		// show the current fps
 		DrawText(TextFormat("FPS: %.1f", m_CurrentFPS), 10, 10, 20, BLACK);
-    
-        EndDrawing();
 
-		SwapScreenBuffer();
+		Renderer.End();
 
 		currentTime = GetTime();
 
@@ -127,7 +139,7 @@ void s_Game::Loop() {
 
 // NOTE: a tick is basically a 20th of a second.
 void s_Game::Tick() {
-	if (m_GameRunning) {
+	if (m_GameRunning && !m_PauseMenu) {
 		m_CurrentLevel.Tick();
 	}
 
@@ -190,7 +202,7 @@ void s_Game::StartGameplay() {
 
     m_GameRunning = true;
 
-    m_CurrentLevel.LoadLevelFromFile("hi.lvl");
+    m_CurrentLevel.LoadLevelFromFile("hi.rsp");
 
     m_CurrentLevel.AddCollectable();
     m_CurrentLevel.GetCollectable().InitTextures();

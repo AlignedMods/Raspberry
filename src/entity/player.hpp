@@ -18,16 +18,27 @@ public:
     virtual void OnRender() override;
     virtual void OnUpdate() override;
 
+	float Approach(float end, float current, float interval);
+
     void UpdateTextures();
 
 private:
-    void CheckCollisions();
+    void CheckCollisionsH();
+    void CheckCollisionsV();
 
-    float m_Acceleration;
+    const float m_Gravity = 30.0f;
 
-    const float m_Gravity = 0.02f;
+	Vector2 m_WalkSpeed;
+	Vector2 m_DashSpeed;
 
-    bool m_OnGround;
+    bool m_Grounded;
+
+	double m_JumpCooldown = 0.0;
+	double m_TimeSinceDash = 0.0;
+
+	double m_CoyoteTimeCounter = 0.0;
+
+	bool m_Dashing = false;
 
     std::map<std::string, Texture> m_Textures = {};
 };

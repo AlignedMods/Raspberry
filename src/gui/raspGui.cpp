@@ -1,4 +1,5 @@
 #include "raspGui.hpp"
+#include "renderer/renderer.hpp"
 
 #include "raylib.h"
 
@@ -19,10 +20,31 @@ struct Info {
 
 	int Font_Size = 70;
 	std::unordered_map<int, Font> Fonts;
+
+	int32_t TextBoxPosition = 0;
+};
+
+struct GuiRectangle {
+	Rectangle rectangle;
+	float roundness;
+	int segments;
+	uint32_t color;
+};
+
+struct GuiText {
+	const char* text;
+	int size;
+	Rectangle rectangle;
+};
+
+struct RenderThings {
+	std::vector<GuiRectangle> Rectangles;
+	std::vector<GuiText> Texts;
 };
 
 // "global" info, not accesible outside of this file
 static Info g_Info;
+static RenderThings g_Render;
 
 // Utility functions
 Rectangle GetRealSize(Rectangle bounds) {
@@ -30,8 +52,27 @@ Rectangle GetRealSize(Rectangle bounds) {
 			bounds.width * GetScreenWidth(), bounds.height * GetScreenHeight()};
 }
 
+void NewCanvas() {
+	// clear all the rectangles
+	g_Render.Rectangles.clear();
+	g_Render.Texts.clear();
+}
+
+void Render() {
+	for (auto& rec : g_Render.Rectangles) {
+		DrawRectangleRounded(rec.rectangle, rec.roundness, rec.segments, GetColor(rec.color));
+	}
+
+	for (auto& text : g_Render.Texts) {
+		int width = MeasureTextEx(g_Info.Fonts.at(g_Info.Font_Size), text.text, g_Info.Font_Size, 3).x;
+
+		DrawTextEx(g_Info.Fonts.at(text.size), text.text, {text.rectangle.x + text.rectangle.width / 2 - width / 2.0f,
+				   text.rectangle.y + text.rectangle.height / 2 - text.size / 2.0f}, text.size, 3, WHITE);
+	}
+}
+
 // Control
-void GuiColor(ColorOptions option, uint32_t color) {
+void SetColor(ColorOptions option, uint32_t color) {
 	switch (option) {
 		case ColorOptions::DefaultFill:
 			g_Info.Default_Fill = color;
@@ -54,6 +95,10 @@ void GuiColor(ColorOptions option, uint32_t color) {
 	}
 }
 
+void SetFontSize(int size) {
+	g_Info.Font_Size = size;
+}
+
 // Basic drawing functions
 void RectangluarRectangle(Rectangle bounds, uint32_t fillColor) {
 	OutlinedRectangle(bounds, 0, fillColor, 0x12345678);
@@ -67,14 +112,13 @@ void OutlinedRoundedRectangle(Rectangle bounds, int outline, float roundness, ui
 	// don't bother calculating an outline if there is none
 	Rectangle actual = GetRealSize(bounds);
 	if (outline != 0.0f) {
-		// Draw outline
-		::DrawRectangleRounded({actual.x - outline / 2.0f, actual.y - outline / 2.0f,
-								actual.width + outline, actual.height + outline}, 
-								roundness, 25, GetColor(outlineColor));
+		g_Render.Rectangles.push_back({{actual.x - outline / 2.0f, actual.y - outline / 2.0f,
+									   actual.width + outline, actual.height + outline},
+									   roundness, 25, outlineColor});
 	}
 
 	// Draw actual rectangle
-	::DrawRectangleRounded(actual, roundness, 25, GetColor(fillColor));
+	g_Render.Rectangles.push_back({actual, roundness, 25, fillColor});
 }
 
 void Text(Rectangle bounds, const char* text) {
@@ -84,11 +128,9 @@ void Text(Rectangle bounds, const char* text) {
 	}
 
 	Rectangle actual = GetRealSize(bounds);
+	int fontSize = g_Info.Font_Size;
 
-	int width = MeasureTextEx(g_Info.Fonts.at(g_Info.Font_Size), text, g_Info.Font_Size, 3).x;
-
-	::DrawTextEx(g_Info.Fonts.at(g_Info.Font_Size), text, {actual.x + actual.width / 2 - width / 2.0f,
-			   actual.y + actual.height / 2 - g_Info.Font_Size / 2.0f}, g_Info.Font_Size, 3, WHITE);
+	g_Render.Texts.push_back({text, fontSize, actual});
 }
 
 void Label(Rectangle bounds, const char* text) {
@@ -122,6 +164,51 @@ bool Button(Rectangle bounds, const char* text) {
 	Text(bounds, text);
 
 	return clicked;
+}
+
+// this was way simpler to implement that i thought
+// to be fair it doesn't have all the features
+// such as moving left and right but you don't need that
+bool TextInput(Rectangle bounds, std::string& str) {
+	bool enterPressed = false;
+	g_Info.TextBoxPosition = 0;
+
+	if (IsKeyPressed(KEY_ENTER)) {
+		enterPressed = true;
+	}
+
+	if (IsKeyPressed(KEY_LEFT)) {
+		g_Info.TextBoxPosition = std::max(g_Info.TextBoxPosition - 1, 0);
+	}
+
+	if (IsKeyPressed(KEY_RIGHT)) {
+		g_Info.TextBoxPosition = std::min(g_Info.TextBoxPosition + 1, (int32_t)str.size());
+	}
+
+	if (IsKeyPressed(KEY_BACKSPACE)) {
+		if (!str.empty()) {
+			str.erase(str.end() - 1);
+		}
+	}
+
+	// handle pasting
+	if (IsKeyPressed(KEY_V) && IsKeyDown(KEY_LEFT_CONTROL)) {
+		const char* text = GetClipboardText();
+
+		str.append(text);
+	}
+
+	char key = GetCharPressed();
+
+	// check if the character is in range
+	if (key > 31 && key < 123) {
+		str.append(1, key);
+	}
+
+	OutlinedRoundedRectangle(bounds, 5, 0.2f, g_Info.Default_Fill, g_Info.Default_Outline);
+	Text(bounds, str.c_str());
+
+	return enterPressed;
 }
 
 };

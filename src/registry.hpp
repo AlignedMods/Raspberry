@@ -22,6 +22,8 @@ public:
 	
 	Texture& GetTileTexture(const std::string& name); // retrieves a texture for a specific tile
 	Texture& GetTileTexture(TileID id); // retrieves a texture for a specific tile
+	
+	bool DoesTileExist(const std::string& name);
 private:
 	// maps for tiles
 	std::unordered_map<TileID, Texture> m_TileTextures;

@@ -1,6 +1,6 @@
 project "Raspberry"
 	language "C++"
-	cppdialect "C++23"
+	cppdialect "C++20"
 	location "../build/"
 
 	files { "**.cpp", "**.hpp" }

@@ -32,7 +32,8 @@ private:
 
     bool m_GameRunning = false;
 	bool m_EditorRunning = false;
-	int targetFPS = 360;
+	bool m_PauseMenu = false;
+	int targetFPS = 1000;
 
 	float m_CurrentFPS = 0;
   

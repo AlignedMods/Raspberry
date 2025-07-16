@@ -22,10 +22,11 @@ class Editor {
 public:
 	Editor(Camera2D& camera);
 
-	void OnRender();
 	void OnUpdate();
+	void OnRender();
 
 	void PlaceTile();
+	void DestroyTile();
 
 private:
 	std::vector<Tile> m_Tiles;

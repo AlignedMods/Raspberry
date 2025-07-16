@@ -1,6 +1,7 @@
 #include "level.hpp"
 #include "collectables/collectable.hpp"
 #include "collectables/raspberry.hpp"
+#include "registry.hpp"
 #include "tile/tile.hpp"
 #include "core/log.hpp"
 
@@ -127,6 +128,8 @@ bool Level::LoadLevelFromFile(std::filesystem::path path) {
 			pos++;
 		}
 
+		Log(LogLevel::Info, str);
+
 		// we are parsing a tile
 		if (str == "tile") {
 			// skip past the ':'
@@ -134,22 +137,32 @@ bool Level::LoadLevelFromFile(std::filesystem::path path) {
 			Log(LogLevel::Info, std::format("Value after tile is: {}", contents.at(pos)));
 
 			uint8_t type;
-			int16_t x;
-			int16_t y;
+			int32_t x;
+			int32_t y;
 
 			type = contents.at(pos++);
 
 			// reassemble the number from little endian
-			x = static_cast<int16_t>(contents.at(pos + 1) << 8 | contents.at(pos));
-			pos += 2;
+			x = static_cast<int32_t>((int8_t)contents.at(pos + 3) << 24 |
+									 (int8_t)contents.at(pos + 2) << 16 |
+									 (int8_t)contents.at(pos + 1) << 8  |
+									 (int8_t)contents.at(pos));
 
-			y = static_cast<int16_t>(contents.at(pos + 1) << 8 | contents.at(pos));
-			pos += 2;
+			pos += 4;
+
+			y = static_cast<int32_t>((int8_t)contents.at(pos + 3) << 24 |
+									 (int8_t)contents.at(pos + 2) << 16 |
+									 (int8_t)contents.at(pos + 1) << 8  |
+									 (int8_t)contents.at(pos));
+
+			pos += 4;
 
 			Log(LogLevel::Info, std::format("{}, {}", x, y));
 
-			AddTile(Tile(tiles.at(type), {x, y}));
+			AddTile(Tile(Registry.GetNameFromID(type), {x, y}));
 		}
+
+		str.clear();
     }
 
 	m_Player.InitTextures();
