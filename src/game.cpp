@@ -2,7 +2,7 @@
 #include "core/random.hpp"
 #include "entity/player.hpp"
 #include "core/log.hpp"
-#include "menu/menu.hpp"
+#include "menu.hpp"
 #include "gui/raspGui.hpp"
 #include "registry.hpp"
 
@@ -12,22 +12,20 @@
 static s_Game* s_Instance;
 
 s_Game::s_Game() {
-  if (!s_Instance) {
-    s_Instance = this;
-  } else {
+	if (!s_Instance) {
+		s_Instance = this;
+	} else {
 		Log(LogLevel::Critical, "There cannot be multiple game classes at once!!");
-  }
+	}
 
-  SetCurrentLevel(Level());
+	SetCurrentLevel(Level());
 
-  SetTraceLogLevel(LOG_WARNING);
+	SetTraceLogLevel(LOG_WARNING);
 }
 
 s_Game::~s_Game() {}
 
 void s_Game::Loop() {
-    //Button button = Button(Vec2d(0.25f, 0.25f), Vec2d(0.5f, 0.5f), "funny", true, []() {Debug("hi");});
-	
 	double currentTime = 0.0;
 	double lastTime = GetTime();
 	double updateDrawTime = 0.0;
@@ -43,31 +41,18 @@ void s_Game::Loop() {
 	m_EditorCamera.rotation = 0.0f;
 	m_EditorCamera.zoom = 1.0f;
 
-	Registry.AddTile("Dirt", LoadTexture("Assets/dirt.png"));
-	Registry.AddTile("Stone", LoadTexture("Assets/stone.png"));
-	Registry.AddTile("Brick", LoadTexture("Assets/blue_brick.png"));
-	Registry.AddTile("Sand", LoadTexture("Assets/sand.png"));
-
-    while (!WindowShouldClose()) {
+    while (!WindowShouldClose() && m_Running) {
 		PollInputEvents();
 
-		while (GetTime() - m_LastTime > 0.05f) {
+		while (GetTime() - m_LastTime > 0.0167f) {
 			m_LastTime += GetTime() - m_LastTime;
 
 			Tick();
 		}
 
-		// neither the game nor editor are running
-		if (!m_GameRunning && !m_EditorRunning) {
-			if (RaspGui::Button({0.05f, 0.65f, 0.2f, 0.1f}, "Play")) {
-				StartGameplay();
-			}
-
-			if (RaspGui::Button({0.05f, 0.8f, 0.2f, 0.1f}, "Editor")) {
-				StartEditor();
-			}
-
-			RaspGui::Label({0.1f, 0.05f, 0.8f, 0.2f}, "Welcome to raspberry!");
+		// Fullscreen keybind
+		if (IsKeyPressed(KEY_F11)) {
+			ToggleBorderlessWindowed();
 		}
 
         if (m_GameRunning) {
@@ -81,13 +66,7 @@ void s_Game::Loop() {
                             m_CurrentLevel.GetPlayer().GetY() * 64.0f - 32.0f};
 
 			if (IsKeyPressed(KEY_ESCAPE)) {
-				m_PauseMenu = true;
-			}
-
-			if (m_PauseMenu) {
-				if (RaspGui::Button({0.3f, 0.1f, 0.4f, 0.15f}, "Continue")) {
-					m_PauseMenu = false;
-				}
+                m_Menu.SetCurrentMenu(MenuTypes::Pause);
 			}
         }
 
@@ -95,6 +74,8 @@ void s_Game::Loop() {
 			m_EditorCamera.offset = { GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
 			m_Editor->OnUpdate();
 		}
+
+        m_Menu.OnUpdate();
 
 		// begin rendering
 		Renderer.Begin();
@@ -118,6 +99,11 @@ void s_Game::Loop() {
 		// show the current fps
 		DrawText(TextFormat("FPS: %.1f", m_CurrentFPS), 10, 10, 20, BLACK);
 
+		RaspGui::Render();
+		
+		// custom cursor cause why not
+		DrawTexture(m_Cursor, GetMouseX(), GetMouseY(), WHITE);
+
 		Renderer.End();
 
 		currentTime = GetTime();
@@ -137,11 +123,26 @@ void s_Game::Loop() {
     }
 }
 
-// NOTE: a tick is basically a 20th of a second.
+void s_Game::Pause() {
+    m_PauseMenu = false;
+}
+
+void s_Game::Resume() {
+    m_PauseMenu = true;
+}
+
+void s_Game::Quit() {
+    m_Running = false;
+}
+
+// NOTE: a tick is basically a 60th of a second.
+// esentially acting as a "FixedUpdate"
 void s_Game::Tick() {
 	if (m_GameRunning && !m_PauseMenu) {
 		m_CurrentLevel.Tick();
 	}
+
+    ticks++;
 
 	m_CurrentFPS = 1.0f / deltaTime;
 }
@@ -161,12 +162,16 @@ void s_Game::Run() {
   }
 #endif
 
-    constexpr static int WINDOW_WIDTH = 21 * 64;
-    constexpr static int WINDOW_HEIGHT = 12 * 64;
-  
 	SetConfigFlags(FLAG_WINDOW_RESIZABLE);
 	SetConfigFlags(FLAG_MSAA_4X_HINT);
-    InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Raspberry");
+    InitWindow(m_Specification.Width, m_Specification.Height, m_Specification.Name);
+
+	Registry.RegisterAllTextures();
+
+	SetWindowIcon(LoadImage("Assets/Textures/stone.png"));
+
+	SetWindowMaxSize(m_Specification.MaxWidth, m_Specification.MaxHeight);
+	SetWindowMinSize(m_Specification.MinWidth, m_Specification.MinHeight);
   
     m_LastTime = GetTime();
   
@@ -175,6 +180,10 @@ void s_Game::Run() {
     SetExitKey(KEY_F9);
 
 	Loop();
+}
+
+void s_Game::UpdateSettingsMenu() {
+    
 }
 
 void s_Game::SetCurrentLevel(const Level& level) {

@@ -5,11 +5,17 @@
 
 #include "raylib.h"
 
+#include <map>
+
 class Entity {
 public:
 	virtual ~Entity() {}
-	virtual void OnUpdate() {}
 
+    Entity operator=(const Entity& player);
+
+	virtual void InitTextures() {}
+
+	virtual void OnUpdate() {}
 	virtual void OnRender() {}
 
 	float GetX();
@@ -17,17 +23,39 @@ public:
 
 	Vector2& GetPos();
 
+    void UpdateTextures();
+
+protected:
+	void OffsetPositionByVelocity();
+
+    void CheckCollisionsH();
+    void CheckCollisionsV();
+
+	float Approach(float end, float current, float interval);
+
 protected:
 	Vector2 m_Velocity;
-	Vector2 m_Position;
+	Vector2 m_Position = { 0.0f, 0.0f };
 
+	// vectors for individual speeds
+	Vector2 m_WalkSpeed;
+	Vector2 m_DashSpeed;
+
+	bool m_Grounded;
 	bool m_Walking;
-	bool m_Falling;
+
+    const float m_Gravity = 30.0f;
 
 	int m_Direction;
 
 	Texture m_Texture;
 
+	double m_JumpCooldown = 0.0;
+	double m_TimeSinceDash = 0.0;
+
+	double m_CoyoteTimeCounter = 0.0;
+
+    std::map<std::string, Texture> m_Textures = {};
+
 	int m_Anim = 0;
-	bool m_TextureFlip = false;
 };

@@ -19,7 +19,7 @@ void Tile::OnRender(uint32_t flag) {
 	Renderer.RenderTexture(m_Texture, m_Position.RaylibVector().x, m_Position.RaylibVector().y, GetColor(flag));
 }
 
-TilePosition Tile::GetPosition() {
+TilePosition& Tile::GetPosition() {
 	return m_Position;
 }
 

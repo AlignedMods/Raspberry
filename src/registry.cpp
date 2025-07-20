@@ -1,4 +1,18 @@
 #include "registry.hpp"
+#include "core/log.hpp"
+
+#include <filesystem>
+
+void s_Registry::RegisterAllTextures() {
+	std::filesystem::path textures = std::filesystem::current_path() / "Assets" / "Textures";
+
+	for (const auto& entry : std::filesystem::directory_iterator(textures)) {
+		if (entry.path().extension() != "png") {
+			Log(LogLevel::Info, entry.path().string());
+			AddTile(entry.path().stem(), LoadTexture(entry.path().string().c_str()));
+		}
+	}
+}
 
 void s_Registry::RegisterTile(const std::string& name) {
 	m_TileNameToID[name] = m_NumberOfTiles;

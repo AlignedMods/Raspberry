@@ -13,8 +13,8 @@ public:
 
 	void OnRender();
 	void OnRender(uint32_t flag);
-	// returning this by value is intentional (returning by value is half the size lols)
-	TilePosition GetPosition();
+
+	TilePosition& GetPosition();
 	std::string& GetType();
 
 private:

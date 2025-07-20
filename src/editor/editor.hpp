@@ -1,42 +1,50 @@
 #pragma once
 
 #include "tile/tile.hpp"
+#include "gui/raspGui.hpp"
 
 #include "raylib.h"
 
+#include <map>
 #include <vector>
 
 enum class EditorModes {
-	Pan,
-	Build,
-	Select,
-	Destroy
+    Pan,
+    Build,
+    Select,
+    Destroy
 };
 
 enum class EditorStates {
-	Click,
-	Drag
+    Click,
+    Drag
 };
 
 class Editor {
 public:
-	Editor(Camera2D& camera);
+    Editor(Camera2D& camera);
 
-	void OnUpdate();
-	void OnRender();
-
-	void PlaceTile();
-	void DestroyTile();
+    void OnUpdate();
+    void OnRender();
 
 private:
-	std::vector<Tile> m_Tiles;
-	std::string m_CurrentTile = "Dirt";
-	Tile* m_Selection = nullptr;
-	EditorModes m_Mode = EditorModes::Build;
-	EditorStates m_State = EditorStates::Click;
+    void PlaceTile();
+    void DestroyTile();
 
-	bool m_Searching = false;
-	std::string m_Search;
+    TilePosition GetWorldPosition();
+    void HandleSelection();
+    void Export();
 
-	Camera2D& m_Camera;
+private:
+    std::map<TilePosition, Tile> m_Tiles;
+    std::vector<Tile> m_Selection;
+
+    std::string m_CurrentTile = "dirt";
+    EditorModes m_Mode = EditorModes::Build;
+    EditorStates m_State = EditorStates::Click;
+
+    bool m_Searching = false;
+    RaspGui::Input m_Input;
+
+    Camera2D& m_Camera;
 };

@@ -1,21 +1,11 @@
 // chat GPT our lord and saviour
 
 #include "player.hpp"
-#include "entity/entity.hpp"
 #include "game.hpp"
 #include "renderer/renderer.hpp"
-#include "core/types.hpp"
 #include "core/log.hpp"
 
 #include "raylib.h"
-#include "raymath.h"
-
-#include <algorithm>
-
-Player::Player() {
-	m_Position.x = 0.0f;
-	m_Position.y = 0.0f;
-}
 
 void Player::InitTextures() {
 	m_Textures["IdleLeft"] = LoadTexture("Assets/entity/player_left.png");
@@ -29,9 +19,6 @@ void Player::InitTextures() {
 	m_Texture = m_Textures.at("IdleLeft");
 }
 
-Player Player::operator=(const Player& other) {
-	return other;
-}
 
 // phyics
 void Player::OnUpdate() {
@@ -52,12 +39,7 @@ void Player::OnUpdate() {
 		m_WalkSpeed.x = -5.0f;
 	}
 
-	// Decrease the cooldowns
-	m_JumpCooldown -= Game.deltaTime;
-
-	m_Dashing = false;
-
-	if (IsKeyDown(KEY_E)) {
+	if (IsKeyDown(KEY_LEFT_SHIFT)) {
 		if (GetTime() - m_TimeSinceDash > 3.0) {
 			if (m_Direction) {
 				Log(LogLevel::Info, "right");
@@ -67,7 +49,6 @@ void Player::OnUpdate() {
 				m_DashSpeed.x = -20.0f;
 			}
 
-			m_Dashing = true;
 			m_TimeSinceDash += 3.0;
 		}
 	}
@@ -81,102 +62,31 @@ void Player::OnUpdate() {
 	}
 
 	if (IsKeyPressed(KEY_SPACE)) {
+		//#ifndef RDEBUG
 		if (m_CoyoteTimeCounter > 0.0) {
+            m_CoyoteTimeCounter = 0.0;
 			m_Velocity.y = -9.0f;
 			m_Grounded = false;
-		}
+            m_TimesJumped = 1;
+		} else if (m_TimesJumped < 2) {
+            m_Velocity.y = -9.0f;
+            m_Grounded = false;
+            m_TimesJumped = 2;
+        }
+		//#else
+			//m_Velocity.y = -9.0f;
+			//m_Grounded = false;
+		//#endif
 
 		m_JumpCooldown += 0.5f * Game.deltaTime;
 	}
 
 	m_Velocity.y += m_Gravity * Game.deltaTime;
 
-	m_Position.x += m_Velocity.x * Game.deltaTime;
-	CheckCollisionsH();
-
-	m_Position.y += m_Velocity.y * Game.deltaTime;
-	CheckCollisionsV();
+	OffsetPositionByVelocity();
 }
 
-float Player::Approach(float end, float current, float interval) {
-	float val = current;
-
-	if (end > current) {
-		val = std::min(current + interval, end);
-	} else {
-		val = std::max(current - interval, end);
-	}
-
-	return val;
-}
-
-void Player::UpdateTextures() {
-    m_Anim++;
-
-    if (m_Direction == 0) {
-        m_Texture = m_Textures.at("IdleLeft");
-
-        if (m_Walking && m_Velocity.x < 0.0f) {
-            if (m_Anim % 10 > 5) {
-                m_Texture = m_Textures.at("RunningLeftUp");
-            } else {
-                m_Texture = m_Textures.at("RunningLeftDown");
-            }
-        }
-    }
-
-    if (m_Direction == 1) {
-        m_Texture = m_Textures.at("IdleRight");
-
-        if (m_Walking && m_Velocity.x > 0.0f) {
-            if (m_Anim % 10 > 5) {
-                m_Texture = m_Textures.at("RunningRightUp");
-            } else {
-                m_Texture = m_Textures.at("RunningRightDown");
-            }
-        }
-	}
-}
-
-void Player::CheckCollisionsH() {
-	Level& level = Game.GetCurrentLevel();
-
-    for (auto& tile : level.GetAllTiles()) {
-		if (CheckCollisionRecs({m_Position.x, m_Position.y + 0.1f, 1.0f, 0.9f},
-							   {tile.GetPosition().RaylibVector().x, tile.GetPosition().RaylibVector().y, 1.0f, 1.0f})) 
-		{
-			if (m_Velocity.x > 0) {
-				m_Position.x = tile.GetPosition().RaylibVector().x - 1.0f;
-			} else if (m_Velocity.x < 0) {
-				m_Position.x = tile.GetPosition().RaylibVector().x + 1.0f;
-			}
-
-			m_Velocity.x = 0;
-		}
-    }
-}
-
-void Player::CheckCollisionsV() {
-	Level& level = Game.GetCurrentLevel();
-
-	m_Grounded = false;
-
-    for (auto& tile : level.GetAllTiles()) {
-		if (CheckCollisionRecs({m_Position.x, m_Position.y + 0.1f, 1.0f, 0.9f},
-							   {tile.GetPosition().RaylibVector().x, tile.GetPosition().RaylibVector().y, 1.0f, 1.0f})) 
-		{
-			if (m_Velocity.y > 0) {
-				m_Position.y = tile.GetPosition().RaylibVector().y - 1.0f;
-				m_Grounded = true;
-			} else if (m_Velocity.y < 0) {
-				m_Position.y = tile.GetPosition().RaylibVector().y + 1.0f;
-			}
-
-			m_Velocity.y = 0;
-		}
-    }
-}
 
 void Player::OnRender() {
-    Renderer.RenderEntity(m_Texture, m_Position, m_TextureFlip);
+    Renderer.RenderEntity(m_Texture, m_Position);
 }

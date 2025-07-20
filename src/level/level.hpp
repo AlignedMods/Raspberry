@@ -3,6 +3,7 @@
 #include "collectables/diamond.hpp"
 #include "collectables/raspberry.hpp"
 #include "collectables/collectable.hpp"
+#include "entity/mob.hpp"
 #include "entity/player.hpp"
 #include "tile/tile.hpp"
 
@@ -12,9 +13,9 @@
 
 class Level {
 public:
-	void OnUpdate();
-	void OnRender();
-	void Tick();
+    void OnUpdate();
+    void OnRender();
+    void Tick();
 
     Player& GetPlayer();
 
@@ -33,10 +34,12 @@ public:
 private:
     std::vector<Tile> m_Tiles;
 
-	std::string m_Name;
+    std::string m_Name;
 
     Collectable m_Collectable;
     Player m_Player{};
+
+    std::vector<Mob> m_Mobs;
 
     bool m_CollectableFound;
 };

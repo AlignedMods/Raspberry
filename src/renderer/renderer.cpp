@@ -15,7 +15,7 @@ void s_Renderer::RenderTexture(const Texture& texture, float x, float y, Color t
     }
 }
 
-void s_Renderer::RenderEntity(const Texture& texture, Vector2 position, bool flip) {
+void s_Renderer::RenderEntity(const Texture& texture, Vector2 position) {
 	if (texture.width != texture.height) {
         Log(LogLevel::Error, "Textures must be square!");
     } else if (texture.width % 8 != 0) {
@@ -37,7 +37,6 @@ void s_Renderer::Begin() {
 }
 
 void s_Renderer::End() {
-	RaspGui::Render();
 	RaspGui::NewCanvas();
 
 	EndDrawing();

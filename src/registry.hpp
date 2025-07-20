@@ -12,6 +12,8 @@ using TileID = uint8_t;
 
 class s_Registry {
 public:
+	void RegisterAllTextures(); // This function will automatically look at all of the textures and load them
+
 	void AddTile(const std::string& name, const Texture& texture); // both registers a tile AND sets the texture
 	
 	std::string& GetNameFromID(TileID id);

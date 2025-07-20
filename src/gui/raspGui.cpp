@@ -1,27 +1,24 @@
 #include "raspGui.hpp"
+#include "core/log.hpp"
 #include "renderer/renderer.hpp"
 
 #include "raylib.h"
 
+#include <cstddef>
+#include <format>
+#include <string>
 #include <unordered_map>
 
 namespace RaspGui {
 
 struct Info {
-	// Colors
-	uint32_t Default_Fill = 0xffb0d2ff;
-	uint32_t Default_Outline = 0x96687cff;
-
-	uint32_t Hovered_Fill = 0xbf5885ff;
-	uint32_t Hovered_Outline = 0x96687cff;
-
-	uint32_t Clicked_Fill = 0x8a3e5fff;
-	uint32_t Clicked_Outline = 0x692f48ff;
-
 	int Font_Size = 70;
 	std::unordered_map<int, Font> Fonts;
 
-	int32_t TextBoxPosition = 0;
+    std::vector<int> TextInputPositions;
+    int TextBoxPosition;
+
+	bool Hovering = false;
 };
 
 struct GuiRectangle {
@@ -46,10 +43,16 @@ struct RenderThings {
 static Info g_Info;
 static RenderThings g_Render;
 
+static Pallete g_DefaultPallete;
+
 // Utility functions
 Rectangle GetRealSize(Rectangle bounds) {
 	return {bounds.x * GetScreenWidth(), bounds.y * GetScreenHeight(),
 			bounds.width * GetScreenWidth(), bounds.height * GetScreenHeight()};
+}
+
+bool HoveringOverGui() {
+	return g_Info.Hovering;
 }
 
 void NewCanvas() {
@@ -71,34 +74,6 @@ void Render() {
 	}
 }
 
-// Control
-void SetColor(ColorOptions option, uint32_t color) {
-	switch (option) {
-		case ColorOptions::DefaultFill:
-			g_Info.Default_Fill = color;
-			break;
-		case ColorOptions::DefaultOutline:
-			g_Info.Default_Outline = color;
-			break;
-		case ColorOptions::HoveredFill:
-			g_Info.Hovered_Fill = color;
-			break;
-		case ColorOptions::HoveredOutline:
-			g_Info.Hovered_Outline = color;
-			break;
-		case ColorOptions::ClickedFill:
-			g_Info.Clicked_Fill = color;
-			break;
-		case ColorOptions::ClickedOutline:
-			g_Info.Clicked_Outline = color;
-			break;
-	}
-}
-
-void SetFontSize(int size) {
-	g_Info.Font_Size = size;
-}
-
 // Basic drawing functions
 void RectangluarRectangle(Rectangle bounds, uint32_t fillColor) {
 	OutlinedRectangle(bounds, 0, fillColor, 0x12345678);
@@ -111,11 +86,18 @@ void OutlinedRectangle(Rectangle bounds, int outline, uint32_t fillColor, uint32
 void OutlinedRoundedRectangle(Rectangle bounds, int outline, float roundness, uint32_t fillColor, uint32_t outlineColor) {
 	// don't bother calculating an outline if there is none
 	Rectangle actual = GetRealSize(bounds);
+    Rectangle outlineRec = {actual.x - outline / 2.0f, actual.y - outline / 2.0f,
+                         actual.width + outline, actual.height + outline};
+
 	if (outline != 0.0f) {
-		g_Render.Rectangles.push_back({{actual.x - outline / 2.0f, actual.y - outline / 2.0f,
-									   actual.width + outline, actual.height + outline},
-									   roundness, 25, outlineColor});
+		g_Render.Rectangles.push_back({outlineRec, roundness, 25, outlineColor});
 	}
+
+    if (CheckCollisionPointRec(GetMousePosition(), outlineRec)) {
+        g_Info.Hovering = true;
+    } else {
+        g_Info.Hovering = false;
+    }
 
 	// Draw actual rectangle
 	g_Render.Rectangles.push_back({actual, roundness, 25, fillColor});
@@ -134,12 +116,20 @@ void Text(Rectangle bounds, const char* text) {
 }
 
 void Label(Rectangle bounds, const char* text) {
-	OutlinedRectangle(bounds, 5, g_Info.Default_Fill, g_Info.Default_Outline);
+    Label(bounds, text, g_DefaultPallete);
+}
+
+void Label(Rectangle bounds, const char* text, const Pallete& pallete) {
+	OutlinedRectangle(bounds, pallete.Outline, pallete.DefaultFill, pallete.DefaultOutline);
 
 	Text(bounds, text);
 }
 
 bool Button(Rectangle bounds, const char* text) {
+    return Button(bounds, text, g_DefaultPallete);
+}
+
+bool Button(Rectangle bounds, const char* text, const Pallete& pallete) {
 	Vector2 mousePos = GetMousePosition();
 	Rectangle actual = GetRealSize(bounds);
 
@@ -149,16 +139,17 @@ bool Button(Rectangle bounds, const char* text) {
 	if (CheckCollisionPointRec(mousePos, actual)) {
 		// button is clicked
 		if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
-			OutlinedRoundedRectangle(bounds, 4, 0.2f, g_Info.Clicked_Fill, g_Info.Clicked_Outline);
+			OutlinedRectangle(bounds, pallete.Outline, pallete.ClickedFill, pallete.ClickedOutline);
 		} else {
-			OutlinedRoundedRectangle(bounds, 4, 0.2f, g_Info.Hovered_Fill, g_Info.Hovered_Outline);
+			OutlinedRectangle(bounds, pallete.Outline, pallete.HoveredFill, pallete.HoveredOutline);
 		}
 
 		if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
 			clicked = true;
 		}
 	} else {
-		OutlinedRoundedRectangle(bounds, 4, 0.2f, g_Info.Default_Fill, g_Info.Default_Outline);
+		OutlinedRectangle(bounds, pallete.Outline, pallete.DefaultFill, pallete.DefaultOutline);
+		g_Info.Hovering = false;
 	}
 
 	Text(bounds, text);
@@ -166,47 +157,54 @@ bool Button(Rectangle bounds, const char* text) {
 	return clicked;
 }
 
+bool TextInput(Rectangle bounds, Input& input) {
+    return TextInput(bounds, input, g_DefaultPallete);
+}
+
 // this was way simpler to implement that i thought
 // to be fair it doesn't have all the features
 // such as moving left and right but you don't need that
-bool TextInput(Rectangle bounds, std::string& str) {
+bool TextInput(Rectangle bounds, Input& input, const Pallete& pallete) {
 	bool enterPressed = false;
-	g_Info.TextBoxPosition = 0;
 
 	if (IsKeyPressed(KEY_ENTER)) {
 		enterPressed = true;
 	}
 
 	if (IsKeyPressed(KEY_LEFT)) {
-		g_Info.TextBoxPosition = std::max(g_Info.TextBoxPosition - 1, 0);
+		input.Position = std::max(input.Position - 1, 0);
 	}
 
 	if (IsKeyPressed(KEY_RIGHT)) {
-		g_Info.TextBoxPosition = std::min(g_Info.TextBoxPosition + 1, (int32_t)str.size());
+		input.Position = std::min(input.Position + 1, (int32_t)input.Text.length() - 1);
 	}
 
 	if (IsKeyPressed(KEY_BACKSPACE)) {
-		if (!str.empty()) {
-			str.erase(str.end() - 1);
-		}
+        if (input.Position > 0) {
+            input.Text.erase(input.Position - 1, 1);
+            input.Position--;
+        }
 	}
 
 	// handle pasting
 	if (IsKeyPressed(KEY_V) && IsKeyDown(KEY_LEFT_CONTROL)) {
 		const char* text = GetClipboardText();
 
-		str.append(text);
+		input.Text.append(text);
 	}
 
 	char key = GetCharPressed();
 
 	// check if the character is in range
 	if (key > 31 && key < 123) {
-		str.append(1, key);
+        input.Text.insert(input.Position, 1, key);
+        input.Position++;
 	}
 
-	OutlinedRoundedRectangle(bounds, 5, 0.2f, g_Info.Default_Fill, g_Info.Default_Outline);
-	Text(bounds, str.c_str());
+    Log(LogLevel::Info, std::format("{}", input.Position));
+
+	OutlinedRectangle(bounds, pallete.Outline, pallete.DefaultFill, pallete.DefaultOutline);
+	Text(bounds, input.Text.c_str());
 
 	return enterPressed;
 }
