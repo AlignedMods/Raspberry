@@ -149,7 +149,7 @@ void Editor::OnUpdate() {
         Export();
     }
 
-    RaspGui::OutlinedRectangle({0.0f, 0.80f, 1.0f, 0.2f}, 1, 0x00000099, 0x00000000);
+    RaspGui::Panel({0.0f, 0.8f, 1.0f, 0.2f});
 }
 
 void Editor::PlaceTile() {

@@ -3,10 +3,10 @@
 #include "editor/editor.hpp"
 #include "renderer/renderer.hpp"
 #include "level/level.hpp"
-#include "menu.hpp"
 
 #include "raylib.h"
 
+#include <cmath>
 #include <cstddef>
 
 struct ApplicationSpecification {
@@ -20,9 +20,16 @@ struct ApplicationSpecification {
 	int MaxWidth = 3840;
 	int MaxHeight = 2160;
 
-	// The min size for the window is 480p 
-	int MinWidth = 854;
-	int MinHeight = 480;
+	// The min size for the window is 360p 
+	int MinWidth = 640;
+	int MinHeight = 360;
+};
+
+enum class Menu {
+    None = 0,
+    Main,
+    Pause,
+    Quit
 };
 
 class s_Game {
@@ -39,42 +46,42 @@ public:
     void StartGameplay();
     void StartEditor();
 
+    // Pause will automatically resume if the game is already paused
     void Pause();
-    void Resume();
 
     void Quit();
 
 	Level& GetCurrentLevel();
 
 private:
-    void UpdateSettingsMenu();
+    void UpdateUI();
 
 private:
 	Level m_CurrentLevel;
 	Editor* m_Editor;
 
+    // Viewports
 	Camera2D m_Camera;
 	Camera2D m_EditorCamera;
-
-    Menu m_Menu;
 
 	// NOTE: setting this to false will close the game!
 	bool m_Running = true;
 
     bool m_GameRunning = false;
 	bool m_EditorRunning = false;
-	bool m_PauseMenu = false;
-	int targetFPS = 360;
 
+	bool m_Paused = false;
+    
+	int targetFPS = 360;
 	float m_CurrentFPS = 0;
 
 	ApplicationSpecification m_Specification;
 
-	Texture m_Cursor;
+    Menu m_CurrentMenu = Menu::Main;
+    // useful for menu's that go back to the previous one
+    Menu m_PreviousMenu = Menu::None;
   
 public:
-    float m_LastTime;
-    float m_Time = 0.0f;
 
 	float deltaTime = 0.0f;
 

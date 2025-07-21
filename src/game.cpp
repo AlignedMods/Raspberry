@@ -2,14 +2,13 @@
 #include "core/random.hpp"
 #include "entity/player.hpp"
 #include "core/log.hpp"
-#include "menu.hpp"
 #include "gui/raspGui.hpp"
 #include "registry.hpp"
 
 #include "raylib.h"
 #include "rlgl.h"
 
-static s_Game* s_Instance;
+static s_Game* s_Instance = nullptr;
 
 s_Game::s_Game() {
 	if (!s_Instance) {
@@ -31,21 +30,13 @@ void s_Game::Loop() {
 	double updateDrawTime = 0.0;
 	double waitTime = 0.0;
 
-	m_Camera.target = { 0.0f, 0.0f };
-	m_Camera.offset = { GetScreenWidth() / 2.0f - 64.0f, GetScreenHeight() / 2.0f - 64.0f };
-	m_Camera.rotation = 0.0f;
-	m_Camera.zoom = 1.0f;
-
-	m_EditorCamera.target = { 0.0f, 0.0f };
-	m_EditorCamera.offset = { GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
-	m_EditorCamera.rotation = 0.0f;
-	m_EditorCamera.zoom = 1.0f;
+    double tickTime = 0.0;
 
     while (!WindowShouldClose() && m_Running) {
 		PollInputEvents();
 
-		while (GetTime() - m_LastTime > 0.0167f) {
-			m_LastTime += GetTime() - m_LastTime;
+		while (GetTime() - tickTime > 0.0167f) {
+			tickTime += GetTime() - tickTime;
 
 			Tick();
 		}
@@ -58,7 +49,7 @@ void s_Game::Loop() {
         if (m_GameRunning) {
 			m_Camera.offset = { GetScreenWidth() / 2.0f - 64.0f, GetScreenHeight() / 2.0f - 64.0f };
 
-			if (!m_PauseMenu) {
+			if (!m_Paused) {
 				m_CurrentLevel.OnUpdate();
 			}
 
@@ -66,7 +57,7 @@ void s_Game::Loop() {
                             m_CurrentLevel.GetPlayer().GetY() * 64.0f - 32.0f};
 
 			if (IsKeyPressed(KEY_ESCAPE)) {
-                m_Menu.SetCurrentMenu(MenuTypes::Pause);
+                Pause();
 			}
         }
 
@@ -75,7 +66,7 @@ void s_Game::Loop() {
 			m_Editor->OnUpdate();
 		}
 
-        m_Menu.OnUpdate();
+        UpdateUI();
 
 		// begin rendering
 		Renderer.Begin();
@@ -101,9 +92,6 @@ void s_Game::Loop() {
 
 		RaspGui::Render();
 		
-		// custom cursor cause why not
-		DrawTexture(m_Cursor, GetMouseX(), GetMouseY(), WHITE);
-
 		Renderer.End();
 
 		currentTime = GetTime();
@@ -123,22 +111,76 @@ void s_Game::Loop() {
     }
 }
 
-void s_Game::Pause() {
-    m_PauseMenu = false;
+void s_Game::UpdateUI() {
+    if (m_CurrentMenu == Menu::None) { return; }
+
+    if (m_CurrentMenu == Menu::Main) {
+        if (RaspGui::Button({0.05f, 0.55f, 0.2f, 0.1f}, "Play")) {
+            StartGameplay();
+        }
+
+        if (RaspGui::Button({0.05f, 0.7f, 0.2f, 0.1f}, "Editor")) {
+            StartEditor();
+        }
+
+        if (RaspGui::Button({0.05f, 0.85f, 0.2f, 0.1f}, "Quit")) {
+            Quit();
+        }
+
+        RaspGui::Label({0.1f, 0.05f, 0.8f, 0.2f}, "Welcome to raspberry!");
+    }
+
+    if (m_CurrentMenu == Menu::Pause) {
+        if (RaspGui::Button({0.3f, 0.1f, 0.4f, 0.15f}, "Continue")) {
+            Pause();
+        }
+
+        if (RaspGui::Button({0.3f, 0.3f, 0.4f, 0.15f}, "Settings")) {
+        }
+
+        if (RaspGui::Button({0.3f, 0.5f, 0.4f, 0.15f}, "Main Menu")) {
+            m_CurrentMenu = Menu::Main;
+        }
+
+        if (RaspGui::Button({0.3f, 0.7f, 0.4f, 0.15f}, "Quit")) {
+            Quit();
+        }
+    }
+
+    if (m_CurrentMenu == Menu::Quit) {
+        RaspGui::Text({0.3f, 0.2f, 0.4f, 0.1f}, "Are you sure you wish to quit?");
+
+        if (RaspGui::Button({0.4f, 0.4f, 0.2f, 0.1f}, "Yes")) {
+            m_Running = false;
+        }
+
+        if (RaspGui::Button({0.4f, 0.55f, 0.2f, 0.1f}, "No")) {
+            m_CurrentMenu = m_PreviousMenu;
+        }
+    }
 }
 
-void s_Game::Resume() {
-    m_PauseMenu = true;
+void s_Game::Pause() {
+    m_Paused = !m_Paused;
+
+    if (m_Paused) {
+        m_CurrentMenu = Menu::Pause;
+    } else {
+        m_CurrentMenu = Menu::None;
+    }
 }
 
 void s_Game::Quit() {
-    m_Running = false;
+    m_PreviousMenu = m_CurrentMenu;
+    m_CurrentMenu = Menu::Quit;
 }
 
 // NOTE: a tick is basically a 60th of a second.
 // esentially acting as a "FixedUpdate"
+// You *should* be able to always run this game on at least 60fps
+// if you can't certain things will slow down
 void s_Game::Tick() {
-	if (m_GameRunning && !m_PauseMenu) {
+	if (m_GameRunning && !m_Paused) {
 		m_CurrentLevel.Tick();
 	}
 
@@ -172,18 +214,26 @@ void s_Game::Run() {
 
 	SetWindowMaxSize(m_Specification.MaxWidth, m_Specification.MaxHeight);
 	SetWindowMinSize(m_Specification.MinWidth, m_Specification.MinHeight);
-  
-    m_LastTime = GetTime();
+
+	m_Camera.target = { 0.0f, 0.0f };
+	m_Camera.offset = { GetScreenWidth() / 2.0f - 64.0f, GetScreenHeight() / 2.0f - 64.0f };
+	m_Camera.rotation = 0.0f;
+	m_Camera.zoom = 1.0f;
+
+	m_EditorCamera.target = { 0.0f, 0.0f };
+	m_EditorCamera.offset = { GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
+	m_EditorCamera.rotation = 0.0f;
+	m_EditorCamera.zoom = 1.0f;
   
     Random::Init();
 
-    SetExitKey(KEY_F9);
+    #ifdef RDEBUG
+        SetExitKey(KEY_F9);
+    #else
+        SetExitKey(0);
+    #endif
 
 	Loop();
-}
-
-void s_Game::UpdateSettingsMenu() {
-    
 }
 
 void s_Game::SetCurrentLevel(const Level& level) {
@@ -215,4 +265,6 @@ void s_Game::StartGameplay() {
 
     m_CurrentLevel.AddCollectable();
     m_CurrentLevel.GetCollectable().InitTextures();
+
+    m_CurrentMenu = Menu::None;
 }

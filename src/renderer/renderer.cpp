@@ -33,7 +33,7 @@ void s_Renderer::RenderText(const char* text, int x, int y) {
 
 void s_Renderer::Begin() {
 	BeginDrawing();
-	ClearBackground(WHITE);
+	ClearBackground(GetColor(RaspGui::Black));
 }
 
 void s_Renderer::End() {

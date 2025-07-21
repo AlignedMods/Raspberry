@@ -1,5 +1,7 @@
 #include "raspGui.hpp"
 #include "core/log.hpp"
+#include "game.hpp"
+#include "raymath.h"
 #include "renderer/renderer.hpp"
 
 #include "raylib.h"
@@ -12,13 +14,16 @@
 namespace RaspGui {
 
 struct Info {
-	int Font_Size = 70;
+	int Font_Size = 40;
 	std::unordered_map<int, Font> Fonts;
 
     std::vector<int> TextInputPositions;
     int TextBoxPosition;
 
 	bool Hovering = false;
+
+    std::vector<Rectangle> Windows;
+    size_t WindowCount = 0;
 };
 
 struct GuiRectangle {
@@ -59,6 +64,8 @@ void NewCanvas() {
 	// clear all the rectangles
 	g_Render.Rectangles.clear();
 	g_Render.Texts.clear();
+
+    g_Info.WindowCount = 0;
 }
 
 void Render() {
@@ -103,10 +110,33 @@ void OutlinedRoundedRectangle(Rectangle bounds, int outline, float roundness, ui
 	g_Render.Rectangles.push_back({actual, roundness, 25, fillColor});
 }
 
+void Window(Rectangle& bounds, const char* name) {
+    Window(bounds, name, g_DefaultPallete);
+}
+
+void Window(Rectangle& bounds, const char* name, const Pallete& pallete) {
+    if (Button({bounds.x, bounds.y - 0.05f, bounds.width, 0.05f}, name, pallete, ButtonInput::Hold)) {
+        Vector2 delta = Vector2Scale(GetMouseDelta(), 1.0f);
+
+        bounds.x += delta.x;
+        bounds.y += delta.y;
+    }
+
+    OutlinedRectangle(bounds, pallete.Outline, pallete.DefaultFill, pallete.DefaultOutline);
+}
+
+void Panel(Rectangle bounds) {
+    Panel(bounds, g_DefaultPallete);
+}
+
+void Panel(Rectangle bounds, const Pallete& pallete) {
+    OutlinedRectangle(bounds, pallete.Outline, pallete.DefaultFill, pallete.DefaultOutline);
+}
+
 void Text(Rectangle bounds, const char* text) {
 	// load font if it already hasn't been loaded
 	if (!g_Info.Fonts.contains(g_Info.Font_Size)) {
-		g_Info.Fonts[g_Info.Font_Size] = LoadFontEx("Assets/Fonts/comfy-feeling.otf", g_Info.Font_Size, nullptr, 0);
+		g_Info.Fonts[g_Info.Font_Size] = LoadFontEx("Assets/Fonts/alagard.ttf", g_Info.Font_Size, nullptr, 0);
 	}
 
 	Rectangle actual = GetRealSize(bounds);
@@ -130,6 +160,10 @@ bool Button(Rectangle bounds, const char* text) {
 }
 
 bool Button(Rectangle bounds, const char* text, const Pallete& pallete) {
+    return Button(bounds, text, pallete, ButtonInput::Click);
+}
+
+bool Button(Rectangle bounds, const char* text, const Pallete& pallete, ButtonInput input) {
 	Vector2 mousePos = GetMousePosition();
 	Rectangle actual = GetRealSize(bounds);
 
@@ -139,13 +173,14 @@ bool Button(Rectangle bounds, const char* text, const Pallete& pallete) {
 	if (CheckCollisionPointRec(mousePos, actual)) {
 		// button is clicked
 		if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+            if (input == ButtonInput::Hold) clicked = true;
 			OutlinedRectangle(bounds, pallete.Outline, pallete.ClickedFill, pallete.ClickedOutline);
 		} else {
 			OutlinedRectangle(bounds, pallete.Outline, pallete.HoveredFill, pallete.HoveredOutline);
 		}
 
 		if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-			clicked = true;
+            if (input == ButtonInput::Click) clicked = true;
 		}
 	} else {
 		OutlinedRectangle(bounds, pallete.Outline, pallete.DefaultFill, pallete.DefaultOutline);
