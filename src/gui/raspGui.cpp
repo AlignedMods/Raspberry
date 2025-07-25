@@ -6,7 +6,9 @@
 
 #include "raylib.h"
 
+#include <array>
 #include <cstddef>
+#include <cstring>
 #include <format>
 #include <string>
 #include <unordered_map>
@@ -24,6 +26,11 @@ struct Info {
 
     std::vector<Rectangle> Windows;
     size_t WindowCount = 0;
+
+    // the current rendering area
+    Rectangle Area;
+    std::array<Rectangle, 5> Areas;
+    size_t Nestedness;
 };
 
 struct GuiRectangle {
@@ -34,7 +41,7 @@ struct GuiRectangle {
 };
 
 struct GuiText {
-	const char* text;
+	std::string text;
 	int size;
 	Rectangle rectangle;
 };
@@ -52,8 +59,10 @@ static Pallete g_DefaultPallete;
 
 // Utility functions
 Rectangle GetRealSize(Rectangle bounds) {
-	return {bounds.x * GetScreenWidth(), bounds.y * GetScreenHeight(),
-			bounds.width * GetScreenWidth(), bounds.height * GetScreenHeight()};
+    Rectangle& area = g_Info.Area;
+
+	return {bounds.x * area.width + area.x, bounds.y * area.height + area.y,
+			bounds.width * area.width, bounds.height * area.height};
 }
 
 bool HoveringOverGui() {
@@ -66,6 +75,12 @@ void NewCanvas() {
 	g_Render.Texts.clear();
 
     g_Info.WindowCount = 0;
+    g_Info.Area = {0.0f, 0.0f, (float)GetScreenWidth(), (float)GetScreenHeight()};
+    // clear all the areas
+    for (auto& rec : g_Info.Areas) {
+        rec = g_Info.Area;
+    }
+    g_Info.Nestedness = 0;
 }
 
 void Render() {
@@ -74,9 +89,9 @@ void Render() {
 	}
 
 	for (auto& text : g_Render.Texts) {
-		int width = MeasureTextEx(g_Info.Fonts.at(g_Info.Font_Size), text.text, g_Info.Font_Size, 3).x;
+		int width = MeasureTextEx(g_Info.Fonts.at(text.size), text.text.c_str(), text.size, 3).x;
 
-		DrawTextEx(g_Info.Fonts.at(text.size), text.text, {text.rectangle.x + text.rectangle.width / 2 - width / 2.0f,
+		DrawTextEx(g_Info.Fonts.at(text.size), text.text.c_str(), {text.rectangle.x + text.rectangle.width / 2 - width / 2.0f,
 				   text.rectangle.y + text.rectangle.height / 2 - text.size / 2.0f}, text.size, 3, WHITE);
 	}
 }
@@ -111,11 +126,11 @@ void OutlinedRoundedRectangle(Rectangle bounds, int outline, float roundness, ui
 }
 
 void Window(Rectangle& bounds, const char* name) {
-    Window(bounds, name, g_DefaultPallete);
+    WindowEx(bounds, name, g_DefaultPallete);
 }
 
-void Window(Rectangle& bounds, const char* name, const Pallete& pallete) {
-    if (Button({bounds.x, bounds.y - 0.05f, bounds.width, 0.05f}, name, pallete, ButtonInput::Hold)) {
+void WindowEx(Rectangle& bounds, const char* name, const Pallete& pallete) {
+    if (ButtonPro({bounds.x, bounds.y - 0.05f, bounds.width, 0.05f}, name, pallete, ButtonInput::Hold)) {
         Vector2 delta = Vector2Scale(GetMouseDelta(), 1.0f);
 
         bounds.x += delta.x;
@@ -126,44 +141,73 @@ void Window(Rectangle& bounds, const char* name, const Pallete& pallete) {
 }
 
 void Panel(Rectangle bounds) {
-    Panel(bounds, g_DefaultPallete);
+    PanelEx(bounds, g_DefaultPallete);
 }
 
-void Panel(Rectangle bounds, const Pallete& pallete) {
+void PanelEx(Rectangle bounds, const Pallete& pallete) {
     OutlinedRectangle(bounds, pallete.Outline, pallete.DefaultFill, pallete.DefaultOutline);
+
+    g_Info.Nestedness++;
+
+    g_Info.Areas[g_Info.Nestedness] = GetRealSize(bounds);
+    g_Info.Area = g_Info.Areas.at(g_Info.Nestedness);
+}
+
+void End() {
+    g_Info.Nestedness--;
+    g_Info.Area = g_Info.Areas.at(g_Info.Nestedness);
 }
 
 void Text(Rectangle bounds, const char* text) {
+	Rectangle actual = GetRealSize(bounds);
+
+    // some gui code
+    // also the variable names are bad, cry about it
+
+    int baseFontSize = 100;
+    float vertical = 1.2f;
+    float horizontal = 1.2f;
+
 	// load font if it already hasn't been loaded
-	if (!g_Info.Fonts.contains(g_Info.Font_Size)) {
-		g_Info.Fonts[g_Info.Font_Size] = LoadFontEx("Assets/Fonts/alagard.ttf", g_Info.Font_Size, nullptr, 0);
+	if (!g_Info.Fonts.contains(baseFontSize)) {
+		g_Info.Fonts[baseFontSize] = LoadFontEx("Assets/Fonts/alagard.ttf", baseFontSize, nullptr, 0);
 	}
 
-	Rectangle actual = GetRealSize(bounds);
-	int fontSize = g_Info.Font_Size;
+    Vector2 size = MeasureTextEx(g_Info.Fonts.at(baseFontSize), text, baseFontSize, 3);
+
+    float scaleX = (actual.width) / (size.x * horizontal);
+    float scaleY = (actual.height) / (size.y * vertical);
+
+    float scale = std::min(scaleX, scaleY);
+
+    int fontSize = baseFontSize * scale;
+
+	if (!g_Info.Fonts.contains(fontSize)) {
+		g_Info.Fonts[fontSize] = LoadFontEx("Assets/Fonts/alagard.ttf", fontSize, nullptr, 0);
+	}
 
 	g_Render.Texts.push_back({text, fontSize, actual});
 }
 
 void Label(Rectangle bounds, const char* text) {
-    Label(bounds, text, g_DefaultPallete);
+    LabelEx(bounds, text, g_DefaultPallete);
 }
 
-void Label(Rectangle bounds, const char* text, const Pallete& pallete) {
+void LabelEx(Rectangle bounds, const char* text, const Pallete& pallete) {
 	OutlinedRectangle(bounds, pallete.Outline, pallete.DefaultFill, pallete.DefaultOutline);
 
 	Text(bounds, text);
 }
 
 bool Button(Rectangle bounds, const char* text) {
-    return Button(bounds, text, g_DefaultPallete);
+    return ButtonEx(bounds, text, g_DefaultPallete);
 }
 
-bool Button(Rectangle bounds, const char* text, const Pallete& pallete) {
-    return Button(bounds, text, pallete, ButtonInput::Click);
+bool ButtonEx(Rectangle bounds, const char* text, const Pallete& pallete) {
+    return ButtonPro(bounds, text, pallete, ButtonInput::Click);
 }
 
-bool Button(Rectangle bounds, const char* text, const Pallete& pallete, ButtonInput input) {
+bool ButtonPro(Rectangle bounds, const char* text, const Pallete& pallete, ButtonInput input) {
 	Vector2 mousePos = GetMousePosition();
 	Rectangle actual = GetRealSize(bounds);
 
@@ -193,13 +237,13 @@ bool Button(Rectangle bounds, const char* text, const Pallete& pallete, ButtonIn
 }
 
 bool TextInput(Rectangle bounds, Input& input) {
-    return TextInput(bounds, input, g_DefaultPallete);
+    return TextInputEx(bounds, input, g_DefaultPallete);
 }
 
 // this was way simpler to implement that i thought
 // to be fair it doesn't have all the features
 // such as moving left and right but you don't need that
-bool TextInput(Rectangle bounds, Input& input, const Pallete& pallete) {
+bool TextInputEx(Rectangle bounds, Input& input, const Pallete& pallete) {
 	bool enterPressed = false;
 
 	if (IsKeyPressed(KEY_ENTER)) {
@@ -236,12 +280,45 @@ bool TextInput(Rectangle bounds, Input& input, const Pallete& pallete) {
         input.Position++;
 	}
 
-    Log(LogLevel::Info, std::format("{}", input.Position));
-
 	OutlinedRectangle(bounds, pallete.Outline, pallete.DefaultFill, pallete.DefaultOutline);
 	Text(bounds, input.Text.c_str());
 
 	return enterPressed;
+}
+
+void ComboBox(Rectangle bounds, const std::string& options, uint32_t& selection, Behaviour behavoir) {
+    ComboBoxEx(bounds, options, selection, behavoir, g_DefaultPallete);
+}
+
+void ComboBoxEx(Rectangle bounds, const std::string& options, uint32_t& selection, Behaviour behavior, const Pallete& pallete) {
+    std::vector<std::string> entries;
+    std::string buffer;
+
+    for (char c : options) {
+        if (c == ';') {
+            entries.push_back(buffer);
+            buffer.clear();
+        } else {
+            buffer += c;
+        }
+    }
+
+    if (!buffer.empty()) {
+        entries.push_back(buffer); // add the last entry if not followed by ';'
+    }
+
+    if (selection >= entries.size()) {
+        selection = 0;
+    }
+
+    if (behavior == Behaviour::Default) {
+        if (ButtonEx(bounds, entries.at(selection).c_str(), pallete)) {
+            selection = (selection + 1) % entries.size(); // wraps around
+            Log(LogLevel::Info, entries.at(selection));
+        }
+    } else if (behavior == Behaviour::Custom) {
+        LabelEx(bounds, entries[selection].c_str(), pallete);
+    }
 }
 
 };

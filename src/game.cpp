@@ -1,7 +1,10 @@
 #include "game.hpp"
+#include <format>
+#include <string>
 #include "core/random.hpp"
 #include "entity/player.hpp"
 #include "core/log.hpp"
+#include "renderer/renderer.hpp"
 #include "gui/raspGui.hpp"
 #include "registry.hpp"
 
@@ -35,6 +38,8 @@ void s_Game::Loop() {
     while (!WindowShouldClose() && m_Running) {
 		PollInputEvents();
 
+        RaspGui::NewCanvas();
+
 		while (GetTime() - tickTime > 0.0167f) {
 			tickTime += GetTime() - tickTime;
 
@@ -43,7 +48,20 @@ void s_Game::Loop() {
 
 		// Fullscreen keybind
 		if (IsKeyPressed(KEY_F11)) {
-			ToggleBorderlessWindowed();
+            int monitor = GetCurrentMonitor();
+
+            // Toggling fullscreen will *NOT* automatically set the window's size
+            // so we must so it manually (using borderless windowed fixes this however)
+            if (IsWindowFullscreen()) {
+                SetWindowSize(m_PreviousWindowWidth, m_PreviousWindowHeight);
+            } else {
+                m_PreviousWindowWidth = GetScreenWidth();
+                m_PreviousWindowHeight = GetScreenHeight();
+
+                SetWindowSize(GetMonitorWidth(monitor), GetMonitorHeight(monitor));
+            }
+
+            ToggleFullscreen();
 		}
 
         if (m_GameRunning) {
@@ -88,7 +106,7 @@ void s_Game::Loop() {
 		}
 
 		// show the current fps
-		DrawText(TextFormat("FPS: %.1f", m_CurrentFPS), 10, 10, 20, BLACK);
+		DrawText(TextFormat("FPS: %.1f", m_CurrentFPS), 10, 10, 20, GREEN);
 
 		RaspGui::Render();
 		
@@ -98,8 +116,8 @@ void s_Game::Loop() {
 
 		updateDrawTime = currentTime - lastTime;
 
-		if (targetFPS > 0) {
-			waitTime = (1.0 / static_cast<double>(targetFPS)) - updateDrawTime;
+		if (m_TargetFPS > 0) {
+			waitTime = (1.0 / static_cast<double>(m_TargetFPS)) - updateDrawTime;
 			WaitTime(waitTime);
 			currentTime = GetTime();
 			deltaTime = static_cast<float>(currentTime - lastTime);
@@ -115,16 +133,22 @@ void s_Game::UpdateUI() {
     if (m_CurrentMenu == Menu::None) { return; }
 
     if (m_CurrentMenu == Menu::Main) {
-        if (RaspGui::Button({0.05f, 0.55f, 0.2f, 0.1f}, "Play")) {
+        if (RaspGui::Button({0.05f, 0.55f, 0.15f, 0.05f}, "Play")) {
             StartGameplay();
         }
 
-        if (RaspGui::Button({0.05f, 0.7f, 0.2f, 0.1f}, "Editor")) {
+        if (RaspGui::Button({0.05f, 0.65f, 0.15f, 0.05f}, "Editor")) {
             StartEditor();
         }
 
-        if (RaspGui::Button({0.05f, 0.85f, 0.2f, 0.1f}, "Quit")) {
-            Quit();
+        if (RaspGui::Button({0.05f, 0.75f, 0.15f, 0.05f}, "Settings")) {
+            m_PreviousMenu = m_CurrentMenu;
+            m_CurrentMenu = Menu::Settings;
+        }
+
+        if (RaspGui::Button({0.05f, 0.85f, 0.15f, 0.05f}, "Quit")) {
+            m_PreviousMenu = m_CurrentMenu;
+            m_CurrentMenu = Menu::Quit;
         }
 
         RaspGui::Label({0.1f, 0.05f, 0.8f, 0.2f}, "Welcome to raspberry!");
@@ -136,14 +160,82 @@ void s_Game::UpdateUI() {
         }
 
         if (RaspGui::Button({0.3f, 0.3f, 0.4f, 0.15f}, "Settings")) {
+            m_PreviousMenu = m_CurrentMenu;
+            m_CurrentMenu = Menu::Settings;
         }
 
         if (RaspGui::Button({0.3f, 0.5f, 0.4f, 0.15f}, "Main Menu")) {
+            m_GameRunning = false;
             m_CurrentMenu = Menu::Main;
         }
 
         if (RaspGui::Button({0.3f, 0.7f, 0.4f, 0.15f}, "Quit")) {
-            Quit();
+            m_PreviousMenu = m_CurrentMenu;
+            m_CurrentMenu = Menu::Quit;
+        }
+    }
+
+    if (m_CurrentMenu == Menu::Settings) {
+        RaspGui::Text({0.0f, 0.05f, 0.3f, 0.1f}, "Settings");
+
+        RaspGui::Panel({0.25f, 0.1f, 0.65f, 0.8f});
+
+        if (m_CurrentSubMenu == SubMenu::Video) {
+            RaspGui::Text({0.05f, 0.05f, 0.3f, 0.1f}, "Resolution: ");
+            RaspGui::Text({0.05f, 0.20f, 0.3f, 0.1f}, "Fullscreen: ");
+            RaspGui::Text({0.05f, 0.35f, 0.3f, 0.1f}, "FPS Cap: ");
+            RaspGui::Text({0.05f, 0.50f, 0.3f, 0.1f}, "Target FPS: ");
+
+            RaspGui::ComboBox({0.5f, 0.05f, 0.3f, 0.1f}, m_StrResolutions, mt_ResolutionIndex, RaspGui::Behaviour::Default);
+            RaspGui::ComboBox({0.5f, 0.20f, 0.3f, 0.1f}, "No;Yes", mt_Fullscreen, RaspGui::Behaviour::Default);
+            RaspGui::ComboBox({0.5f, 0.35f, 0.3f, 0.1f}, "No;Yes", mt_FPSCap, RaspGui::Behaviour::Default);
+            RaspGui::ComboBox({0.5f, 0.50f, 0.3f, 0.1f}, m_StrFramerates, mt_TargetFPS, RaspGui::Behaviour::Default);
+
+            if (RaspGui::Button({0.4f, 0.05f, 0.05f, 0.1f}, "<")) {
+                if (mt_ResolutionIndex != 0) {
+                    mt_ResolutionIndex--;
+                }
+            }
+
+            if (RaspGui::Button({0.85f, 0.05f, 0.05f, 0.1f}, ">")) {
+                if (mt_ResolutionIndex != m_Resolutions.size()) {
+                    mt_ResolutionIndex++;
+                }
+            }
+
+            if (RaspGui::Button({0.7f, 0.8f, 0.25f, 0.15f}, "Apply")) {
+                if (GetScreenWidth() != m_Resolutions.at(mt_ResolutionIndex).x || GetScreenHeight() != m_Resolutions.at(mt_ResolutionIndex).y) {
+                    SetWindowSize(m_Resolutions.at(mt_ResolutionIndex).x, m_Resolutions.at(mt_ResolutionIndex).y);
+                }
+
+                if (mt_Fullscreen) {
+                    SetFullscreen(true);
+                } else {
+                    SetFullscreen(false);
+                }
+
+                if (mt_FPSCap) {
+                    m_TargetFPS = m_Framerates.at(mt_TargetFPS);
+                } else {
+                    // fps is uncapped
+                    m_TargetFPS = 0;
+                }
+            }
+        }
+
+        RaspGui::End();
+
+        // Sidebar
+        RaspGui::Panel({0.1f, 0.1f, 0.15f, 0.8f});
+
+            if (RaspGui::Button({0.0f, 0.0f, 1.0f, 0.1f}, "Video")) {
+                m_CurrentSubMenu = SubMenu::Video;
+            }
+
+        RaspGui::End();
+
+        if (RaspGui::Button({0.05f, 0.9f, 0.15f, 0.05f}, "Back")) {
+            m_CurrentMenu = m_PreviousMenu;
         }
     }
 
@@ -151,12 +243,62 @@ void s_Game::UpdateUI() {
         RaspGui::Text({0.3f, 0.2f, 0.4f, 0.1f}, "Are you sure you wish to quit?");
 
         if (RaspGui::Button({0.4f, 0.4f, 0.2f, 0.1f}, "Yes")) {
-            m_Running = false;
+            Quit();
         }
 
         if (RaspGui::Button({0.4f, 0.55f, 0.2f, 0.1f}, "No")) {
             m_CurrentMenu = m_PreviousMenu;
         }
+    }
+}
+
+constexpr std::string s_Game::FormatResolutions() {
+    std::string buffer;
+
+    for (auto& res : m_Resolutions) {
+        buffer.append(std::to_string((int)res.x));
+        buffer.append(1, 'x');
+        buffer.append(std::to_string((int)res.y));
+        buffer.append(1, ';');
+    }
+
+    return buffer;
+}
+
+constexpr std::string s_Game::FormatFramerates() {
+    std::string buffer;
+
+    for (auto& fr : m_Framerates) {
+        buffer.append(std::to_string((int)fr));
+        buffer.append(1, ';');
+    }
+
+    return buffer;
+}
+
+void s_Game::SetFullscreen(bool yesno) {
+    int monitor = GetCurrentMonitor();
+
+    // Toggling fullscreen will *NOT* automatically set the window's size
+    // so we must so it manually (using borderless windowed fixes this however)
+    if (IsWindowFullscreen() && yesno) {
+        return;
+    } else if (!IsWindowFullscreen() && !yesno) {
+        return;
+    } else if (IsWindowFullscreen() && !yesno) {
+        Log(LogLevel::Info, "Un fullscreen!");
+
+        SetWindowSize(m_PreviousWindowWidth, m_PreviousWindowHeight);
+        ToggleFullscreen();
+        return;
+    } else if (!IsWindowFullscreen() && yesno) {
+        Log(LogLevel::Info, "Making fullscreen!");
+        m_PreviousWindowWidth = GetScreenWidth();
+        m_PreviousWindowHeight = GetScreenHeight();
+
+        SetWindowSize(GetMonitorWidth(monitor), GetMonitorHeight(monitor));
+        ToggleFullscreen();
+        return;
     }
 }
 
@@ -171,8 +313,7 @@ void s_Game::Pause() {
 }
 
 void s_Game::Quit() {
-    m_PreviousMenu = m_CurrentMenu;
-    m_CurrentMenu = Menu::Quit;
+    m_Running = false;
 }
 
 // NOTE: a tick is basically a 60th of a second.
@@ -206,14 +347,12 @@ void s_Game::Run() {
 
 	SetConfigFlags(FLAG_WINDOW_RESIZABLE);
 	SetConfigFlags(FLAG_MSAA_4X_HINT);
-    InitWindow(m_Specification.Width, m_Specification.Height, m_Specification.Name);
+    InitWindow(1280, 720, "Raspberry");
 
 	Registry.RegisterAllTextures();
 
 	SetWindowIcon(LoadImage("Assets/Textures/stone.png"));
-
-	SetWindowMaxSize(m_Specification.MaxWidth, m_Specification.MaxHeight);
-	SetWindowMinSize(m_Specification.MinWidth, m_Specification.MinHeight);
+    SetWindowMinSize(640, 360);
 
 	m_Camera.target = { 0.0f, 0.0f };
 	m_Camera.offset = { GetScreenWidth() / 2.0f - 64.0f, GetScreenHeight() / 2.0f - 64.0f };
@@ -232,6 +371,9 @@ void s_Game::Run() {
     #else
         SetExitKey(0);
     #endif
+
+    m_StrResolutions = FormatResolutions();
+    m_StrFramerates = FormatFramerates();
 
 	Loop();
 }

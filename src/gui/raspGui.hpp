@@ -5,8 +5,10 @@
 
 #include "raylib.h"
 
+#include <array>
 #include <cstdint>
 #include <string>
+#include <vector>
 
 namespace RaspGui {
 
@@ -60,6 +62,10 @@ enum class ButtonInput {
     Click, Hold
 };
 
+enum class Behaviour {
+    Default, Custom
+};
+
 // Utility functions
 Rectangle GetRealSize(Rectangle bounds);
 
@@ -75,26 +81,31 @@ void OutlinedRectangle(Rectangle bounds, int outline, uint32_t fillColor, uint32
 void OutlinedRoundedRectangle(Rectangle bounds, int outline, float roundness, uint32_t fillColor, uint32_t outlineColor);
 
 void Window(Rectangle& bounds, const char* name);
-void Window(Rectangle& bounds, const char* name, const Pallete& pallete);
+void WindowEx(Rectangle& bounds, const char* name, const Pallete& pallete);
 
 // Panels
 void Panel(Rectangle bounds);
-void Panel(Rectangle bounds, const Pallete& pallete);
+void PanelEx(Rectangle bounds, const Pallete& pallete);
+
+void End();
 
 // Text
 void Text(Rectangle bounds, const char* text);
 
 void Label(Rectangle bounds, const char* text);
-void Label(Rectangle bounds, const char* text, const Pallete& pallete);
+void LabelEx(Rectangle bounds, const char* text, const Pallete& pallete);
 
 // Buttons (not specifying a pallete will use the default one)
 bool Button(Rectangle bounds, const char* text);
-bool Button(Rectangle bounds, const char* text, const Pallete& pallete);
-bool Button(Rectangle bounds, const char* text, const Pallete& pallete, ButtonInput input);
+bool ButtonEx(Rectangle bounds, const char* text, const Pallete& pallete);
+bool ButtonPro(Rectangle bounds, const char* text, const Pallete& pallete, ButtonInput input);
 
 // returns true when enter is pressed
-// You must provide an existing string to be used
+// You must provide an existing input object to be used
 bool TextInput(Rectangle bounds, Input& input);
-bool TextInput(Rectangle bounds, Input& input, const Pallete& pallete);
+bool TextInputEx(Rectangle bounds, Input& input, const Pallete& pallete);
+
+void ComboBox(Rectangle bounds, const std::string& options, uint32_t& selection, Behaviour behavoir = Behaviour::Default);
+void ComboBoxEx(Rectangle bounds, const std::string& options, uint32_t& selection, Behaviour behavoir,const Pallete& pallete);
 
 } // namespace gui;

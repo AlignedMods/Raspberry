@@ -37,8 +37,6 @@ void s_Renderer::Begin() {
 }
 
 void s_Renderer::End() {
-	RaspGui::NewCanvas();
-
 	EndDrawing();
 	SwapScreenBuffer();
 }

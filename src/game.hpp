@@ -1,35 +1,26 @@
 #pragma once
 
 #include "editor/editor.hpp"
-#include "renderer/renderer.hpp"
 #include "level/level.hpp"
 
 #include "raylib.h"
 
-#include <cmath>
+#include <array>
 #include <cstddef>
-
-struct ApplicationSpecification {
-	const char* Name = "Raspberry";
-
-	// The normal size for the window is 720p
-	int Width = 1280;
-	int Height = 720;
-
-	// The max size for the window is 4K
-	int MaxWidth = 3840;
-	int MaxHeight = 2160;
-
-	// The min size for the window is 360p 
-	int MinWidth = 640;
-	int MinHeight = 360;
-};
+#include <cstdint>
 
 enum class Menu {
     None = 0,
     Main,
     Pause,
+    Settings,
     Quit
+};
+
+// a submenu works together along with a menu
+enum class SubMenu {
+    None,
+    Video
 };
 
 class s_Game {
@@ -55,36 +46,90 @@ public:
 
 private:
     void UpdateUI();
+    constexpr std::string FormatResolutions();
+    constexpr std::string FormatFramerates();
+    void SetFullscreen(bool yesno);
 
 private:
 	Level m_CurrentLevel;
 	Editor* m_Editor;
 
-    // Viewports
+    // -- VIEWPORTS -- //
 	Camera2D m_Camera;
 	Camera2D m_EditorCamera;
 
-	// NOTE: setting this to false will close the game!
+    // -- APPLICATION -- //
+    
 	bool m_Running = true;
+
+	int m_TargetFPS = 60;
+	float m_CurrentFPS = 0;
+
+    int m_PreviousWindowWidth, m_PreviousWindowHeight;
+
+    // -- GAME -- //
 
     bool m_GameRunning = false;
 	bool m_EditorRunning = false;
 
 	bool m_Paused = false;
     
-	int targetFPS = 360;
-	float m_CurrentFPS = 0;
-
-	ApplicationSpecification m_Specification;
+    // -- GUI -- //
 
     Menu m_CurrentMenu = Menu::Main;
-    // useful for menu's that go back to the previous one
+    SubMenu m_CurrentSubMenu = SubMenu::None;
     Menu m_PreviousMenu = Menu::None;
+
+    std::array<Vector2, 20> m_Resolutions = {{
+        // yes i had to write this out manually
+        {640,  360}, 
+        {640,  480},
+        {800,  600}, 
+        {1024, 768}, 
+        {1280, 720}, 
+        {1280, 800}, 
+        {1280, 1024}, 
+        {1360, 768}, 
+        {1440, 900}, 
+        {1536, 864}, 
+        {1600, 900}, 
+        {1600, 1200}, 
+        {1680, 1050}, 
+        {1920, 1080}, 
+        {1920, 1200}, 
+        {2560, 1080}, 
+        {2560, 1440}, 
+        {2560, 1600}, 
+        {3440, 1440}, 
+        {3840, 2160} 
+    }};
+
+
+    std::array<uint32_t, 9> m_Framerates = {{
+        60,
+        75,
+        120,
+        144,
+        165,
+        240,
+        360,
+        480,
+        720
+    }};
+
+    std::string m_StrResolutions;
+    std::string m_StrFramerates;
+    
+    // -- TEMPORARY GUI STUFF -- //
+    
+    uint32_t mt_TargetFPS = 60;
+    uint32_t mt_FPSCap = 1;
+
+    uint32_t mt_ResolutionIndex = 4;
+    uint32_t mt_Fullscreen = 0;
   
 public:
-
 	float deltaTime = 0.0f;
-
     size_t ticks = 0;
 };
 

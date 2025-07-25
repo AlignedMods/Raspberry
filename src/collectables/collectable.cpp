@@ -2,6 +2,7 @@
 #include "core/random.hpp"
 #include "game.hpp"
 #include "core/log.hpp"
+#include "renderer/renderer.hpp"
 
 #include "raylib.h"
 
