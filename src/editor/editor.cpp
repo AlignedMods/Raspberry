@@ -134,7 +134,7 @@ void Editor::OnUpdate() {
     HandleSelection();
    
     if (m_Searching) {
-        if (RaspGui::TextInput({0.3f, 0.3f, 0.4f, 0.2f}, m_Input)) m_Searching = false;
+        if (RaspGui::TextInput({0.3f, 0.3f, 0.4f, 0.2f}, &m_Input)) m_Searching = false;
     } else if (!m_Input.Text.empty() ){
         if (Registry.DoesTileExist(m_Input.Text)) {
             m_CurrentTile = m_Input.Text;
@@ -145,11 +145,13 @@ void Editor::OnUpdate() {
         m_Input.Text.clear();
     }
 
-    if (RaspGui::Button({0.7f, 0.8f, 0.2f, 0.1f}, "Export")) {
+    RaspGui::Panel({0.0f, 0.8f, 1.0f, 0.2f});
+
+    if (RaspGui::Button({0.7f, 0.1f, 0.25f, 0.8f}, "Export")) {
         Export();
     }
 
-    RaspGui::Panel({0.0f, 0.8f, 1.0f, 0.2f});
+    RaspGui::End();
 }
 
 void Editor::PlaceTile() {

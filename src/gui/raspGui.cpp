@@ -237,14 +237,14 @@ bool ButtonPro(Rectangle bounds, const char* text, const Pallete& pallete, Butto
 	return clicked;
 }
 
-bool TextInput(Rectangle bounds, Input& input) {
+bool TextInput(Rectangle bounds, Input* input) {
     return TextInputEx(bounds, input, g_DefaultPallete);
 }
 
 // this was way simpler to implement that i thought
 // to be fair it doesn't have all the features
 // such as moving left and right but you don't need that
-bool TextInputEx(Rectangle bounds, Input& input, const Pallete& pallete) {
+bool TextInputEx(Rectangle bounds, Input* input, const Pallete& pallete) {
 	bool enterPressed = false;
 
 	if (IsKeyPressed(KEY_ENTER)) {
@@ -252,17 +252,17 @@ bool TextInputEx(Rectangle bounds, Input& input, const Pallete& pallete) {
 	}
 
 	if (IsKeyPressed(KEY_LEFT)) {
-		input.Position = std::max(input.Position - 1, 0);
+		input->Position = std::max(input->Position - 1, 0);
 	}
 
 	if (IsKeyPressed(KEY_RIGHT)) {
-		input.Position = std::min(input.Position + 1, (int32_t)input.Text.length() - 1);
+		input->Position = std::min(input->Position + 1, (int32_t)input->Text.length() - 1);
 	}
 
 	if (IsKeyPressed(KEY_BACKSPACE)) {
-        if (input.Position > 0) {
-            input.Text.erase(input.Position - 1, 1);
-            input.Position--;
+        if (input->Position > 0) {
+            input->Text.erase(input->Position - 1, 1);
+            input->Position--;
         }
 	}
 
@@ -270,28 +270,28 @@ bool TextInputEx(Rectangle bounds, Input& input, const Pallete& pallete) {
 	if (IsKeyPressed(KEY_V) && IsKeyDown(KEY_LEFT_CONTROL)) {
 		const char* text = GetClipboardText();
 
-		input.Text.append(text);
+		input->Text.append(text);
 	}
 
 	char key = GetCharPressed();
 
 	// check if the character is in range
 	if (key > 31 && key < 123) {
-        input.Text.insert(input.Position, 1, key);
-        input.Position++;
+        input->Text.insert(input->Position, 1, key);
+        input->Position++;
 	}
 
 	OutlinedRectangle(bounds, pallete.Outline, pallete.DefaultFill, pallete.DefaultOutline);
-	Text(bounds, input.Text.c_str());
+	Text(bounds, input->Text.c_str());
 
 	return enterPressed;
 }
 
-void ComboBox(Rectangle bounds, const std::string& options, uint32_t& selection, Behaviour behavoir) {
+void ComboBox(Rectangle bounds, const std::string& options, uint32_t* selection, Behaviour behavoir) {
     ComboBoxEx(bounds, options, selection, behavoir, g_DefaultPallete);
 }
 
-void ComboBoxEx(Rectangle bounds, const std::string& options, uint32_t& selection, Behaviour behavior, const Pallete& pallete) {
+void ComboBoxEx(Rectangle bounds, const std::string& options, uint32_t* selection, Behaviour behavior, const Pallete& pallete) {
     std::vector<std::string> entries;
     std::string buffer;
 
@@ -308,8 +308,8 @@ void ComboBoxEx(Rectangle bounds, const std::string& options, uint32_t& selectio
         entries.push_back(buffer); // add the last entry if not followed by ';'
     }
 
-    if (selection >= entries.size()) {
-        selection = 0;
+    if (*selection >= entries.size()) {
+        *selection = 0;
     }
 
     if (behavior == Behaviour::Default) {
@@ -317,25 +317,25 @@ void ComboBoxEx(Rectangle bounds, const std::string& options, uint32_t& selectio
         Rectangle button1Bounds = {bounds.x, bounds.y, bounds.width * 0.10f, bounds.height};
         Rectangle button2Bounds = {bounds.x + bounds.width - bounds.width * 0.10f, bounds.y, bounds.width * 0.10f, bounds.height};
 
-        LabelEx(labelBounds, entries[selection].c_str(), pallete);
+        LabelEx(labelBounds, entries[*selection].c_str(), pallete);
 
         if (ButtonEx(button1Bounds, "<", pallete)) {
-            if (selection == 0) {
-                selection = entries.size() - 1;
+            if (*selection == 0) {
+                *selection = entries.size() - 1;
             } else {
-                selection--;
+                (*selection)--;
             }
         }
 
         if (ButtonEx(button2Bounds, ">", pallete)) {
-            if (selection == entries.size() - 1) {
-                selection = 0;
+            if (*selection == entries.size() - 1) {
+                *selection = 0;
             } else {
-                selection++;
+                (*selection)++;
             }
         }
     } else if (behavior == Behaviour::Custom) {
-        LabelEx(bounds, entries[selection].c_str(), pallete);
+        LabelEx(bounds, entries[*selection].c_str(), pallete);
     }
 }
 

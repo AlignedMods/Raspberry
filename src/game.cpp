@@ -1,5 +1,4 @@
 #include "game.hpp"
-#include <format>
 #include "core/random.hpp"
 #include "entity/player.hpp"
 #include "core/log.hpp"
@@ -12,107 +11,109 @@
 
 static s_Game* s_Instance = nullptr;
 
+// no remorse
+
 s_Game::s_Game() {
-	if (!s_Instance) {
-		s_Instance = this;
-	} else {
-		Log(LogLevel::Critical, "There cannot be multiple game classes at once!!");
-	}
+    if (!s_Instance) {
+        s_Instance = this;
+    } else {
+        Log(LogLevel::Critical, "There cannot be multiple game classes at once!!");
+    }
 
-	SetCurrentLevel(Level());
+    SetCurrentLevel(Level());
 
-	SetTraceLogLevel(LOG_WARNING);
+    SetTraceLogLevel(LOG_WARNING);
 }
 
 s_Game::~s_Game() {}
 
 void s_Game::Loop() {
-	double currentTime = 0.0;
-	double lastTime = GetTime();
-	double updateDrawTime = 0.0;
-	double waitTime = 0.0;
+    double currentTime = 0.0;
+    double lastTime = GetTime();
+    double updateDrawTime = 0.0;
+    double waitTime = 0.0;
 
     double tickTime = 0.0;
 
     while (!WindowShouldClose() && m_Running) {
-		PollInputEvents();
+        PollInputEvents();
 
         RaspGui::NewCanvas();
 
-		while (GetTime() - tickTime > 0.0167f) {
-			tickTime += GetTime() - tickTime;
+        while (GetTime() - tickTime > 0.0167f) {
+            tickTime += GetTime() - tickTime;
 
-			Tick();
-		}
-
-		// Fullscreen keybind
-		if (IsKeyPressed(KEY_F11)) {
-            SetFullscreen(!IsWindowFullscreen());
-            mt_Fullscreen = IsWindowFullscreen();
-		}
-
-        if (m_GameRunning) {
-			m_Camera.offset = { GetScreenWidth() / 2.0f - 64.0f, GetScreenHeight() / 2.0f - 64.0f };
-
-			if (!m_Paused) {
-				m_CurrentLevel.OnUpdate();
-			}
-
-            m_Camera.target = {m_CurrentLevel.GetPlayer().GetX() * 64.0f - 32.0f,
-                            m_CurrentLevel.GetPlayer().GetY() * 64.0f - 32.0f};
-
-			if (IsKeyPressed(KEY_ESCAPE)) {
-                Pause();
-			}
+            Tick();
         }
 
-		if (m_EditorRunning) {
-			m_EditorCamera.offset = { GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
-			m_Editor->OnUpdate();
-		}
+        // Fullscreen keybind
+        if (IsKeyPressed(KEY_F11)) {
+            SetFullscreen(!IsWindowFullscreen());
+            mt_Fullscreen = IsWindowFullscreen();
+        }
+
+        if (m_GameRunning) {
+            m_Camera.offset = { GetScreenWidth() / 2.0f - 64.0f, GetScreenHeight() / 2.0f - 64.0f };
+
+            if (!m_Paused) {
+                m_CurrentLevel.OnUpdate();
+            }
+
+            m_Camera.target = {m_CurrentLevel.GetPlayer().GetX() * 64.0f - 32.0f,
+                m_CurrentLevel.GetPlayer().GetY() * 64.0f - 32.0f};
+
+            if (IsKeyPressed(KEY_ESCAPE)) {
+                Pause();
+            }
+        }
+
+        if (m_EditorRunning) {
+            m_EditorCamera.offset = { GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
+            m_Editor->OnUpdate();
+        }
 
         UpdateUI();
 
-		// begin rendering
-		Renderer.Begin();
-    
+        // begin rendering
+        Renderer.Begin();
+
         if (m_GameRunning) {
             BeginMode2D(m_Camera);
 
-			m_CurrentLevel.OnRender();
-      
+            m_CurrentLevel.OnRender();
+
             if (m_CurrentLevel.IsCollectableFound()) {
                 DrawText("Found raspberry", 400, 600, 20, GREEN);
             }
-      
+
             EndMode2D();
         }
 
-		if (m_EditorRunning) {
-			m_Editor->OnRender();
-		}
+        if (m_EditorRunning) {
+            m_Editor->OnRender();
+        }
 
-		// show the current fps
-		DrawText(TextFormat("FPS: %.1f", m_CurrentFPS), 10, 10, 20, GREEN);
+        // show the current fps
+        DrawText(TextFormat("FPS: %.1f", m_CurrentFPS), 10, 10, 20, GREEN);
 
-		RaspGui::Render();
-		
-		Renderer.End();
+        RaspGui::Render();
 
-		currentTime = GetTime();
+        Renderer.End();
 
-		updateDrawTime = currentTime - lastTime;
+        currentTime = GetTime();
 
-		if (m_TargetFPS > 0) {
-			waitTime = (1.0 / static_cast<double>(m_TargetFPS)) - updateDrawTime;
-			WaitTime(waitTime);
-			currentTime = GetTime();
-			deltaTime = static_cast<float>(currentTime - lastTime);
-		} else {
-			deltaTime = static_cast<float>(updateDrawTime);
-		}
+        updateDrawTime = currentTime - lastTime;
 
-		lastTime = currentTime;
+        if (m_TargetFPS > 0) {
+            waitTime = (1.0 / static_cast<double>(m_TargetFPS)) - updateDrawTime;
+            WaitTime(waitTime);
+            currentTime = GetTime();
+            deltaTime = static_cast<float>(currentTime - lastTime);
+        } else {
+            deltaTime = static_cast<float>(updateDrawTime);
+        }
+
+        lastTime = currentTime;
     }
 }
 
@@ -126,11 +127,13 @@ void s_Game::UpdateUI() {
 
         if (RaspGui::Button({0.05f, 0.65f, 0.15f, 0.05f}, "Editor")) {
             StartEditor();
+            m_CurrentMenu = Menu::Editor;
         }
 
         if (RaspGui::Button({0.05f, 0.75f, 0.15f, 0.05f}, "Settings")) {
             m_PreviousMenu = m_CurrentMenu;
             m_CurrentMenu = Menu::Settings;
+            m_CurrentSubMenu = SubMenu::Video;
         }
 
         if (RaspGui::Button({0.05f, 0.85f, 0.15f, 0.05f}, "Quit")) {
@@ -163,7 +166,14 @@ void s_Game::UpdateUI() {
     }
 
     if (m_CurrentMenu == Menu::Settings) {
-        RaspGui::Text({0.0f, 0.05f, 0.3f, 0.1f}, "Settings");
+        // Sidebar
+        RaspGui::Panel({0.1f, 0.1f, 0.15f, 0.8f});
+
+        if (RaspGui::Button({0.05f, 0.02f, 0.9f, 0.1f}, "Video")) {
+            m_CurrentSubMenu = SubMenu::Video;
+        }
+
+        RaspGui::End();
 
         RaspGui::Panel({0.25f, 0.1f, 0.65f, 0.8f});
 
@@ -173,11 +183,11 @@ void s_Game::UpdateUI() {
             RaspGui::Text({0.05f, 0.35f, 0.3f, 0.1f}, "FPS Cap: ");
             RaspGui::Text({0.05f, 0.50f, 0.3f, 0.1f}, "Target FPS: ");
 
-            RaspGui::ComboBox({0.5f, 0.05f, 0.3f, 0.1f}, m_StrResolutions, mt_ResolutionIndex, RaspGui::Behaviour::Default);
-            RaspGui::ComboBox({0.5f, 0.20f, 0.3f, 0.1f}, "No;Yes", mt_Fullscreen, RaspGui::Behaviour::Default);
-            RaspGui::ComboBox({0.5f, 0.35f, 0.3f, 0.1f}, "No;Yes", mt_FPSCap, RaspGui::Behaviour::Default);
-            RaspGui::ComboBox({0.5f, 0.50f, 0.3f, 0.1f}, m_StrFramerates, mt_TargetFPS, RaspGui::Behaviour::Default);
-            
+            RaspGui::ComboBox({0.5f, 0.05f, 0.3f, 0.1f}, m_StrResolutions, &mt_ResolutionIndex);
+            RaspGui::ComboBox({0.5f, 0.20f, 0.3f, 0.1f}, "No;Yes", &mt_Fullscreen);
+            RaspGui::ComboBox({0.5f, 0.35f, 0.3f, 0.1f}, "No;Yes", &mt_FPSCap);
+            RaspGui::ComboBox({0.5f, 0.50f, 0.3f, 0.1f}, m_StrFramerates, &mt_TargetFPS);
+
             if (RaspGui::Button({0.7f, 0.8f, 0.25f, 0.15f}, "Apply")) {
                 if ((GetScreenWidth() != m_Resolutions.at(mt_ResolutionIndex).x || GetScreenHeight() != m_Resolutions.at(mt_ResolutionIndex).y) && !mt_Fullscreen) {
                     SetWindowSize(m_Resolutions.at(mt_ResolutionIndex).x, m_Resolutions.at(mt_ResolutionIndex).y);
@@ -202,16 +212,7 @@ void s_Game::UpdateUI() {
 
         RaspGui::End();
 
-        // Sidebar
-        RaspGui::Panel({0.1f, 0.1f, 0.15f, 0.8f});
-
-            if (RaspGui::Button({0.0f, 0.0f, 1.0f, 0.1f}, "Video")) {
-                m_CurrentSubMenu = SubMenu::Video;
-            }
-
-        RaspGui::End();
-
-        if (RaspGui::Button({0.05f, 0.9f, 0.15f, 0.05f}, "Back")) {
+        if (RaspGui::Button({0.03f, 0.92f, 0.15f, 0.05f}, "Back")) {
             m_CurrentMenu = m_PreviousMenu;
         }
     }
@@ -309,79 +310,79 @@ void s_Game::Quit() {
 // You *should* be able to always run this game on at least 60fps
 // if you can't certain things will slow down
 void s_Game::Tick() {
-	if (m_GameRunning && !m_Paused) {
-		m_CurrentLevel.Tick();
-	}
+    if (m_GameRunning && !m_Paused) {
+        m_CurrentLevel.Tick();
+    }
 
     ticks++;
 
-	m_CurrentFPS = 1.0f / deltaTime;
+    m_CurrentFPS = 1.0f / deltaTime;
 }
 
 void s_Game::Run() {
-  // If this macro is specified then we will search for the Assets directory one
-  // directory at a time until we find it
+    // If this macro is specified then we will search for the Assets directory one
+    // directory at a time until we find it
 #ifdef RTRACEASSETS
-  if (!std::filesystem::exists(std::filesystem::current_path() / "Assets")) {
-    while (
-        !std::filesystem::exists(std::filesystem::current_path() / "Assets")) {
-      std::filesystem::current_path(
-          std::filesystem::current_path().parent_path());
-    }
+    if (!std::filesystem::exists(std::filesystem::current_path() / "Assets")) {
+        while (
+            !std::filesystem::exists(std::filesystem::current_path() / "Assets")) {
+            std::filesystem::current_path(
+                std::filesystem::current_path().parent_path());
+        }
 
-    Debug("FOUND THE DIRECTORY!");
-  }
+        Debug("FOUND THE DIRECTORY!");
+    }
 #endif
 
-	SetConfigFlags(FLAG_WINDOW_RESIZABLE);
-	SetConfigFlags(FLAG_MSAA_4X_HINT);
+    SetConfigFlags(FLAG_WINDOW_RESIZABLE);
+    SetConfigFlags(FLAG_MSAA_4X_HINT);
     InitWindow(1280, 720, "Raspberry");
 
-	Registry.RegisterAllTextures();
+    Registry.RegisterAllTextures();
 
-	SetWindowIcon(LoadImage("Assets/Textures/stone.png"));
+    SetWindowIcon(LoadImage("Assets/Textures/stone.png"));
     SetWindowMinSize(640, 360);
 
-	m_Camera.target = { 0.0f, 0.0f };
-	m_Camera.offset = { GetScreenWidth() / 2.0f - 64.0f, GetScreenHeight() / 2.0f - 64.0f };
-	m_Camera.rotation = 0.0f;
-	m_Camera.zoom = 1.0f;
+    m_Camera.target = { 0.0f, 0.0f };
+    m_Camera.offset = { GetScreenWidth() / 2.0f - 64.0f, GetScreenHeight() / 2.0f - 64.0f };
+    m_Camera.rotation = 0.0f;
+    m_Camera.zoom = 1.0f;
 
-	m_EditorCamera.target = { 0.0f, 0.0f };
-	m_EditorCamera.offset = { GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
-	m_EditorCamera.rotation = 0.0f;
-	m_EditorCamera.zoom = 1.0f;
-  
+    m_EditorCamera.target = { 0.0f, 0.0f };
+    m_EditorCamera.offset = { GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
+    m_EditorCamera.rotation = 0.0f;
+    m_EditorCamera.zoom = 1.0f;
+
     Random::Init();
 
-    #ifdef RDEBUG
-        SetExitKey(KEY_F9);
-    #else
-        SetExitKey(0);
-    #endif
+#ifdef RDEBUG
+    SetExitKey(KEY_F9);
+#else
+    SetExitKey(0);
+#endif
 
     m_StrResolutions = FormatResolutions();
     m_StrFramerates = FormatFramerates();
 
-	Loop();
+    Loop();
 }
 
 void s_Game::SetCurrentLevel(const Level& level) {
-	m_CurrentLevel = level;
+    m_CurrentLevel = level;
 }
 
 Level& s_Game::GetCurrentLevel() {
-	return m_CurrentLevel;
+    return m_CurrentLevel;
 }
 
 void s_Game::StartEditor() {
-	if (m_EditorRunning || m_GameRunning) {
-		return;
-	}
+    if (m_EditorRunning || m_GameRunning) {
+        return;
+    }
 
-	m_EditorRunning = true;
+    m_EditorRunning = true;
 
-	m_Editor = new Editor(m_EditorCamera);
+    m_Editor = new Editor(m_EditorCamera);
 }
 
 void s_Game::StartGameplay() {

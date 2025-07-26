@@ -12,6 +12,7 @@
 enum class Menu {
     None = 0,
     Main,
+    Editor,
     Pause,
     Settings,
     Quit
@@ -103,7 +104,6 @@ private:
         {3440, 1440}, 
         {3840, 2160} 
     }};
-
 
     std::array<uint32_t, 9> m_Framerates = {{
         60,

@@ -102,10 +102,10 @@ bool ButtonPro(Rectangle bounds, const char* text, const Pallete& pallete, Butto
 
 // returns true when enter is pressed
 // You must provide an existing input object to be used
-bool TextInput(Rectangle bounds, Input& input);
-bool TextInputEx(Rectangle bounds, Input& input, const Pallete& pallete);
+bool TextInput(Rectangle bounds, Input* input);
+bool TextInputEx(Rectangle bounds, Input* input, const Pallete& pallete);
 
-void ComboBox(Rectangle bounds, const std::string& options, uint32_t& selection, Behaviour behavoir = Behaviour::Default);
-void ComboBoxEx(Rectangle bounds, const std::string& options, uint32_t& selection, Behaviour behavoir,const Pallete& pallete);
+void ComboBox(Rectangle bounds, const std::string& options, uint32_t* selection, Behaviour behavoir = Behaviour::Default);
+void ComboBoxEx(Rectangle bounds, const std::string& options, uint32_t* selection, Behaviour behavoir,const Pallete& pallete);
 
 } // namespace gui;
