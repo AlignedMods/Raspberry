@@ -1,6 +1,5 @@
 #include "game.hpp"
 #include <format>
-#include <string>
 #include "core/random.hpp"
 #include "entity/player.hpp"
 #include "core/log.hpp"
@@ -48,20 +47,8 @@ void s_Game::Loop() {
 
 		// Fullscreen keybind
 		if (IsKeyPressed(KEY_F11)) {
-            int monitor = GetCurrentMonitor();
-
-            // Toggling fullscreen will *NOT* automatically set the window's size
-            // so we must so it manually (using borderless windowed fixes this however)
-            if (IsWindowFullscreen()) {
-                SetWindowSize(m_PreviousWindowWidth, m_PreviousWindowHeight);
-            } else {
-                m_PreviousWindowWidth = GetScreenWidth();
-                m_PreviousWindowHeight = GetScreenHeight();
-
-                SetWindowSize(GetMonitorWidth(monitor), GetMonitorHeight(monitor));
-            }
-
-            ToggleFullscreen();
+            SetFullscreen(!IsWindowFullscreen());
+            mt_Fullscreen = IsWindowFullscreen();
 		}
 
         if (m_GameRunning) {
@@ -190,29 +177,19 @@ void s_Game::UpdateUI() {
             RaspGui::ComboBox({0.5f, 0.20f, 0.3f, 0.1f}, "No;Yes", mt_Fullscreen, RaspGui::Behaviour::Default);
             RaspGui::ComboBox({0.5f, 0.35f, 0.3f, 0.1f}, "No;Yes", mt_FPSCap, RaspGui::Behaviour::Default);
             RaspGui::ComboBox({0.5f, 0.50f, 0.3f, 0.1f}, m_StrFramerates, mt_TargetFPS, RaspGui::Behaviour::Default);
-
-            if (RaspGui::Button({0.4f, 0.05f, 0.05f, 0.1f}, "<")) {
-                if (mt_ResolutionIndex != 0) {
-                    mt_ResolutionIndex--;
-                }
-            }
-
-            if (RaspGui::Button({0.85f, 0.05f, 0.05f, 0.1f}, ">")) {
-                if (mt_ResolutionIndex != m_Resolutions.size()) {
-                    mt_ResolutionIndex++;
-                }
-            }
-
+            
             if (RaspGui::Button({0.7f, 0.8f, 0.25f, 0.15f}, "Apply")) {
-                if (GetScreenWidth() != m_Resolutions.at(mt_ResolutionIndex).x || GetScreenHeight() != m_Resolutions.at(mt_ResolutionIndex).y) {
+                if ((GetScreenWidth() != m_Resolutions.at(mt_ResolutionIndex).x || GetScreenHeight() != m_Resolutions.at(mt_ResolutionIndex).y) && !mt_Fullscreen) {
                     SetWindowSize(m_Resolutions.at(mt_ResolutionIndex).x, m_Resolutions.at(mt_ResolutionIndex).y);
+
+                    // Center the window
+                    SetWindowPosition(GetMonitorWidth(GetCurrentMonitor()) / 2 - GetScreenWidth() / 2, GetMonitorHeight(GetCurrentMonitor()) / 2 - GetScreenHeight() / 2);
+
+                    // Viewport should always look the same
+                    m_Camera.zoom = 1.0f / (720.0f / GetScreenHeight());
                 }
 
-                if (mt_Fullscreen) {
-                    SetFullscreen(true);
-                } else {
-                    SetFullscreen(false);
-                }
+                SetFullscreen(mt_Fullscreen);
 
                 if (mt_FPSCap) {
                     m_TargetFPS = m_Framerates.at(mt_TargetFPS);
@@ -285,21 +262,32 @@ void s_Game::SetFullscreen(bool yesno) {
         return;
     } else if (!IsWindowFullscreen() && !yesno) {
         return;
-    } else if (IsWindowFullscreen() && !yesno) {
-        Log(LogLevel::Info, "Un fullscreen!");
+    }
+
+    if (IsWindowFullscreen()) {
+        Log(LogLevel::Info, "Window is fullscreen!");
 
         SetWindowSize(m_PreviousWindowWidth, m_PreviousWindowHeight);
+
+        m_PreviousWindowWidth = GetScreenWidth();
+        m_PreviousWindowHeight = GetScreenHeight();
+
         ToggleFullscreen();
+
         return;
-    } else if (!IsWindowFullscreen() && yesno) {
-        Log(LogLevel::Info, "Making fullscreen!");
+    } else {
+        Log(LogLevel::Info, "Window is NOT fullscreen!");
         m_PreviousWindowWidth = GetScreenWidth();
         m_PreviousWindowHeight = GetScreenHeight();
 
         SetWindowSize(GetMonitorWidth(monitor), GetMonitorHeight(monitor));
+
         ToggleFullscreen();
+
         return;
     }
+
+    Log(LogLevel::Info, "No condition is met!");
 }
 
 void s_Game::Pause() {

@@ -6,6 +6,7 @@
 
 #include "raylib.h"
 
+#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <cstring>
@@ -312,9 +313,26 @@ void ComboBoxEx(Rectangle bounds, const std::string& options, uint32_t& selectio
     }
 
     if (behavior == Behaviour::Default) {
-        if (ButtonEx(bounds, entries.at(selection).c_str(), pallete)) {
-            selection = (selection + 1) % entries.size(); // wraps around
-            Log(LogLevel::Info, entries.at(selection));
+        Rectangle labelBounds = {bounds.x + bounds.width * 0.15f, bounds.y, bounds.width * 0.70f, bounds.height};
+        Rectangle button1Bounds = {bounds.x, bounds.y, bounds.width * 0.10f, bounds.height};
+        Rectangle button2Bounds = {bounds.x + bounds.width - bounds.width * 0.10f, bounds.y, bounds.width * 0.10f, bounds.height};
+
+        LabelEx(labelBounds, entries[selection].c_str(), pallete);
+
+        if (ButtonEx(button1Bounds, "<", pallete)) {
+            if (selection == 0) {
+                selection = entries.size() - 1;
+            } else {
+                selection--;
+            }
+        }
+
+        if (ButtonEx(button2Bounds, ">", pallete)) {
+            if (selection == entries.size() - 1) {
+                selection = 0;
+            } else {
+                selection++;
+            }
         }
     } else if (behavior == Behaviour::Custom) {
         LabelEx(bounds, entries[selection].c_str(), pallete);
