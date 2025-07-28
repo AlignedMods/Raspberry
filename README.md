@@ -1,10 +1,10 @@
 # Raspberry
 
-## **NOTE:** Currently Visual Studio just doesn't work and I don't know why, if you know why feel free to tell me!
-
 ## How to build:
 
 ### **1: Prerequisites**
+
+***A C++ compiler (duh)***
 
 ***Premake***
 
@@ -14,13 +14,7 @@
 
 To generate the build system you wish run:
 
-    cd scripts
-    .\build-make.bat        // For Windows
-    ./build-make.sh         // For Linux
-(for make)
+    $ premake5 gmake (or vs2022)
+    $ make config=debug_windows (change this to debug_linux if building on linux, change debug to release if building for release)
 
-**OR**
-
-    cd scripts
-    .\build-vs.bat
-(for visual studio)
+(The executable will be put in *build/bin/(configuration)/(platform)/*)
