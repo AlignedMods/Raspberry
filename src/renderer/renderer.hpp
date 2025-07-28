@@ -2,12 +2,10 @@
 
 #include "raylib.h"
 
-#include <vector>
-#include <cstdint>
-
-
 class s_Renderer {
 public:
+    s_Renderer();
+
     void RenderTexture(const Texture& texture, float x, float y, Color tint);
     void RenderText(const char* txt, int x, int y);
     void RenderEntity(const Texture& texture, Vector2 position);
@@ -21,4 +19,4 @@ public:
 	void End();
 };
 
-inline s_Renderer Renderer;
+extern s_Renderer Renderer;

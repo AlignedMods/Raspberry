@@ -29,7 +29,6 @@ inline void Error(const std::string& message) {
 
 inline void Critical(const std::string& message) {
     std::cout << "CRITICAL: " << message << std::endl;
-    std::exit(-1);
 }
 
 inline static void Log(LogLevel level, const std::string& message) {

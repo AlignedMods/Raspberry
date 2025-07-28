@@ -9,6 +9,8 @@
 #include "raylib.h"
 #include "rlgl.h"
 
+#include <cstdlib>
+
 static s_Game* s_Instance = nullptr;
 
 // no remorse
@@ -18,103 +20,160 @@ s_Game::s_Game() {
         s_Instance = this;
     } else {
         Log(LogLevel::Critical, "There cannot be multiple game classes at once!!");
+        exit(1);
     }
-
-    SetCurrentLevel(Level());
-
-    SetTraceLogLevel(LOG_WARNING);
 }
 
 s_Game::~s_Game() {}
 
-void s_Game::Loop() {
-    double currentTime = 0.0;
-    double lastTime = GetTime();
-    double updateDrawTime = 0.0;
-    double waitTime = 0.0;
+bool s_Game::Init() {
+    SetConfigFlags(FLAG_WINDOW_RESIZABLE);
+    SetConfigFlags(FLAG_MSAA_4X_HINT);
+    InitWindow(1280, 720, "Raspberry");
 
-    double tickTime = 0.0;
+    // we can't create the window
+    if (!IsWindowReady()) return false;
 
-    while (!WindowShouldClose() && m_Running) {
-        PollInputEvents();
+    InitAudioDevice();
 
-        RaspGui::NewCanvas();
+    // there won't be any audio
+    if (!IsAudioDeviceReady()) return false;
 
-        while (GetTime() - tickTime > 0.0167f) {
-            tickTime += GetTime() - tickTime;
+    SetTraceLogLevel(LOG_WARNING);
 
-            Tick();
-        }
+    Registry.RegisterAllTextures();
 
-        // Fullscreen keybind
-        if (IsKeyPressed(KEY_F11)) {
-            SetFullscreen(!IsWindowFullscreen());
-            mt_Fullscreen = IsWindowFullscreen();
-        }
+    SetWindowIcon(LoadImage("Assets/Textures/stone.png"));
+    SetWindowMinSize(640, 360);
 
-        if (m_GameRunning) {
-            m_Camera.offset = { GetScreenWidth() / 2.0f - 64.0f, GetScreenHeight() / 2.0f - 64.0f };
+    m_Camera.target = { 0.0f, 0.0f };
+    m_Camera.offset = { GetScreenWidth() / 2.0f - 64.0f, GetScreenHeight() / 2.0f - 64.0f };
+    m_Camera.rotation = 0.0f;
+    m_Camera.zoom = 1.0f;
 
-            if (!m_Paused) {
-                m_CurrentLevel.OnUpdate();
-            }
+    m_EditorCamera.target = { 0.0f, 0.0f };
+    m_EditorCamera.offset = { GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
+    m_EditorCamera.rotation = 0.0f;
+    m_EditorCamera.zoom = 1.0f;
 
-            m_Camera.target = {m_CurrentLevel.GetPlayer().GetX() * 64.0f - 32.0f,
-                m_CurrentLevel.GetPlayer().GetY() * 64.0f - 32.0f};
+    Random::Init();
 
-            if (IsKeyPressed(KEY_ESCAPE)) {
-                Pause();
-            }
-        }
+#ifdef RDEBUG
+    SetExitKey(KEY_F9);
+#else
+    SetExitKey(0);
+#endif
 
-        if (m_EditorRunning) {
-            m_EditorCamera.offset = { GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
-            m_Editor->OnUpdate();
-        }
+    m_StrResolutions = FormatResolutions();
+    m_StrFramerates = FormatFramerates();
 
-        UpdateUI();
+    m_LastTime = GetTime();
 
-        // begin rendering
-        Renderer.Begin();
+    return true;
+}
 
-        if (m_GameRunning) {
-            BeginMode2D(m_Camera);
+void s_Game::Shutdown() {
+    CloseAudioDevice();
+    CloseWindow();
+}
 
-            m_CurrentLevel.OnRender();
+bool s_Game::Running() {
+    return m_Running;
+}
 
-            if (m_CurrentLevel.IsCollectableFound()) {
-                DrawText("Found raspberry", 400, 600, 20, GREEN);
-            }
+void s_Game::PollEvents() {
+    PollInputEvents();
+}
 
-            EndMode2D();
-        }
+void s_Game::CalculateTiming() {
+    m_CurrentTime = GetTime();
 
-        if (m_EditorRunning) {
-            m_Editor->OnRender();
-        }
+    m_UpdateDrawTime = m_CurrentTime - m_LastTime;
 
-        // show the current fps
-        DrawText(TextFormat("FPS: %.1f", m_CurrentFPS), 10, 10, 20, GREEN);
-
-        RaspGui::Render();
-
-        Renderer.End();
-
-        currentTime = GetTime();
-
-        updateDrawTime = currentTime - lastTime;
-
-        if (m_TargetFPS > 0) {
-            waitTime = (1.0 / static_cast<double>(m_TargetFPS)) - updateDrawTime;
-            WaitTime(waitTime);
-            currentTime = GetTime();
-            deltaTime = static_cast<float>(currentTime - lastTime);
-        } else {
-            deltaTime = static_cast<float>(updateDrawTime);
-        }
-
-        lastTime = currentTime;
+    if (m_TargetFPS > 0) {
+        m_WaitTime = (1.0 / static_cast<double>(m_TargetFPS)) - m_UpdateDrawTime;
+        WaitTime(m_WaitTime);
+        m_CurrentTime = GetTime();
+        deltaTime = static_cast<float>(m_CurrentTime - m_LastTime);
+    } else {
+        deltaTime = static_cast<float>(m_UpdateDrawTime);
     }
+
+    m_LastTime = m_CurrentTime;
+}
+
+void s_Game::OnUpdate() {
+    // check if we should continue
+    m_Running = m_Running && !WindowShouldClose();
+
+    while (GetTime() - m_TickTime > 0.0167f) {
+        m_TickTime += GetTime() - m_TickTime;
+
+        FixedUpdate();
+    }
+
+    RaspGui::NewCanvas();
+
+    // Fullscreen keybind
+    if (IsKeyPressed(KEY_F11)) {
+        SetFullscreen(!IsWindowFullscreen());
+        mt_Fullscreen = IsWindowFullscreen();
+    }
+
+    if (m_GameRunning) {
+        m_Camera.offset = { GetScreenWidth() / 2.0f - 64.0f, GetScreenHeight() / 2.0f - 64.0f };
+
+        if (!m_Paused) {
+            m_CurrentLevel.OnUpdate();
+        }
+
+        m_Camera.target = {m_CurrentLevel.GetPlayer().GetX() * 64.0f - 32.0f,
+            m_CurrentLevel.GetPlayer().GetY() * 64.0f - 32.0f};
+
+        if (IsKeyPressed(KEY_ESCAPE)) {
+            Pause();
+        }
+    }
+
+    if (m_EditorRunning) {
+        m_EditorCamera.offset = { GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
+        m_Editor->OnUpdate();
+    }
+
+    UpdateUI();
+}
+
+void s_Game::FixedUpdate() {
+    if (m_GameRunning && !m_Paused) {
+        m_CurrentLevel.Tick();
+    }
+
+    ticks++;
+
+    m_CurrentFPS = 1.0f / deltaTime;
+}
+
+void s_Game::OnRender() {
+    if (m_GameRunning) {
+        BeginMode2D(m_Camera);
+
+        m_CurrentLevel.OnRender();
+
+        if (m_CurrentLevel.IsCollectableFound()) {
+            DrawText("Found raspberry", 400, 600, 20, GREEN);
+        }
+
+        EndMode2D();
+    }
+
+    if (m_EditorRunning) {
+        m_Editor->OnRender();
+    }
+
+    // show the current fps
+    DrawText(TextFormat("FPS: %.1f", m_CurrentFPS), 10, 10, 20, GREEN);
+
+    RaspGui::Render();
 }
 
 void s_Game::UpdateUI() {
@@ -303,68 +362,6 @@ void s_Game::Pause() {
 
 void s_Game::Quit() {
     m_Running = false;
-}
-
-// NOTE: a tick is basically a 60th of a second.
-// esentially acting as a "FixedUpdate"
-// You *should* be able to always run this game on at least 60fps
-// if you can't certain things will slow down
-void s_Game::Tick() {
-    if (m_GameRunning && !m_Paused) {
-        m_CurrentLevel.Tick();
-    }
-
-    ticks++;
-
-    m_CurrentFPS = 1.0f / deltaTime;
-}
-
-void s_Game::Run() {
-    // If this macro is specified then we will search for the Assets directory one
-    // directory at a time until we find it
-#ifdef RTRACEASSETS
-    if (!std::filesystem::exists(std::filesystem::current_path() / "Assets")) {
-        while (
-            !std::filesystem::exists(std::filesystem::current_path() / "Assets")) {
-            std::filesystem::current_path(
-                std::filesystem::current_path().parent_path());
-        }
-
-        Debug("FOUND THE DIRECTORY!");
-    }
-#endif
-
-    SetConfigFlags(FLAG_WINDOW_RESIZABLE);
-    SetConfigFlags(FLAG_MSAA_4X_HINT);
-    InitWindow(1280, 720, "Raspberry");
-
-    Registry.RegisterAllTextures();
-
-    SetWindowIcon(LoadImage("Assets/Textures/stone.png"));
-    SetWindowMinSize(640, 360);
-
-    m_Camera.target = { 0.0f, 0.0f };
-    m_Camera.offset = { GetScreenWidth() / 2.0f - 64.0f, GetScreenHeight() / 2.0f - 64.0f };
-    m_Camera.rotation = 0.0f;
-    m_Camera.zoom = 1.0f;
-
-    m_EditorCamera.target = { 0.0f, 0.0f };
-    m_EditorCamera.offset = { GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
-    m_EditorCamera.rotation = 0.0f;
-    m_EditorCamera.zoom = 1.0f;
-
-    Random::Init();
-
-#ifdef RDEBUG
-    SetExitKey(KEY_F9);
-#else
-    SetExitKey(0);
-#endif
-
-    m_StrResolutions = FormatResolutions();
-    m_StrFramerates = FormatFramerates();
-
-    Loop();
 }
 
 void s_Game::SetCurrentLevel(const Level& level) {

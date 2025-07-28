@@ -29,9 +29,16 @@ public:
     s_Game();
     ~s_Game();
 
-    void Run();
-    void Loop();
-    void Tick();
+    bool Init();
+    void Shutdown();
+    bool Running();
+
+    void PollEvents();
+    void CalculateTiming();
+
+    void OnUpdate();
+    void FixedUpdate();
+    void OnRender();
 
     void SetCurrentLevel(const Level& level);
 
@@ -67,6 +74,15 @@ private:
 	float m_CurrentFPS = 0;
 
     int m_PreviousWindowWidth, m_PreviousWindowHeight;
+
+    // -- TIMING -- //
+    
+    double m_CurrentTime = 0.0;
+    double m_LastTime = 0.0;
+    double m_UpdateDrawTime = 0.0;
+    double m_WaitTime = 0.0;
+
+    double m_TickTime = 0.0;
 
     // -- GAME -- //
 
@@ -133,4 +149,4 @@ public:
     size_t ticks = 0;
 };
 
-inline s_Game Game;
+extern s_Game Game;

@@ -5,6 +5,17 @@
 #include "raylib.h"
 #include "raymath.h"
 
+static s_Renderer* instance = nullptr;
+
+s_Renderer::s_Renderer() {
+    if (!instance)
+        instance = this;
+    else {
+        Log(LogLevel::Critical, "More than one renderer is created!");
+        exit(1);
+    }
+}
+
 void s_Renderer::RenderTexture(const Texture& texture, float x, float y, Color tint) {
     if (texture.width != texture.height) {
         Log(LogLevel::Error, "Textures must be square!");
