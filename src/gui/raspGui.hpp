@@ -1,18 +1,18 @@
 #pragma once
 
 // RaspGui -- An immediate mode gui made only for raspberry
-// NOTE: RaspGui uses scaling instead of absolute values
+// NOTE: When providing bounds, they should be treated as being in a 640x360 resolution;
+
+#include "core/types.hpp"
 
 #include "raylib.h"
 
-#include <array>
 #include <cstdint>
 #include <string>
-#include <vector>
 
 namespace RaspGui {
 
-using Hex = uint32_t;
+using Hex = u32;
 
 // The Raspberry color palette™
 
@@ -55,7 +55,7 @@ struct Pallete {
 
 struct Input {
     std::string Text;
-    int32_t Position = 0;
+    i32 Position = 0;
 };
 
 enum class ButtonInput {
@@ -68,8 +68,15 @@ enum class Behaviour {
 
 // Utility functions
 Rectangle GetRealSize(Rectangle bounds);
+const Pallete& GetPallete();
 
 bool HoveringOverGui();
+
+// makes sure that any gui element that is drawn is a square
+// yes this is absolutely necessary
+// i hope this got a good laugh out of you when you saw it for the first time
+void BeginSquareMode();
+void EndSquareMode();
 
 // Rendering only functions (you do not *need* to use these, just nothing will be displayed if you don't)
 void NewCanvas();
@@ -106,6 +113,13 @@ bool TextInput(Rectangle bounds, Input* input);
 bool TextInputEx(Rectangle bounds, Input* input, const Pallete& pallete);
 
 void ComboBox(Rectangle bounds, const std::string& options, uint32_t* selection, Behaviour behavoir = Behaviour::Default);
-void ComboBoxEx(Rectangle bounds, const std::string& options, uint32_t* selection, Behaviour behavoir,const Pallete& pallete);
+void ComboBoxEx(Rectangle bounds, const std::string& options, uint32_t* selection, Behaviour behavoir, const Pallete& pallete);
+
+// Sliders
+void SliderFloat(Rectangle bounds, f32* value, f32 min, f32 max);
+void SliderFloatEx(Rectangle bounds, f32* value, f32 min, f32 max, f32 step, const Pallete& pallete);
+
+void SliderInt(Rectangle bounds, i32* value, i32 min, i32 max);
+void SliderIntEx(Rectangle bounds, i32* value, i32 min, i32 max, i32 step, const Pallete& pallete);
 
 } // namespace gui;

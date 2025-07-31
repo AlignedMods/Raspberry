@@ -1,5 +1,6 @@
 #pragma once
 
+#include "core/types.hpp"
 #include "tile/tile.hpp"
 #include "gui/raspGui.hpp"
 
@@ -31,12 +32,12 @@ private:
     void PlaceTile();
     void DestroyTile();
 
-    TilePosition GetWorldPosition();
+    i2 GetWorldPosition();
     void HandleSelection();
     void Export();
 
 private:
-    std::map<TilePosition, Tile> m_Tiles;
+    std::map<i2, Tile> m_Tiles;
     std::vector<Tile> m_Selection;
 
     std::string m_CurrentTile = "dirt";
@@ -45,6 +46,10 @@ private:
 
     bool m_Searching = false;
     RaspGui::Input m_Input;
+
+    f32 m_SelectionBrightness = 0.0f;
+    f32 m_SelectionBrightnes = 0.0f;
+    Color col = {0, 0, 0, 255};
 
     Camera2D& m_Camera;
 };

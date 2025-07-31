@@ -1,24 +1,53 @@
 #pragma once
 
-#include "core/log.hpp"
-#include "core/util.hpp"
-
 #include "raylib.h"
+#include "raymath.h"
 
 #include <cstddef>
 #include <cstdint>
-#include <format>
 
-struct TilePosition {
-    int32_t x;
-    int32_t y;
+// rust style types (no i still don't like rust, although type names is something they got right)
+
+// integer types
+using u8 = uint8_t;
+using i8 = int8_t;
+using u16 = uint16_t;
+using i16 = int16_t;
+using u32 = uint32_t;
+using i32 = int32_t;
+using u64 = uint64_t;
+using i64 = int64_t;
+
+// floating point types
+using f32 = float;
+using f64 = double;
+
+// size type
+using sz = size_t;
+
+struct IVector2 {
+    i32 x;
+    i32 y;
 
     inline Vector2 RaylibVector() {
         return Vector2{static_cast<float>(x), static_cast<float>(y)};
     }
 };
 
-inline bool operator<(const TilePosition& f, const TilePosition s) {
+// vectors
+using f2 = Vector2;
+using i2 = IVector2;
+
+// operators
+inline bool operator<(const i2& f, const i2& s) {
+    if (f.x != s.x) {
+        return f.x < s.x;
+    }
+
+    return f.y < s.y;
+}
+
+inline bool operator<(const f2& f, const f2& s) {
     if (f.x != s.x) {
         return f.x < s.x;
     }

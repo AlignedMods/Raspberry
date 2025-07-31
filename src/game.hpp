@@ -6,8 +6,6 @@
 #include "raylib.h"
 
 #include <array>
-#include <cstddef>
-#include <cstdint>
 
 enum class Menu {
     None = 0,
@@ -52,6 +50,9 @@ public:
 
 	Level& GetCurrentLevel();
 
+    const Camera2D& GetCamera() const;
+    const Rectangle& GetViewportRect() const;
+
 private:
     void UpdateUI();
     constexpr std::string FormatResolutions();
@@ -66,23 +67,25 @@ private:
 	Camera2D m_Camera;
 	Camera2D m_EditorCamera;
 
+    Rectangle m_Viewport;
+
     // -- APPLICATION -- //
     
 	bool m_Running = true;
 
-	int m_TargetFPS = 60;
-	float m_CurrentFPS = 0;
+	u32 m_TargetFPS = 60;
+	f32 m_CurrentFPS = 0;
 
-    int m_PreviousWindowWidth, m_PreviousWindowHeight;
+    u32 m_PreviousWindowWidth, m_PreviousWindowHeight;
 
     // -- TIMING -- //
     
-    double m_CurrentTime = 0.0;
-    double m_LastTime = 0.0;
-    double m_UpdateDrawTime = 0.0;
-    double m_WaitTime = 0.0;
+    f64 m_CurrentTime = 0.0;
+    f64 m_LastTime = 0.0;
+    f64 m_UpdateDrawTime = 0.0;
+    f64 m_WaitTime = 0.0;
 
-    double m_TickTime = 0.0;
+    f64 m_TickTime = 0.0;
 
     // -- GAME -- //
 
@@ -97,31 +100,23 @@ private:
     SubMenu m_CurrentSubMenu = SubMenu::None;
     Menu m_PreviousMenu = Menu::None;
 
-    std::array<Vector2, 20> m_Resolutions = {{
+    i32 guy = 2;
+    float m_F = 1.0f;
+
+    std::array<Vector2, 9> m_Resolutions = {{
         // yes i had to write this out manually
         {640,  360}, 
-        {640,  480},
-        {800,  600}, 
-        {1024, 768}, 
         {1280, 720}, 
-        {1280, 800}, 
-        {1280, 1024}, 
-        {1360, 768}, 
-        {1440, 900}, 
-        {1536, 864}, 
-        {1600, 900}, 
-        {1600, 1200}, 
-        {1680, 1050}, 
         {1920, 1080}, 
-        {1920, 1200}, 
         {2560, 1080}, 
         {2560, 1440}, 
-        {2560, 1600}, 
         {3440, 1440}, 
-        {3840, 2160} 
+        {3840, 2160},
+        {5120, 2160},
+        {7680, 4320} // 8k resolution, i do NOT know why you would ever need this (game runs like shit on this resolution)
     }};
 
-    std::array<uint32_t, 9> m_Framerates = {{
+    std::array<u32, 9> m_Framerates = {{
         60,
         75,
         120,
@@ -138,15 +133,15 @@ private:
     
     // -- TEMPORARY GUI STUFF -- //
     
-    uint32_t mt_TargetFPS = 60;
-    uint32_t mt_FPSCap = 1;
+    u32 mt_TargetFPS = 60;
+    u32 mt_FPSCap = 1;
 
-    uint32_t mt_ResolutionIndex = 4;
-    uint32_t mt_Fullscreen = 0;
+    u32 mt_ResolutionIndex = 0;
+    u32 mt_Fullscreen = 0;
   
 public:
-	float deltaTime = 0.0f;
-    size_t ticks = 0;
+	f32 deltaTime = 0.0f;
+    sz ticks = 0;
 };
 
 extern s_Game Game;

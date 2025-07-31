@@ -9,16 +9,21 @@
 class Tile {
 public:
 	Tile() = default;
-	Tile(const std::string& type, const TilePosition& position);
+	Tile(const std::string& type, const i2& position);
 
 	void OnRender();
-	void OnRender(uint32_t flag);
+	void OnRender(u32 flag);
 
-	TilePosition& GetPosition();
+	i2& GetPosition();
+    f2& GetRealPosition();
 	std::string& GetType();
 
+public:
+    f32 brightness = 1.0f;
+
 private:
-	TilePosition m_Position;
+	i2 m_Position;
+    f2 m_RealPosition;
 	std::string m_Type;
 
 	Texture m_Texture;

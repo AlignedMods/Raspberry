@@ -1,26 +1,38 @@
 #include "tile.hpp"
-#include "core/log.hpp"
 #include "renderer/renderer.hpp"
 #include "core/types.hpp"
 #include "registry.hpp"
 
-Tile::Tile(const std::string& type, const TilePosition& position) {
+#include "raylib.h"
+
+f32 ffs = 1.0f;
+
+Tile::Tile(const std::string& type, const i2& position) {
 	m_Type = type;
 	m_Position = position;
+    m_RealPosition = {position.x * 64.0f, position.y * 64.0f};
 
 	m_Texture = Registry.GetTileTexture(type);
+
+    brightness = ffs;
+    ffs -= 0.05f;
 }
 
 void Tile::OnRender() {
-	OnRender(0xffffffff);
+    Color col = {(u8)(brightness * 255.0f), (u8)(brightness * 255.0f), (u8)(brightness * 255.0f), 255};
+	OnRender(ColorToInt(col));
 }
 
-void Tile::OnRender(uint32_t flag) {
+void Tile::OnRender(u32 flag) {
 	Renderer.RenderTexture(m_Texture, m_Position.RaylibVector().x, m_Position.RaylibVector().y, GetColor(flag));
 }
 
-TilePosition& Tile::GetPosition() {
+i2& Tile::GetPosition() {
 	return m_Position;
+}
+
+f2& Tile::GetRealPosition() {
+    return m_RealPosition;
 }
 
 std::string& Tile::GetType() {

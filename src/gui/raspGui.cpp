@@ -2,48 +2,50 @@
 #include "core/log.hpp"
 #include "game.hpp"
 #include "raymath.h"
-#include "renderer/renderer.hpp"
 
 #include "raylib.h"
 
 #include <algorithm>
 #include <array>
-#include <cstddef>
+#include <complex>
 #include <cstring>
 #include <format>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 namespace RaspGui {
 
 struct Info {
-	int Font_Size = 40;
+	u32 Font_Size = 40;
 	std::unordered_map<int, Font> Fonts;
 
     std::vector<int> TextInputPositions;
-    int TextBoxPosition;
+    i32 TextBoxPosition;
 
 	bool Hovering = false;
 
     std::vector<Rectangle> Windows;
-    size_t WindowCount = 0;
+    sz WindowCount = 0;
 
     // the current rendering area
     Rectangle Area;
     std::array<Rectangle, 5> Areas;
-    size_t Nestedness;
+    sz Nestedness;
+
+    bool Square = false;
 };
 
 struct GuiRectangle {
 	Rectangle rectangle;
-	float roundness;
-	int segments;
-	uint32_t color;
+	f32 roundness;
+	u32 segments;
+	Hex color;
 };
 
 struct GuiText {
 	std::string text;
-	int size;
+	u32 size;
 	Rectangle rectangle;
 };
 
@@ -60,14 +62,36 @@ static Pallete g_DefaultPallete;
 
 // Utility functions
 Rectangle GetRealSize(Rectangle bounds) {
-    Rectangle& area = g_Info.Area;
+    Rectangle size = {(bounds.x + g_Info.Area.x) * (GetScreenWidth() / 640.0f), (bounds.y + g_Info.Area.y) * (GetScreenHeight() / 360.0f),
+                       bounds.width * (GetScreenWidth() / 640.0f), bounds.height * (GetScreenHeight() / 360.0f)};
 
-	return {bounds.x * area.width + area.x, bounds.y * area.height + area.y,
-			bounds.width * area.width, bounds.height * area.height};
+    if (g_Info.Square) {
+        if (size.height > size.width || size.height < size.width) {
+            // size.y = size.y - (size.height - size.width) / 2.0f;
+            size.width = size.height;
+        } else if (size.width > size.height || size.width < size.height) {
+            // size.x = size.x - (size.width - size.height) / 2.0f;
+            size.height = size.width;
+        }
+    }
+
+    return size;
+}
+
+const Pallete& GetPallete() {
+    return g_DefaultPallete;
 }
 
 bool HoveringOverGui() {
 	return g_Info.Hovering;
+}
+
+void BeginSquareMode() {
+    g_Info.Square = true;
+}
+
+void EndSquareMode() {
+    g_Info.Square = false;
 }
 
 void NewCanvas() {
@@ -109,11 +133,15 @@ void OutlinedRectangle(Rectangle bounds, int outline, uint32_t fillColor, uint32
 void OutlinedRoundedRectangle(Rectangle bounds, int outline, float roundness, uint32_t fillColor, uint32_t outlineColor) {
 	// don't bother calculating an outline if there is none
 	Rectangle actual = GetRealSize(bounds);
-    Rectangle outlineRec = {actual.x - outline / 2.0f, actual.y - outline / 2.0f,
-                         actual.width + outline, actual.height + outline};
+
+    Rectangle outlineRec = actual;
 
 	if (outline != 0.0f) {
-		g_Render.Rectangles.push_back({outlineRec, roundness, 25, outlineColor});
+        outlineRec = {bounds.x - outline / 2.0f, bounds.y - outline / 2.0f,
+                      bounds.width + outline, bounds.height + outline};
+
+        Rectangle actualOutline = GetRealSize(outlineRec);
+		g_Render.Rectangles.push_back({actualOutline, roundness, 25, outlineColor});
 	}
 
     if (CheckCollisionPointRec(GetMousePosition(), outlineRec)) {
@@ -150,7 +178,7 @@ void PanelEx(Rectangle bounds, const Pallete& pallete) {
 
     g_Info.Nestedness++;
 
-    g_Info.Areas[g_Info.Nestedness] = GetRealSize(bounds);
+    g_Info.Areas[g_Info.Nestedness] = bounds;
     g_Info.Area = g_Info.Areas.at(g_Info.Nestedness);
 }
 
@@ -159,15 +187,20 @@ void End() {
     g_Info.Area = g_Info.Areas.at(g_Info.Nestedness);
 }
 
+// TODO: optimize the hell out of this
 void Text(Rectangle bounds, const char* text) {
+    if (!std::strcmp(text, "--@@--")) {
+        return;
+    }
+
 	Rectangle actual = GetRealSize(bounds);
 
     // some gui code
     // also the variable names are bad, cry about it
 
-    int baseFontSize = 100;
-    float vertical = 1.2f;
-    float horizontal = 1.2f;
+    u32 baseFontSize = 100;
+    f32 vertical = 1.2f;
+    f32 horizontal = 1.2f;
 
 	// load font if it already hasn't been loaded
 	if (!g_Info.Fonts.contains(baseFontSize)) {
@@ -176,12 +209,12 @@ void Text(Rectangle bounds, const char* text) {
 
     Vector2 size = MeasureTextEx(g_Info.Fonts.at(baseFontSize), text, baseFontSize, 3);
 
-    float scaleX = (actual.width) / (size.x * horizontal);
-    float scaleY = (actual.height) / (size.y * vertical);
+    f32 scaleX = (actual.width) / (size.x * horizontal);
+    f32 scaleY = (actual.height) / (size.y * vertical);
 
-    float scale = std::min(scaleX, scaleY);
+    f32 scale = std::min(scaleX, scaleY);
 
-    int fontSize = baseFontSize * scale;
+    u32 fontSize = baseFontSize * scale;
 
 	if (!g_Info.Fonts.contains(fontSize)) {
 		g_Info.Fonts[fontSize] = LoadFontEx("Assets/Fonts/alagard.ttf", fontSize, nullptr, 0);
@@ -336,6 +369,88 @@ void ComboBoxEx(Rectangle bounds, const std::string& options, uint32_t* selectio
         }
     } else if (behavior == Behaviour::Custom) {
         LabelEx(bounds, entries[*selection].c_str(), pallete);
+    }
+}
+
+void SliderFloat(Rectangle bounds, f32 *value, f32 min, f32 max) {
+    SliderFloatEx(bounds, value, min, max, 0.001f, g_DefaultPallete);
+}
+
+void SliderFloatEx(Rectangle bounds, f32 *value, f32 min, f32 max, f32 step, const Pallete &pallete) {
+    float normalized = (*value - min) / (max - min);
+
+    Rectangle slider = {bounds.x + normalized * (bounds.width - 15), bounds.y, 15, bounds.height};
+    Rectangle actualSlider = GetRealSize(slider);
+    Rectangle actual = GetRealSize(bounds);
+
+    OutlinedRectangle(slider, 2, pallete.ClickedFill, pallete.ClickedOutline);
+
+    Vector2 mousePos = GetMousePosition();
+
+    bool state = false;
+
+    OutlinedRectangle(bounds, pallete.Outline, pallete.DefaultFill, pallete.DefaultOutline);
+
+    if (ButtonPro(slider, "--@@--", pallete, ButtonInput::Hold)) {
+        state = true;
+    } 
+
+    if (CheckCollisionPointRec(mousePos, actual)) {
+        if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) || state) {
+            *value = (max - min) * ((mousePos.x - actual.x - actualSlider.width / 2) / (actual.width - actualSlider.width)) + min;
+
+            f32 steps = round((*value - min) / step);
+            *value = min + steps * step;
+
+            if (*value > max) {
+                *value = max;
+            }
+
+            if (*value < min) {
+                *value = min;
+            }
+        }
+    }
+}
+
+void SliderInt(Rectangle bounds, i32 *value, i32 min, i32 max) {
+    SliderIntEx(bounds, value, min, max, 1, g_DefaultPallete);
+}
+
+void SliderIntEx(Rectangle bounds, i32 *value, i32 min, i32 max, i32 step, const Pallete& pallete) {
+    float normalized = (f32)(*value - min) / (max - min);
+
+    Rectangle slider = {bounds.x + normalized * (bounds.width - 15), bounds.y, 15, bounds.height};
+    Rectangle actualSlider = GetRealSize(slider);
+    Rectangle actual = GetRealSize(bounds);
+
+    OutlinedRectangle(slider, 2, pallete.ClickedFill, pallete.ClickedOutline);
+
+    Vector2 mousePos = GetMousePosition();
+
+    bool state = false;
+
+    OutlinedRectangle(bounds, pallete.Outline, pallete.DefaultFill, pallete.DefaultOutline);
+
+    if (ButtonPro(slider, "--@@--", pallete, ButtonInput::Hold)) {
+        state = true;
+    } 
+
+    if (CheckCollisionPointRec(mousePos, actual)) {
+        if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) || state) {
+            *value = (max - min) * ((mousePos.x - actual.x - actualSlider.width / 2) / (actual.width - actualSlider.width)) + min;
+
+            f32 steps = round((*value - min) / step);
+            *value = min + steps * step;
+
+            if (*value > max) {
+                *value = max;
+            }
+
+            if (*value < min) {
+                *value = min;
+            }
+        }
     }
 }
 

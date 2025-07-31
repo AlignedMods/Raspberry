@@ -1,13 +1,11 @@
 #pragma once
 
-#include "collectables/diamond.hpp"
-#include "collectables/raspberry.hpp"
 #include "collectables/collectable.hpp"
+#include "core/types.hpp"
 #include "entity/mob.hpp"
 #include "entity/player.hpp"
 #include "tile/tile.hpp"
 
-#include <memory>
 #include <vector>
 #include <filesystem>
 
@@ -38,6 +36,9 @@ private:
 
     Collectable m_Collectable;
     Player m_Player{};
+
+    f32 m_Brightness = 1.0f;
+    Shader m_Shader;
 
     std::vector<Mob> m_Mobs;
 

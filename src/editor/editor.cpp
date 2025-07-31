@@ -76,6 +76,8 @@ void Editor::OnUpdate() {
     if (m_Mode == EditorModes::Pan) {
         if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
             // make the camera move at the same speed even with different zoom values
+    
+            // TODO: improve this bullshit
             m_Camera.target = Vector2Add(m_Camera.target, Vector2Scale(GetMouseDelta(), Game.deltaTime / m_Camera.zoom * -900));
         }
     }
@@ -118,21 +120,33 @@ void Editor::OnUpdate() {
 
     if (m_Mode == EditorModes::Select) {
         if (!RaspGui::HoveringOverGui()) {
-            TilePosition worldPosition = GetWorldPosition();
+            i2 worldPosition = GetWorldPosition();
 
             if (m_State == EditorStates::Click) {
                 if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
                     if (m_Tiles.find(worldPosition) != m_Tiles.end()) {
+                        if (!IsKeyDown(KEY_LEFT_CONTROL)) {
+                            for (auto& tile : m_Selection) {
+                                m_Tiles[tile.GetPosition()] = tile;
+                            }
+
+                            m_Selection.clear();
+                        }
+
                         m_Selection.push_back(m_Tiles.at(worldPosition));
                         m_Tiles.erase(worldPosition);
                     }
                 }
             }
+
+            if (m_State == EditorStates::Drag) {
+                // TODO
+            }
         }
     }
 
     HandleSelection();
-   
+
     if (m_Searching) {
         if (RaspGui::TextInput({0.3f, 0.3f, 0.4f, 0.2f}, &m_Input)) m_Searching = false;
     } else if (!m_Input.Text.empty() ){
@@ -152,12 +166,35 @@ void Editor::OnUpdate() {
     }
 
     RaspGui::End();
+
+    RaspGui::Panel({500, 20, 130, 320});
+
+    if (!m_Selection.empty()) {
+        RaspGui::SliderInt({10, 30, 110, 20}, (i32*)&col.r, 0, 255);
+        RaspGui::SliderInt({10, 90, 110, 20}, (i32*)&col.b, 0, 255);
+        
+        // RaspGui::SliderFloat({10, 60, 110, 20}, &m_SelectionBrightness, 0, 255);
+        // RaspGui::SliderFloat({10, 90, 110, 20}, &m_SelectionBrightnes, 0, 255);
+        // RaspGui::SliderFloat({10, 120, 110, 20}, &m_SelectionBrightnes, 0, 255);
+
+        col.a = 255;
+
+        Log(LogLevel::Info, std::format("{}, {}, {}", (i32)col.r, (i32)col.g, (i32)col.b));
+
+        RaspGui::OutlinedRectangle({10, 120, 40, 40}, 1, ColorToInt(col), 0xff);
+
+        for (auto& tile : m_Selection) {
+            tile.brightness = m_SelectionBrightness;
+        }
+    }
+
+    RaspGui::End();
 }
 
 void Editor::PlaceTile() {
     bool canPlace = true;
 
-    TilePosition worldPosition = GetWorldPosition();
+    i2 worldPosition = GetWorldPosition();
 
     if (m_Tiles.find(worldPosition) != m_Tiles.end()) {
         Log(LogLevel::Info, "Cannot place block here sussy");
@@ -170,14 +207,14 @@ void Editor::PlaceTile() {
 }
 
 void Editor::DestroyTile() {
-    TilePosition worldPosition = GetWorldPosition();
+    i2 worldPosition = GetWorldPosition();
 
     if (m_Tiles.find(worldPosition) != m_Tiles.end()) {
         m_Tiles.erase(worldPosition);
     }
 }
 
-TilePosition Editor::GetWorldPosition() {
+i2 Editor::GetWorldPosition() {
     // the funny
     return {static_cast<int32_t>(std::floor( ((GetMouseX() + (m_Camera.target.x * m_Camera.zoom - m_Camera.offset.x)) / (m_Camera.zoom * 64.0f)) )),
             static_cast<int32_t>(std::floor( ((GetMouseY() + (m_Camera.target.y * m_Camera.zoom - m_Camera.offset.y)) / (m_Camera.zoom * 64.0f)) )) };
@@ -260,7 +297,11 @@ void Editor::OnRender() {
     }
 
     for (auto& tile : m_Selection) {
-        tile.OnRender(0x00ff00aa);
+        tile.OnRender();
+
+        Vector2& pos = tile.GetRealPosition();
+
+        DrawRectangleLines(pos.x, pos.y, 64.0f, 64.0f, GREEN);
     }
 
     EndMode2D();

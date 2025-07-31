@@ -1,13 +1,13 @@
 #include "level.hpp"
 #include "collectables/collectable.hpp"
 #include "collectables/raspberry.hpp"
-#include "registry.hpp"
+#include "game.hpp"
+#include "raylib.h"
 #include "tile/tile.hpp"
 #include "core/log.hpp"
 
 #include <cstdint>
 #include <format>
-#include <memory>
 #include <fstream>
 #include <string>
 #include <sstream>
@@ -22,8 +22,21 @@ void Level::OnUpdate() {
 }
 
 void Level::OnRender() {
+    int location = GetShaderLocation(m_Shader, "brightness");
+    SetShaderValue(m_Shader, location, (float*)&m_Brightness, SHADER_UNIFORM_FLOAT);
+
+    float v = 0.0f;
+
+    i32 counter = 0;
+    const Rectangle& vp = Game.GetViewportRect();
+
+    BeginShaderMode(m_Shader);
+
     for (auto& tile : m_Tiles) {
-        tile.OnRender();
+        if (CheckCollisionRecs({tile.GetRealPosition().x, tile.GetRealPosition().y, 64.0f, 64.0f}, vp)) {
+            counter++;
+            tile.OnRender();
+        }
     }
 
     m_Player.OnRender();
@@ -32,6 +45,10 @@ void Level::OnRender() {
     for (auto& mob : m_Mobs) {
         mob.OnRender();
     }
+
+    EndShaderMode();
+
+    Log(LogLevel::Info, std::format("Rendering {} tiles", counter));
 }
 
 void Level::Tick() {
@@ -172,8 +189,10 @@ bool Level::LoadLevelFromFile(std::filesystem::path path) {
 
     m_Player.InitTextures();
 
-    m_Mobs.push_back(Mob());
-    m_Mobs.begin()->InitTextures();
+    m_Shader = LoadShader(nullptr, "Assets/Shaders/lighting.glsl");
+
+    //m_Mobs.push_back(Mob());
+    //m_Mobs.begin()->InitTextures();
 
     Log(LogLevel::Info, "Successfully loaded level!");
 

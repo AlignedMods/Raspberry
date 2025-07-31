@@ -2,7 +2,6 @@
 #include "core/random.hpp"
 #include "entity/player.hpp"
 #include "core/log.hpp"
-#include "renderer/renderer.hpp"
 #include "gui/raspGui.hpp"
 #include "registry.hpp"
 
@@ -29,7 +28,7 @@ s_Game::~s_Game() {}
 bool s_Game::Init() {
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     SetConfigFlags(FLAG_MSAA_4X_HINT);
-    InitWindow(1280, 720, "Raspberry");
+    InitWindow(640, 360, "Raspberry");
 
     // we can't create the window
     if (!IsWindowReady()) return false;
@@ -69,6 +68,8 @@ bool s_Game::Init() {
 
     m_LastTime = GetTime();
 
+    m_CurrentLevel = Level();
+
     return true;
 }
 
@@ -106,6 +107,12 @@ void s_Game::OnUpdate() {
     // check if we should continue
     m_Running = m_Running && !WindowShouldClose();
 
+    // Viewport should always look the same
+    m_Camera.zoom = 0.5f / (360.0f / GetScreenHeight());
+
+    m_Viewport = {m_Camera.target.x - m_Camera.offset.x / m_Camera.zoom, m_Camera.target.y - m_Camera.offset.y / m_Camera.zoom,
+                  GetScreenWidth() / m_Camera.zoom, GetScreenHeight() / m_Camera.zoom};
+
     while (GetTime() - m_TickTime > 0.0167f) {
         m_TickTime += GetTime() - m_TickTime;
 
@@ -121,14 +128,14 @@ void s_Game::OnUpdate() {
     }
 
     if (m_GameRunning) {
-        m_Camera.offset = { GetScreenWidth() / 2.0f - 64.0f, GetScreenHeight() / 2.0f - 64.0f };
+        m_Camera.offset = { GetScreenWidth() / 2.0f - 32.0f * m_Camera.zoom, GetScreenHeight() / 2.0f - 32.0f * m_Camera.zoom };
 
         if (!m_Paused) {
             m_CurrentLevel.OnUpdate();
         }
 
-        m_Camera.target = {m_CurrentLevel.GetPlayer().GetX() * 64.0f - 32.0f,
-            m_CurrentLevel.GetPlayer().GetY() * 64.0f - 32.0f};
+        m_Camera.target = {m_CurrentLevel.GetPlayer().GetX() * 64.0f,
+            m_CurrentLevel.GetPlayer().GetY() * 64.0f};
 
         if (IsKeyPressed(KEY_ESCAPE)) {
             Pause();
@@ -170,55 +177,64 @@ void s_Game::OnRender() {
         m_Editor->OnRender();
     }
 
+    RaspGui::Render();
+
     // show the current fps
     DrawText(TextFormat("FPS: %.1f", m_CurrentFPS), 10, 10, 20, GREEN);
-
-    RaspGui::Render();
+    DrawText(TextFormat("Time took to render: %.4f ms", deltaTime * 1000.0f), 10, 40, 20, GREEN);
 }
 
 void s_Game::UpdateUI() {
     if (m_CurrentMenu == Menu::None) { return; }
 
     if (m_CurrentMenu == Menu::Main) {
-        if (RaspGui::Button({0.05f, 0.55f, 0.15f, 0.05f}, "Play")) {
+        if (RaspGui::Button({10, 200, 100, 30}, "Play")) {
             StartGameplay();
         }
 
-        if (RaspGui::Button({0.05f, 0.65f, 0.15f, 0.05f}, "Editor")) {
+        if (RaspGui::Button({10, 240, 100, 30}, "Editor")) {
             StartEditor();
             m_CurrentMenu = Menu::Editor;
         }
 
-        if (RaspGui::Button({0.05f, 0.75f, 0.15f, 0.05f}, "Settings")) {
+        if (RaspGui::Button({10, 280, 100, 30}, "Settings")) {
             m_PreviousMenu = m_CurrentMenu;
             m_CurrentMenu = Menu::Settings;
             m_CurrentSubMenu = SubMenu::Video;
         }
 
-        if (RaspGui::Button({0.05f, 0.85f, 0.15f, 0.05f}, "Quit")) {
+        if (RaspGui::Button({10, 320, 100, 30}, "Quit")) {
             m_PreviousMenu = m_CurrentMenu;
             m_CurrentMenu = Menu::Quit;
         }
 
-        RaspGui::Label({0.1f, 0.05f, 0.8f, 0.2f}, "Welcome to raspberry!");
+        RaspGui::SliderIntEx({100, 100, 200, 25}, &guy, 0, 1000, 20, RaspGui::GetPallete());
+
+        RaspGui::Text({100, 140, 200, 25}, TextFormat("value: %d", guy));
+
+        RaspGui::Label({30, 20, 590, 40}, "Welcome to raspberry!");
+
+        RaspGui::BeginSquareMode();
+        RaspGui::Label({200, 200, 40, 40}, "W!");
+        RaspGui::EndSquareMode();
     }
 
     if (m_CurrentMenu == Menu::Pause) {
-        if (RaspGui::Button({0.3f, 0.1f, 0.4f, 0.15f}, "Continue")) {
+        if (RaspGui::Button({20, 180, 70, 30}, "Continue")) {
             Pause();
         }
 
-        if (RaspGui::Button({0.3f, 0.3f, 0.4f, 0.15f}, "Settings")) {
+        if (RaspGui::Button({20, 220, 70, 30}, "Settings")) {
             m_PreviousMenu = m_CurrentMenu;
             m_CurrentMenu = Menu::Settings;
         }
 
-        if (RaspGui::Button({0.3f, 0.5f, 0.4f, 0.15f}, "Main Menu")) {
+        if (RaspGui::Button({20, 260, 70, 30}, "Main Menu")) {
             m_GameRunning = false;
             m_CurrentMenu = Menu::Main;
         }
 
-        if (RaspGui::Button({0.3f, 0.7f, 0.4f, 0.15f}, "Quit")) {
+        if (RaspGui::Button({20, 300, 70, 30}, "Quit")) {
             m_PreviousMenu = m_CurrentMenu;
             m_CurrentMenu = Menu::Quit;
         }
@@ -226,36 +242,37 @@ void s_Game::UpdateUI() {
 
     if (m_CurrentMenu == Menu::Settings) {
         // Sidebar
-        RaspGui::Panel({0.1f, 0.1f, 0.15f, 0.8f});
+        RaspGui::Panel({60, 30, 90, 300});
 
-        if (RaspGui::Button({0.05f, 0.02f, 0.9f, 0.1f}, "Video")) {
+        if (RaspGui::Button({5, 5, 80, 40}, "Video")) {
             m_CurrentSubMenu = SubMenu::Video;
+        }
+
+        if (RaspGui::Button({10, 275, 70, 20}, "Back")) {
+            m_CurrentMenu = m_PreviousMenu;
         }
 
         RaspGui::End();
 
-        RaspGui::Panel({0.25f, 0.1f, 0.65f, 0.8f});
+        RaspGui::Panel({150, 30, 430, 300});
 
         if (m_CurrentSubMenu == SubMenu::Video) {
-            RaspGui::Text({0.05f, 0.05f, 0.3f, 0.1f}, "Resolution: ");
-            RaspGui::Text({0.05f, 0.20f, 0.3f, 0.1f}, "Fullscreen: ");
-            RaspGui::Text({0.05f, 0.35f, 0.3f, 0.1f}, "FPS Cap: ");
-            RaspGui::Text({0.05f, 0.50f, 0.3f, 0.1f}, "Target FPS: ");
+            RaspGui::Text({10, 5, 90, 30}, "Resolution: ");
+            RaspGui::Text({10, 45, 90, 30}, "Fullscreen: ");
+            RaspGui::Text({10, 85, 90, 30}, "FPS Cap: ");
+            RaspGui::Text({10, 125, 90, 30}, "Target FPS: ");
 
-            RaspGui::ComboBox({0.5f, 0.05f, 0.3f, 0.1f}, m_StrResolutions, &mt_ResolutionIndex);
-            RaspGui::ComboBox({0.5f, 0.20f, 0.3f, 0.1f}, "No;Yes", &mt_Fullscreen);
-            RaspGui::ComboBox({0.5f, 0.35f, 0.3f, 0.1f}, "No;Yes", &mt_FPSCap);
-            RaspGui::ComboBox({0.5f, 0.50f, 0.3f, 0.1f}, m_StrFramerates, &mt_TargetFPS);
+            RaspGui::ComboBox({270, 5, 120, 30}, m_StrResolutions, &mt_ResolutionIndex);
+            RaspGui::ComboBox({270, 45, 120, 30}, "No;Yes", &mt_Fullscreen);
+            RaspGui::ComboBox({270, 85, 120, 30}, "No;Yes", &mt_FPSCap);
+            RaspGui::ComboBox({270, 125, 120, 30}, m_StrFramerates, &mt_TargetFPS);
 
-            if (RaspGui::Button({0.7f, 0.8f, 0.25f, 0.15f}, "Apply")) {
+            if (RaspGui::Button({340, 270, 80, 25}, "Apply")) {
                 if ((GetScreenWidth() != m_Resolutions.at(mt_ResolutionIndex).x || GetScreenHeight() != m_Resolutions.at(mt_ResolutionIndex).y) && !mt_Fullscreen) {
                     SetWindowSize(m_Resolutions.at(mt_ResolutionIndex).x, m_Resolutions.at(mt_ResolutionIndex).y);
 
                     // Center the window
                     SetWindowPosition(GetMonitorWidth(GetCurrentMonitor()) / 2 - GetScreenWidth() / 2, GetMonitorHeight(GetCurrentMonitor()) / 2 - GetScreenHeight() / 2);
-
-                    // Viewport should always look the same
-                    m_Camera.zoom = 1.0f / (720.0f / GetScreenHeight());
                 }
 
                 SetFullscreen(mt_Fullscreen);
@@ -271,22 +288,27 @@ void s_Game::UpdateUI() {
 
         RaspGui::End();
 
-        if (RaspGui::Button({0.03f, 0.92f, 0.15f, 0.05f}, "Back")) {
-            m_CurrentMenu = m_PreviousMenu;
-        }
     }
 
     if (m_CurrentMenu == Menu::Quit) {
-        RaspGui::Text({0.3f, 0.2f, 0.4f, 0.1f}, "Are you sure you wish to quit?");
+        RaspGui::Text({40, 20, 560, 60}, "Are you sure you wish to quit?");
 
-        if (RaspGui::Button({0.4f, 0.4f, 0.2f, 0.1f}, "Yes")) {
+        if (RaspGui::Button({260, 160, 120, 30}, "Yes")) {
             Quit();
         }
 
-        if (RaspGui::Button({0.4f, 0.55f, 0.2f, 0.1f}, "No")) {
+        if (RaspGui::Button({260, 200, 120, 30}, "No")) {
             m_CurrentMenu = m_PreviousMenu;
         }
     }
+}
+
+const Camera2D& s_Game::GetCamera() const {
+    return m_Camera;
+}
+
+const Rectangle& s_Game::GetViewportRect() const {
+    return m_Viewport;
 }
 
 constexpr std::string s_Game::FormatResolutions() {

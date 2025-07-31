@@ -62,7 +62,7 @@ void Player::OnUpdate() {
 	}
 
 	if (IsKeyPressed(KEY_SPACE)) {
-		//#ifndef RDEBUG
+		#ifndef RDEBUG
 		if (m_CoyoteTimeCounter > 0.0) {
             m_CoyoteTimeCounter = 0.0;
 			m_Velocity.y = -9.0f;
@@ -73,10 +73,10 @@ void Player::OnUpdate() {
             m_Grounded = false;
             m_TimesJumped = 2;
         }
-		//#else
-			//m_Velocity.y = -9.0f;
-			//m_Grounded = false;
-		//#endif
+		#else
+			m_Velocity.y = -9.0f;
+			m_Grounded = false;
+		#endif
 
 		m_JumpCooldown += 0.5f * Game.deltaTime;
 	}
