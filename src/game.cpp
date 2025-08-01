@@ -3,12 +3,14 @@
 #include "entity/player.hpp"
 #include "core/log.hpp"
 #include "gui/raspGui.hpp"
+#include "menu.hpp"
 #include "registry.hpp"
 
 #include "raylib.h"
 #include "rlgl.h"
 
 #include <cstdlib>
+#include <type_traits>
 
 static s_Game* s_Instance = nullptr;
 
@@ -41,6 +43,8 @@ bool s_Game::Init() {
     SetTraceLogLevel(LOG_WARNING);
 
     Registry.RegisterAllTextures();
+    Registry.RegisterAllMenus();
+    Registry.RegisterAllFunctions();
 
     SetWindowIcon(LoadImage("Assets/Textures/stone.png"));
     SetWindowMinSize(640, 360);
@@ -69,6 +73,8 @@ bool s_Game::Init() {
     m_LastTime = GetTime();
 
     m_CurrentLevel = Level();
+
+    m_CurrentMenu = &Registry.GetMenu("Main-Menu");
 
     return true;
 }
@@ -147,7 +153,21 @@ void s_Game::OnUpdate() {
         m_Editor->OnUpdate();
     }
 
-    UpdateUI();
+    // we write the safe code around here! (probably)
+    if (m_CurrentMenu != nullptr) {
+        for (auto& button : m_CurrentMenu->Buttons) {
+            if (RaspGui::Button(button.Bounds, button.Text.c_str())) {
+                Execute(button.OnClick);
+            }
+        }
+
+        for (auto& label : m_CurrentMenu->Labels) {
+            RaspGui::Label(label.Bounds, label.Text.c_str());
+        }
+    }
+
+
+    //UpdateUI();
 }
 
 void s_Game::FixedUpdate() {
@@ -185,122 +205,6 @@ void s_Game::OnRender() {
 }
 
 void s_Game::UpdateUI() {
-    if (m_CurrentMenu == Menu::None) { return; }
-
-    if (m_CurrentMenu == Menu::Main) {
-        if (RaspGui::Button({10, 200, 100, 30}, "Play")) {
-            StartGameplay();
-        }
-
-        if (RaspGui::Button({10, 240, 100, 30}, "Editor")) {
-            StartEditor();
-            m_CurrentMenu = Menu::Editor;
-        }
-
-        if (RaspGui::Button({10, 280, 100, 30}, "Settings")) {
-            m_PreviousMenu = m_CurrentMenu;
-            m_CurrentMenu = Menu::Settings;
-            m_CurrentSubMenu = SubMenu::Video;
-        }
-
-        if (RaspGui::Button({10, 320, 100, 30}, "Quit")) {
-            m_PreviousMenu = m_CurrentMenu;
-            m_CurrentMenu = Menu::Quit;
-        }
-
-        RaspGui::SliderIntEx({100, 100, 200, 25}, &guy, 0, 1000, 20, RaspGui::GetPallete());
-
-        RaspGui::Text({100, 140, 200, 25}, TextFormat("value: %d", guy));
-
-        RaspGui::Label({30, 20, 590, 40}, "Welcome to raspberry!");
-
-        RaspGui::BeginSquareMode();
-        RaspGui::Label({200, 200, 40, 40}, "W!");
-        RaspGui::EndSquareMode();
-    }
-
-    if (m_CurrentMenu == Menu::Pause) {
-        if (RaspGui::Button({20, 180, 70, 30}, "Continue")) {
-            Pause();
-        }
-
-        if (RaspGui::Button({20, 220, 70, 30}, "Settings")) {
-            m_PreviousMenu = m_CurrentMenu;
-            m_CurrentMenu = Menu::Settings;
-        }
-
-        if (RaspGui::Button({20, 260, 70, 30}, "Main Menu")) {
-            m_GameRunning = false;
-            m_CurrentMenu = Menu::Main;
-        }
-
-        if (RaspGui::Button({20, 300, 70, 30}, "Quit")) {
-            m_PreviousMenu = m_CurrentMenu;
-            m_CurrentMenu = Menu::Quit;
-        }
-    }
-
-    if (m_CurrentMenu == Menu::Settings) {
-        // Sidebar
-        RaspGui::Panel({60, 30, 90, 300});
-
-        if (RaspGui::Button({5, 5, 80, 40}, "Video")) {
-            m_CurrentSubMenu = SubMenu::Video;
-        }
-
-        if (RaspGui::Button({10, 275, 70, 20}, "Back")) {
-            m_CurrentMenu = m_PreviousMenu;
-        }
-
-        RaspGui::End();
-
-        RaspGui::Panel({150, 30, 430, 300});
-
-        if (m_CurrentSubMenu == SubMenu::Video) {
-            RaspGui::Text({10, 5, 90, 30}, "Resolution: ");
-            RaspGui::Text({10, 45, 90, 30}, "Fullscreen: ");
-            RaspGui::Text({10, 85, 90, 30}, "FPS Cap: ");
-            RaspGui::Text({10, 125, 90, 30}, "Target FPS: ");
-
-            RaspGui::ComboBox({270, 5, 120, 30}, m_StrResolutions, &mt_ResolutionIndex);
-            RaspGui::ComboBox({270, 45, 120, 30}, "No;Yes", &mt_Fullscreen);
-            RaspGui::ComboBox({270, 85, 120, 30}, "No;Yes", &mt_FPSCap);
-            RaspGui::ComboBox({270, 125, 120, 30}, m_StrFramerates, &mt_TargetFPS);
-
-            if (RaspGui::Button({340, 270, 80, 25}, "Apply")) {
-                if ((GetScreenWidth() != m_Resolutions.at(mt_ResolutionIndex).x || GetScreenHeight() != m_Resolutions.at(mt_ResolutionIndex).y) && !mt_Fullscreen) {
-                    SetWindowSize(m_Resolutions.at(mt_ResolutionIndex).x, m_Resolutions.at(mt_ResolutionIndex).y);
-
-                    // Center the window
-                    SetWindowPosition(GetMonitorWidth(GetCurrentMonitor()) / 2 - GetScreenWidth() / 2, GetMonitorHeight(GetCurrentMonitor()) / 2 - GetScreenHeight() / 2);
-                }
-
-                SetFullscreen(mt_Fullscreen);
-
-                if (mt_FPSCap) {
-                    m_TargetFPS = m_Framerates.at(mt_TargetFPS);
-                } else {
-                    // fps is uncapped
-                    m_TargetFPS = 0;
-                }
-            }
-        }
-
-        RaspGui::End();
-
-    }
-
-    if (m_CurrentMenu == Menu::Quit) {
-        RaspGui::Text({40, 20, 560, 60}, "Are you sure you wish to quit?");
-
-        if (RaspGui::Button({260, 160, 120, 30}, "Yes")) {
-            Quit();
-        }
-
-        if (RaspGui::Button({260, 200, 120, 30}, "No")) {
-            m_CurrentMenu = m_PreviousMenu;
-        }
-    }
 }
 
 const Camera2D& s_Game::GetCamera() const {
@@ -376,9 +280,9 @@ void s_Game::Pause() {
     m_Paused = !m_Paused;
 
     if (m_Paused) {
-        m_CurrentMenu = Menu::Pause;
+        //m_CurrentMenu = Menu::Pause;
     } else {
-        m_CurrentMenu = Menu::None;
+        //m_CurrentMenu = Menu::None;
     }
 }
 
@@ -388,6 +292,10 @@ void s_Game::Quit() {
 
 void s_Game::SetCurrentLevel(const Level& level) {
     m_CurrentLevel = level;
+}
+
+void s_Game::SetCurrentMenu(const std::string& menu) {
+    m_CurrentMenu = &Registry.GetMenu(menu);
 }
 
 Level& s_Game::GetCurrentLevel() {
@@ -416,5 +324,5 @@ void s_Game::StartGameplay() {
     m_CurrentLevel.AddCollectable();
     m_CurrentLevel.GetCollectable().InitTextures();
 
-    m_CurrentMenu = Menu::None;
+    //m_CurrentMenu = Menu::None;
 }

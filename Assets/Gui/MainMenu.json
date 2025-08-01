@@ -1,0 +1,41 @@
+{
+    "name": "Main-Menu",
+    "type": "menu",
+    "elements": [ "play", "editor", "settings", "quit" ],
+
+    "play": {
+        "type": "button",
+
+        "bounds": [10, 200, 100, 30],
+        "text": "Play",
+
+        "on-click": "exec-cpp StartGame"
+    },
+
+    "editor": {
+        "type": "button",
+
+        "bounds": [10, 240, 100, 30],
+        "text": "Editor",
+
+        "on-click": "switch Test-Menu"
+    },
+
+    "settings": {
+        "type": "button",
+
+        "bounds": [10, 280, 100, 30],
+        "text": "Settings",
+
+        "on-click": "exec-cpp StartGame"
+    },
+
+    "quit": {
+        "type": "button",
+
+        "bounds": [10, 320, 100, 30],
+        "text": "Quit",
+
+        "on-click": "exec-cpp QuitGame"
+    }
+}

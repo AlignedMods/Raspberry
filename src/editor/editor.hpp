@@ -49,7 +49,8 @@ private:
 
     f32 m_SelectionBrightness = 0.0f;
     f32 m_SelectionBrightnes = 0.0f;
-    Color col = {0, 0, 0, 255};
+    Vector3 hsv;
+    //Color col = {0, 0, 0, 255};
 
     Camera2D& m_Camera;
 };

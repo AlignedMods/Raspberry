@@ -6,7 +6,7 @@ project "Raspberry"
 	files { "**.cpp", "**.hpp" }
 	removefiles { "blueberry/**.cpp" }
 
-	includedirs { "../vendor/raylib/src/", "../vendor/raygui/src/", "../vendor/rlImGui/", "../vendor/imgui/" }
+	includedirs { "../vendor/raylib/src/", "../vendor/raygui/src/", "../vendor/json/include/" }
 
 	links { "raylib" }
 

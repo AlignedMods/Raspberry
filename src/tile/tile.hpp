@@ -20,6 +20,7 @@ public:
 
 public:
     f32 brightness = 1.0f;
+    u32 tint = 0x000000ff;
 
 private:
 	i2 m_Position;

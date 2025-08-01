@@ -2,25 +2,11 @@
 
 #include "editor/editor.hpp"
 #include "level/level.hpp"
+#include "menu.hpp"
 
 #include "raylib.h"
 
 #include <array>
-
-enum class Menu {
-    None = 0,
-    Main,
-    Editor,
-    Pause,
-    Settings,
-    Quit
-};
-
-// a submenu works together along with a menu
-enum class SubMenu {
-    None,
-    Video
-};
 
 class s_Game {
 public:
@@ -39,6 +25,7 @@ public:
     void OnRender();
 
     void SetCurrentLevel(const Level& level);
+    void SetCurrentMenu(const std::string& menu);
 
     void StartGameplay();
     void StartEditor();
@@ -96,12 +83,9 @@ private:
     
     // -- GUI -- //
 
-    Menu m_CurrentMenu = Menu::Main;
-    SubMenu m_CurrentSubMenu = SubMenu::None;
-    Menu m_PreviousMenu = Menu::None;
-
-    i32 guy = 2;
-    float m_F = 1.0f;
+    // setting this to nullptr is completely safe
+    // there is a check in place
+    Menu* m_CurrentMenu = nullptr;
 
     std::array<Vector2, 9> m_Resolutions = {{
         // yes i had to write this out manually

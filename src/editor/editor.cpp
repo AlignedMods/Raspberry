@@ -170,21 +170,16 @@ void Editor::OnUpdate() {
     RaspGui::Panel({500, 20, 130, 320});
 
     if (!m_Selection.empty()) {
-        RaspGui::SliderInt({10, 30, 110, 20}, (i32*)&col.r, 0, 255);
-        RaspGui::SliderInt({10, 90, 110, 20}, (i32*)&col.b, 0, 255);
-        
-        // RaspGui::SliderFloat({10, 60, 110, 20}, &m_SelectionBrightness, 0, 255);
-        // RaspGui::SliderFloat({10, 90, 110, 20}, &m_SelectionBrightnes, 0, 255);
-        // RaspGui::SliderFloat({10, 120, 110, 20}, &m_SelectionBrightnes, 0, 255);
+        RaspGui::SliderFloat({10, 30, 110, 20}, &hsv.x, 0, 360);
+        RaspGui::SliderFloat({10, 60, 110, 20}, &hsv.y, 0, 1);
+        RaspGui::SliderFloat({10, 90, 110, 20}, &hsv.z, 0, 1);
 
-        col.a = 255;
+        // Log(LogLevel::Info, std::format("{}, {}, {}", (i32)col.r, (i32)col.g, (i32)col.b));
 
-        Log(LogLevel::Info, std::format("{}, {}, {}", (i32)col.r, (i32)col.g, (i32)col.b));
-
-        RaspGui::OutlinedRectangle({10, 120, 40, 40}, 1, ColorToInt(col), 0xff);
+        RaspGui::OutlinedRectangle({10, 120, 70, 70}, 1, ColorToInt(ColorFromHSV(hsv.x, hsv.y, hsv.z)), 0xff);
 
         for (auto& tile : m_Selection) {
-            tile.brightness = m_SelectionBrightness;
+            tile.tint = ColorToInt(ColorFromHSV(hsv.x, hsv.y, hsv.z));
         }
     }
 

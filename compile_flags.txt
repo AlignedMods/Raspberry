@@ -1,7 +1,6 @@
 -Ivendor/raylib/src/
 -Ivendor/raygui/src/
--Ivendor/rlImGui/
--Ivendor/imgui/
+-Ivendor/json/include/
 
 -Isrc/
 
