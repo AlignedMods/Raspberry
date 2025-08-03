@@ -74,7 +74,7 @@ public:
     virtual void OnRender() {}
 
 protected:
-    PosInfo m_Bounds;
+    PosInfo m_Info;
     Style m_Style;
 };
 
@@ -98,6 +98,17 @@ private:
     Vector2 m_Padding = {1.2f, 1.2f};
 };
 
+class Label : public GuiElement {
+public:
+    Label(const PosInfo& info, const std::string& text);
+
+    virtual void OnUpdate() override;
+    virtual void OnRender() override;
+
+private:
+    Text m_Text;
+};
+
 class Button : public GuiElement {
 public:
     Button(const PosInfo& info, const std::string& text, const std::string& onClick);
@@ -108,8 +119,24 @@ public:
 private:
     std::string m_OnClick;
     Text m_Text;
+    
+    u32 m_Outline = 2;
 
     u32 m_State = 0;
+};
+
+class CheckBox : public GuiElement {
+public:
+    CheckBox(const PosInfo& info);
+
+    virtual void OnUpdate() override;
+    virtual void OnRender() override;
+
+private:
+    u32 m_State = 0;
+    u32 m_Outline = 2;
+
+    bool m_On = false;
 };
 
 class Menu {
@@ -121,6 +148,8 @@ public:
     //void AddElement(const Button& element);
     ELEMENT(Button);
     ELEMENT(Text);
+    ELEMENT(Label);
+    ELEMENT(CheckBox);
 
 private:
     std::vector<std::shared_ptr<GuiElement>> m_Elements;
@@ -141,13 +170,17 @@ public:
 
     Menu* GetCurrentMenu();
 
+    f32 GetScale();
+
+    void RenderRectangle(Rectangle rec, u32 outline, Hex fillColor, Hex outlineColor);
+
 public:
     bool m_Hovering = false;
 
     std::unordered_map<f32, Font> m_Fonts;
 
 private:
-    f32 m_Scale = 1.25f;
+    f32 m_Scale = 1.0f;
     Menu* m_CurrentMenu = nullptr;
 
     Vector2 m_MousePos;

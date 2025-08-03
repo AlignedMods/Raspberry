@@ -6,7 +6,7 @@
 Text::Text(const PosInfo& bounds, const std::string& text) :
     m_Text(text) 
 {
-    m_Bounds = bounds;
+    m_Info = bounds;
 }
 
 void Text::OnUpdate() {
@@ -14,7 +14,7 @@ void Text::OnUpdate() {
         return;
     }
 
-    Rectangle actual = Gui.GetRealSize(m_Bounds);
+    Rectangle actual = Gui.GetRealSize(m_Info);
 
     if (!m_Calculated) {
         if (!Gui.m_Fonts.contains(m_BaseFontSize)) {
@@ -47,7 +47,7 @@ void Text::OnRender() {
         return;
     }
 
-    Rectangle actual = Gui.GetRealSize(m_Bounds);
+    Rectangle actual = Gui.GetRealSize(m_Info);
 
     if (!Gui.m_Fonts.contains(m_FontSize)) {
         Gui.m_Fonts[m_FontSize] = LoadFontEx("Assets/Fonts/alagard.ttf", m_FontSize, nullptr, 0);

@@ -21,8 +21,11 @@ void Menu::SetName(const std::string& name) {
     m_Name = name;
 }
 
+// i don't wanna repeat the same bullshit like 20 times
 ELEMENT_IMPL(Button)
 ELEMENT_IMPL(Text)
+ELEMENT_IMPL(Label)
+ELEMENT_IMPL(CheckBox)
 
 void s_Gui::OnUpdate() {
     m_Hovering = false;
@@ -66,7 +69,7 @@ Rectangle s_Gui::GetRealSize(const PosInfo& info) {
     }
 
     if (info.AnchorY == "middle") {
-        rec.y = GetScreenHeight() / 2.0f - rec.height + info.Bounds.y * m_Scale;
+        rec.y = GetScreenHeight() / 2.0f - rec.height / 2.0f + info.Bounds.y * m_Scale;
     }
 
     if (info.AnchorY == "bottom") {
@@ -105,6 +108,20 @@ void s_Gui::SwitchMenu(const std::string& menu) {
 
 Menu* s_Gui::GetCurrentMenu() {
     return m_CurrentMenu;
+}
+
+f32 s_Gui::GetScale() {
+    return m_Scale;
+}
+
+void s_Gui::RenderRectangle(Rectangle rec, u32 outline, Hex fillColor, Hex outlineColor) {
+    if (outline > 0) {
+        DrawRectangleRec({rec.x - outline * m_Scale, rec.y - outline * m_Scale,
+                          rec.width + outline * m_Scale * 2, rec.height + outline * m_Scale * 2}, 
+                          GetColor(outlineColor));
+    }
+
+    DrawRectangleRec(rec, GetColor(fillColor));
 }
 
 void Execute(const std::string &str) {
@@ -152,5 +169,9 @@ void Execute(const std::string &str) {
         } else {
             Registry.CallFunction(tokens.at(1));
         }
+    }
+
+    if (tokens.at(0) == "nop") {
+        return;
     }
 }

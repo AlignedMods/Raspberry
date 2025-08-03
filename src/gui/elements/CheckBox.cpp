@@ -1,23 +1,18 @@
 #include "gui/gui.hpp"
-
 #include "raylib.h"
 
-extern void Execute(const std::string &str);
-
-Button::Button(const PosInfo& info, const std::string& text, const std::string& onClick) : 
-    m_OnClick(onClick), m_Text(info, text)
-{
+CheckBox::CheckBox(const PosInfo& info) {
     m_Info = info;
-}
+};
 
-void Button::OnUpdate() {
+void CheckBox::OnUpdate() {
     Vector2 mouse = Gui.GetMousePos();
     Rectangle actual = Gui.GetRealSize(m_Info);
 
     // so you can hold down on a button and nothing happens until you let go
     // common practice from what i've seen
     if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && m_State == 2) {
-        Execute(m_OnClick);
+        m_On = !m_On;
     }
 
     if (CheckCollisionPointRec(mouse, actual)) {
@@ -30,12 +25,16 @@ void Button::OnUpdate() {
     } else {
         m_State = 0; // Default
     }
-
-    m_Text.OnUpdate();
 }
 
-void Button::OnRender() {
+void CheckBox::OnRender() {
+    Rectangle inner;
+
     Rectangle actual = Gui.GetRealSize(m_Info);
+
+    if (m_On) {
+        inner = {actual.x + 4 * Gui.GetScale(), actual.y + 4 * Gui.GetScale(), actual.width - 8 * Gui.GetScale(), actual.height - 8 * Gui.GetScale()};
+    }
 
     switch (m_State) {
         case 0:
@@ -49,5 +48,7 @@ void Button::OnRender() {
             break;
     }
 
-    m_Text.OnRender();
+    if (m_On) {
+        Gui.RenderRectangle(inner, 0, m_Style.DefaultOutline, m_Style.DefaultOutline);
+    }
 }

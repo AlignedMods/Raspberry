@@ -1,7 +1,13 @@
 {
     "name": "Main-Menu",
     "type": "menu",
-    "elements": [ "play", "editor", "settings", "quit" ],
+    "elements": [ "test", "play", "editor", "settings", "quit" ],
+
+    "test": {
+        "type": "hh",
+
+        "size": [40, 40]
+    },
 
     "play": {
         "type": "button",
@@ -24,7 +30,7 @@
         "size": [100, 30],
         "text": "Editor",
 
-        "on-click": "switch Test-Menu"
+        "on-click": "nop"
     },
 
     "settings": {
@@ -49,16 +55,5 @@
         "text": "Quit",
 
         "on-click": "switch Quit-Menu"
-    },
-
-    "test": {
-        "type": "slider",
-
-        "bounds": [300, 200, 200, 50],
-
-        "number": "Hello",
-        "min": 31.999,
-        "max": 32.0,
-        "step": 0.0001
     }
 }

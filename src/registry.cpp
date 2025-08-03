@@ -12,6 +12,38 @@
 #include <functional>
 #include <utility>
 
+PosInfo GetInfo(const nlohmann::json& entry) {
+    std::array<i32, 4> bounds;
+    std::pair<std::string, std::string> anchor;
+
+    // you technically do not need to specify any of this info
+    if (!entry.contains("offset")) {
+        bounds[0] = 0;
+        bounds[1] = 0;
+    } else {
+        bounds[0] = entry.at("offset")[0];
+        bounds[1] = entry.at("offset")[1];
+    }
+
+    if (!entry.contains("size")) {
+        bounds[2] = 200;
+        bounds[3] = 50;
+    } else {
+        bounds[2] = entry.at("size")[0];
+        bounds[3] = entry.at("size")[1];
+    }
+
+    if (!entry.contains("anchor")) {
+        anchor.first = "middle";
+        anchor.second = "middle";
+    } else {
+        anchor.first = entry.at("anchor")[0];
+        anchor.second = entry.at("anchor")[1];
+    }
+
+    return { {(f32)bounds[0], (f32)bounds[1], (f32)bounds[2], (f32)bounds[3]}, anchor.first, anchor.second };
+}
+
 void s_Registry::AddVariable(const std::string& name, f32 val) {
     m_Variables[name] = val;
 }
@@ -55,47 +87,48 @@ void s_Registry::AddMenuFromJSON(const std::filesystem::path& json) {
             auto& entry = data.at(entries);
 
             if (entry.contains("type")) {
-                if (entry.at("type") == "button") {
-                    std::array<i32, 4> bounds;
-                    std::pair<std::string, std::string> anchor;
-
-                    bounds[0] = entry.at("offset")[0];
-                    bounds[1] = entry.at("offset")[1];
-                    bounds[2] = entry.at("size")[0];
-                    bounds[3] = entry.at("size")[1];
-
-                    anchor.first = entry.at("anchor")[0];
-                    anchor.second = entry.at("anchor")[1];
-
-                    menu.AddElement( Button({ {(f32)bounds[0], (f32)bounds[1], (f32)bounds[2], (f32)bounds[3]}, anchor.first, anchor.second }, entry.at("text"), entry.at("on-click") ) );
-
-                    // menu.Buttons.push_back({ {(f32)dim[0], (f32)dim[1], (f32)dim[2], (f32)dim[3]}, entry.at("text"), entry.at("on-click") });
-                }
+                Log(LogLevel::Debug, entry.at("type"));
 
                 if (entry.at("type") == "text") {
-                    std::array<i32, 4> bounds;
-                    std::pair<std::string, std::string> anchor;
+                    std::string text = "*blank*";
 
-                    bounds[0] = entry.at("offset")[0];
-                    bounds[1] = entry.at("offset")[1];
-                    bounds[2] = entry.at("size")[0];
-                    bounds[3] = entry.at("size")[1];
+                    if (entry.contains("text")) {
+                        text = entry.at("text");
+                    }
 
-                    anchor.first = entry.at("anchor")[0];
-                    anchor.second = entry.at("anchor")[1];
-
-                    menu.AddElement( Text({ {(f32)bounds[0], (f32)bounds[1], (f32)bounds[2], (f32)bounds[3]}, anchor.first, anchor.second }, entry.at("text")) );
-
-                    // menu.Texts.push_back({ {(f32)dim[0], (f32)dim[1], (f32)dim[2], (f32)dim[3]}, entry.at("text") });
+                    menu.AddElement( Text(GetInfo(entry), text) );
                 }
 
-                if (entry.at("type") == "slider") {
-                    std::array<i32, 4> dim = entry.at("bounds");
+                if (entry.at("type") == "button") {
+                    std::string text = "*blank*";
 
-                    Log(LogLevel::Info, std::format("{}", *(&GetValue(entry.at("number")))));
+                    if (entry.contains("text")) {
+                        text = entry.at("text");
+                    }
 
-                    // menu.Sliders.push_back({ {(f32)dim[0], (f32)dim[1], (f32)dim[2], (f32)dim[3]}, &m_Variables.at(entry.at("number")), 
-                    //                          entry.at("min"), entry.at("max"), entry.at("step") });
+                    if (!entry.contains("on-click")) {
+                        Log(LogLevel::Error, "Button doesn't specify \"on-click\" property!\n" \
+                                             "If you wish to not specify an action use *nop*!");
+
+                        return;
+                    }
+
+                    menu.AddElement( Button(GetInfo(entry), text, entry.at("on-click") ) );
+                }
+
+                if (entry.at("type") == "label") {
+                    std::string text = "*blank*";
+
+                    if (entry.contains("text")) {
+                        text = entry.at("text");
+                    }
+
+                    menu.AddElement( Label(GetInfo(entry), text) );
+                }
+
+                if (entry.at("type") == "hh") {
+                    Log(LogLevel::Info, "checkbox!");
+                    menu.AddElement( CheckBox(GetInfo(entry)) );
                 }
             }
         }
