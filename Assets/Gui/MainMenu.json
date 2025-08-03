@@ -1,12 +1,15 @@
 {
     "name": "Main-Menu",
     "type": "menu",
-    "elements": [ "play", "editor", "settings", "quit", "test" ],
+    "elements": [ "play", "editor", "settings", "quit" ],
 
     "play": {
         "type": "button",
 
-        "bounds": [10, 200, 100, 30],
+        "anchor": ["left", "bottom"],
+
+        "offset": [10, 130],
+        "size": [100, 30],
         "text": "Play",
 
         "on-click": "exec-cpp StartGame"
@@ -15,7 +18,10 @@
     "editor": {
         "type": "button",
 
-        "bounds": [10, 240, 100, 30],
+        "anchor": ["left", "bottom"],
+
+        "offset": [10, 90],
+        "size": [100, 30],
         "text": "Editor",
 
         "on-click": "switch Test-Menu"
@@ -24,7 +30,10 @@
     "settings": {
         "type": "button",
 
-        "bounds": [10, 280, 100, 30],
+        "anchor": ["left", "bottom"],
+
+        "offset": [10, 50],
+        "size": [100, 30],
         "text": "Settings",
 
         "on-click": "exec-cpp StartGame"
@@ -33,7 +42,10 @@
     "quit": {
         "type": "button",
 
-        "bounds": [10, 320, 100, 30],
+        "anchor": ["left", "bottom"],
+
+        "offset": [10, 10],
+        "size": [100, 30],
         "text": "Quit",
 
         "on-click": "switch Quit-Menu"

@@ -10,6 +10,7 @@
 #include <format>
 #include <fstream>
 #include <functional>
+#include <utility>
 
 void s_Registry::AddVariable(const std::string& name, f32 val) {
     m_Variables[name] = val;
@@ -55,15 +56,35 @@ void s_Registry::AddMenuFromJSON(const std::filesystem::path& json) {
 
             if (entry.contains("type")) {
                 if (entry.at("type") == "button") {
-                    std::array<i32, 4> dim = entry.at("bounds");
+                    std::array<i32, 4> bounds;
+                    std::pair<std::string, std::string> anchor;
 
-                    menu.AddElement( Button( {(f32)dim[0], (f32)dim[1], (f32)dim[2], (f32)dim[3]}, entry.at("text"), entry.at("on-click") ) );
+                    bounds[0] = entry.at("offset")[0];
+                    bounds[1] = entry.at("offset")[1];
+                    bounds[2] = entry.at("size")[0];
+                    bounds[3] = entry.at("size")[1];
+
+                    anchor.first = entry.at("anchor")[0];
+                    anchor.second = entry.at("anchor")[1];
+
+                    menu.AddElement( Button({ {(f32)bounds[0], (f32)bounds[1], (f32)bounds[2], (f32)bounds[3]}, anchor.first, anchor.second }, entry.at("text"), entry.at("on-click") ) );
 
                     // menu.Buttons.push_back({ {(f32)dim[0], (f32)dim[1], (f32)dim[2], (f32)dim[3]}, entry.at("text"), entry.at("on-click") });
                 }
 
                 if (entry.at("type") == "text") {
-                    std::array<i32, 4> dim = entry.at("bounds");
+                    std::array<i32, 4> bounds;
+                    std::pair<std::string, std::string> anchor;
+
+                    bounds[0] = entry.at("offset")[0];
+                    bounds[1] = entry.at("offset")[1];
+                    bounds[2] = entry.at("size")[0];
+                    bounds[3] = entry.at("size")[1];
+
+                    anchor.first = entry.at("anchor")[0];
+                    anchor.second = entry.at("anchor")[1];
+
+                    menu.AddElement( Text({ {(f32)bounds[0], (f32)bounds[1], (f32)bounds[2], (f32)bounds[3]}, anchor.first, anchor.second }, entry.at("text")) );
 
                     // menu.Texts.push_back({ {(f32)dim[0], (f32)dim[1], (f32)dim[2], (f32)dim[3]}, entry.at("text") });
                 }
@@ -78,6 +99,8 @@ void s_Registry::AddMenuFromJSON(const std::filesystem::path& json) {
                 }
             }
         }
+
+        menu.SetName(name);
 
         AddMenu(name, menu);
     }

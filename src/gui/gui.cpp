@@ -1,57 +1,9 @@
 #include "gui.hpp"
 #include <format>
-#include <memory>
-#include "game.hpp"
 #include "core/log.hpp"
 #include "registry.hpp"
 
 #include "raylib.h"
-
-void Execute(const std::string &str);
-
-Button::Button(Rectangle bounds, const std::string& text, const std::string& onClick) : 
-    m_Text(text), m_OnClick(onClick) {
-    m_Bounds = bounds;
-}
-
-void Button::OnUpdate() {
-    Log(LogLevel::Info, "Updating!");
-
-    Vector2 mouse = Gui.GetMousePos();
-    Rectangle actual = Gui.GetRealSize(m_Bounds);
-
-    if (CheckCollisionPointRec(mouse, actual)) {
-        m_State = 1; // Hovered
-        Gui.m_Hovering = true;
-
-        if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
-            m_State = 2; // Clicked
-        }
-
-        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-            Execute(m_OnClick);
-        }
-    } else {
-        m_State = 0; // Default
-    }
-}
-
-void Button::OnRender() {
-    Log(LogLevel::Info, "Rendering!");
-    Rectangle actual = Gui.GetRealSize(m_Bounds);
-
-    switch (m_State) {
-        case 0:
-            DrawRectangleRec(actual, GetColor(m_Style.DefaultFill));
-            break;
-        case 1:
-            DrawRectangleRec(actual, GetColor(m_Style.HoveredFill));
-            break;
-        case 2:
-            DrawRectangleRec(actual, GetColor(m_Style.ClickedFill));
-            break;
-    }
-}
 
 void Menu::OnUpdate() {
     for (auto& element : m_Elements) {
@@ -60,9 +12,7 @@ void Menu::OnUpdate() {
 }
 
 void Menu::OnRender() {
-    Log(LogLevel::Info, std::format("{}", m_Elements.size()));
     for (auto& element : m_Elements) {
-        Log(LogLevel::Info, std::format("Hllo world"));
         element->OnRender();
     }
 }
@@ -72,10 +22,7 @@ void Menu::SetName(const std::string& name) {
 }
 
 ELEMENT_IMPL(Button)
-
-// void Menu::AddElement(const Button& element) {
-//     m_Elements.push_back(std::make_shared<Button>(element));
-// }
+ELEMENT_IMPL(Text)
 
 void s_Gui::OnUpdate() {
     m_Hovering = false;
@@ -96,14 +43,42 @@ Vector2 s_Gui::GetMousePos() {
     return m_MousePos;
 }
 
-Rectangle s_Gui::GetRealSize(const Rectangle& rec) {
-    return {rec.x * m_Scale, rec.y * m_Scale, rec.width * m_Scale, rec.height * m_Scale};
+Rectangle s_Gui::GetRealSize(const PosInfo& info) {
+    Rectangle rec;
+
+    rec.width = info.Bounds.width * m_Scale;
+    rec.height = info.Bounds.height * m_Scale;
+
+    if (info.AnchorX == "left") {
+        rec.x = info.Bounds.x * m_Scale;
+    }
+
+    if (info.AnchorX == "middle") {
+        rec.x = GetScreenWidth() / 2.0f - rec.width / 2.0f + info.Bounds.x * m_Scale;
+    }
+
+    if (info.AnchorX == "right") {
+        rec.x = GetScreenWidth() - rec.width + info.Bounds.x * m_Scale;
+    }
+
+    if (info.AnchorY == "top") {
+        rec.y = info.Bounds.y * m_Scale;
+    }
+
+    if (info.AnchorY == "middle") {
+        rec.y = GetScreenHeight() / 2.0f - rec.height + info.Bounds.y * m_Scale;
+    }
+
+    if (info.AnchorY == "bottom") {
+        rec.y = GetScreenHeight() - rec.height - info.Bounds.y * m_Scale;
+    }
+
+    return rec;
 }
 
 bool s_Gui::IsHovering() {
     return m_Hovering;
 }
-
 
 void s_Gui::SwitchMenu(const std::string& menu) {
     if (!Registry.DoesMenuExist(menu)) {
@@ -118,6 +93,10 @@ void s_Gui::SwitchMenu(const std::string& menu) {
     } else {
         if (m_CurrentMenu) {
             Registry.AddMenu("$PREVIOUS", *m_CurrentMenu);
+        }
+
+        if (menu == "Quit-Menu") {
+            Log(LogLevel::Info, std::format("{}", (u64)&Registry.GetMenu(menu)));
         }
 
         m_CurrentMenu = &Registry.GetMenu(menu);

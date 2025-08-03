@@ -1,19 +1,25 @@
 {
     "name": "Quit-Menu",
     "type": "menu",
-    "elements": ["confirm", "yes", "no"],
+    "elements": [ "confirm", "yes", "no" ],
 
     "confirm": {
         "type": "text",
 
-        "bounds": [60, 70, 520, 40],
+        "anchor": ["middle", "top"],
+
+        "offset": [0, 70],
+        "size": [300, 50],
         "text": "Are you sure you wish to quit?"
     },
 
     "yes": {
         "type": "button",
 
-        "bounds": [260, 160, 120, 30],
+        "anchor": ["middle", "bottom"],
+
+        "offset": [0, 80],
+        "size": [80, 30],
         "text": "Yes",
 
         "on-click": "exec-cpp QuitGame"
@@ -22,7 +28,10 @@
     "no": {
         "type": "button",
 
-        "bounds": [260, 200, 120, 30],
+        "anchor": ["middle", "bottom"],
+
+        "offset": [0, 40],
+        "size": [80, 30],
         "text": "No",
 
         "on-click": "switch $PREVIOUS"

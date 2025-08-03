@@ -6,6 +6,8 @@
 
 #include <memory>
 #include <string>
+#include <unordered_map>
+#include <utility>
 #include <vector>
 
 // funny macros
@@ -48,6 +50,12 @@ inline Hex Lime   = 0x25cc51ff;
 
 }
 
+struct PosInfo {
+    Rectangle Bounds;
+    std::string AnchorX;
+    std::string AnchorY;
+};
+
 struct Style {
     Hex DefaultFill = Colors::DGray;
     Hex DefaultOutline = Colors::Teal;
@@ -66,20 +74,40 @@ public:
     virtual void OnRender() {}
 
 protected:
-    Rectangle m_Bounds;
+    PosInfo m_Bounds;
     Style m_Style;
 };
 
-class Button : public GuiElement {
+class Text : public GuiElement {
 public:
-    Button(Rectangle bounds, const std::string& text, const std::string& onClick);
+    Text(const PosInfo& info, const std::string& text);
 
     virtual void OnUpdate() override;
     virtual void OnRender() override;
 
 private:
     std::string m_Text;
+    f32 m_FontSize = 0.0f;
+    f32 m_BaseFontSize = 100.0f;
+
+    f32 m_TextWidth = 0.0f;
+    f32 m_TextHeight = 0.0f;
+
+    bool m_Calculated = false;
+
+    Vector2 m_Padding = {1.2f, 1.2f};
+};
+
+class Button : public GuiElement {
+public:
+    Button(const PosInfo& info, const std::string& text, const std::string& onClick);
+
+    virtual void OnUpdate() override;
+    virtual void OnRender() override;
+
+private:
     std::string m_OnClick;
+    Text m_Text;
 
     u32 m_State = 0;
 };
@@ -92,6 +120,7 @@ public:
     void SetName(const std::string& name);
     //void AddElement(const Button& element);
     ELEMENT(Button);
+    ELEMENT(Text);
 
 private:
     std::vector<std::shared_ptr<GuiElement>> m_Elements;
@@ -104,7 +133,7 @@ public:
     void OnRender();
 
     Vector2 GetMousePos();
-    Rectangle GetRealSize(const Rectangle& rec);
+    Rectangle GetRealSize(const PosInfo& info);
 
     bool IsHovering();
 
@@ -115,8 +144,10 @@ public:
 public:
     bool m_Hovering = false;
 
+    std::unordered_map<f32, Font> m_Fonts;
+
 private:
-    f32 m_Scale = 1.0f;
+    f32 m_Scale = 1.25f;
     Menu* m_CurrentMenu = nullptr;
 
     Vector2 m_MousePos;
