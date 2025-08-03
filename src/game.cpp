@@ -1,16 +1,16 @@
 #include "game.hpp"
 #include "core/random.hpp"
+#include "core/types.hpp"
 #include "entity/player.hpp"
 #include "core/log.hpp"
-#include "gui/raspGui.hpp"
-#include "menu.hpp"
+#include "gui/gui.hpp"
 #include "registry.hpp"
 
 #include "raylib.h"
 #include "rlgl.h"
 
 #include <cstdlib>
-#include <type_traits>
+#include <format>
 
 static s_Game* s_Instance = nullptr;
 
@@ -42,9 +42,13 @@ bool s_Game::Init() {
 
     SetTraceLogLevel(LOG_WARNING);
 
+    Registry.AddVariable("Hello", 32);
+
     Registry.RegisterAllTextures();
     Registry.RegisterAllMenus();
     Registry.RegisterAllFunctions();
+
+    dd = &Registry.GetValue("Hello");
 
     SetWindowIcon(LoadImage("Assets/Textures/stone.png"));
     SetWindowMinSize(640, 360);
@@ -74,7 +78,10 @@ bool s_Game::Init() {
 
     m_CurrentLevel = Level();
 
-    m_CurrentMenu = &Registry.GetMenu("Main-Menu");
+    m_Viewport = {m_Camera.target.x - m_Camera.offset.x / m_Camera.zoom, m_Camera.target.y - m_Camera.offset.y / m_Camera.zoom,
+                  GetScreenWidth() / m_Camera.zoom, GetScreenHeight() / m_Camera.zoom};
+
+    Gui.SwitchMenu("Main-Menu");
 
     return true;
 }
@@ -125,7 +132,7 @@ void s_Game::OnUpdate() {
         FixedUpdate();
     }
 
-    RaspGui::NewCanvas();
+    // RaspGui::NewCanvas();
 
     // Fullscreen keybind
     if (IsKeyPressed(KEY_F11)) {
@@ -153,21 +160,9 @@ void s_Game::OnUpdate() {
         m_Editor->OnUpdate();
     }
 
-    // we write the safe code around here! (probably)
-    if (m_CurrentMenu != nullptr) {
-        for (auto& button : m_CurrentMenu->Buttons) {
-            if (RaspGui::Button(button.Bounds, button.Text.c_str())) {
-                Execute(button.OnClick);
-            }
-        }
+    Gui.OnUpdate();
 
-        for (auto& label : m_CurrentMenu->Labels) {
-            RaspGui::Label(label.Bounds, label.Text.c_str());
-        }
-    }
-
-
-    //UpdateUI();
+    // RaspGui::SliderEx({400, 300, 100, 50}, dd, 0.0f, 32.0f, 0.1f, RaspGui::GetPallete());
 }
 
 void s_Game::FixedUpdate() {
@@ -186,10 +181,6 @@ void s_Game::OnRender() {
 
         m_CurrentLevel.OnRender();
 
-        if (m_CurrentLevel.IsCollectableFound()) {
-            DrawText("Found raspberry", 400, 600, 20, GREEN);
-        }
-
         EndMode2D();
     }
 
@@ -197,14 +188,11 @@ void s_Game::OnRender() {
         m_Editor->OnRender();
     }
 
-    RaspGui::Render();
+    Gui.OnRender();
 
     // show the current fps
     DrawText(TextFormat("FPS: %.1f", m_CurrentFPS), 10, 10, 20, GREEN);
     DrawText(TextFormat("Time took to render: %.4f ms", deltaTime * 1000.0f), 10, 40, 20, GREEN);
-}
-
-void s_Game::UpdateUI() {
 }
 
 const Camera2D& s_Game::GetCamera() const {
@@ -292,10 +280,6 @@ void s_Game::Quit() {
 
 void s_Game::SetCurrentLevel(const Level& level) {
     m_CurrentLevel = level;
-}
-
-void s_Game::SetCurrentMenu(const std::string& menu) {
-    m_CurrentMenu = &Registry.GetMenu(menu);
 }
 
 Level& s_Game::GetCurrentLevel() {

@@ -1,7 +1,7 @@
 {
     "name": "Main-Menu",
     "type": "menu",
-    "elements": [ "play", "editor", "settings", "quit" ],
+    "elements": [ "play", "editor", "settings", "quit", "test" ],
 
     "play": {
         "type": "button",
@@ -36,6 +36,17 @@
         "bounds": [10, 320, 100, 30],
         "text": "Quit",
 
-        "on-click": "exec-cpp QuitGame"
+        "on-click": "switch Quit-Menu"
+    },
+
+    "test": {
+        "type": "slider",
+
+        "bounds": [300, 200, 200, 50],
+
+        "number": "Hello",
+        "min": 31.999,
+        "max": 32.0,
+        "step": 0.0001
     }
 }

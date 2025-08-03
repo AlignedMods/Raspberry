@@ -2,7 +2,6 @@
 
 #include "core/types.hpp"
 #include "tile/tile.hpp"
-#include "gui/raspGui.hpp"
 
 #include "raylib.h"
 
@@ -45,7 +44,7 @@ private:
     EditorStates m_State = EditorStates::Click;
 
     bool m_Searching = false;
-    RaspGui::Input m_Input;
+    //RaspGui::Input m_Input;
 
     f32 m_SelectionBrightness = 0.0f;
     f32 m_SelectionBrightnes = 0.0f;

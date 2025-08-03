@@ -1,7 +1,8 @@
 #include "renderer.hpp"
 #include "core/log.hpp"
 
-#include "gui/raspGui.hpp"
+#include "game.hpp"
+#include "gui/gui.hpp"
 #include "raylib.h"
 
 static s_Renderer* instance = nullptr;
@@ -44,7 +45,7 @@ void s_Renderer::RenderText(const char* text, i32 x, i32 y) {
 
 void s_Renderer::Begin() {
 	BeginDrawing();
-	ClearBackground(GetColor(RaspGui::Black));
+	ClearBackground(GetColor(Colors::Black));
 }
 
 void s_Renderer::End() {

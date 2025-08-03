@@ -1,0 +1,30 @@
+{
+    "name": "Quit-Menu",
+    "type": "menu",
+    "elements": ["confirm", "yes", "no"],
+
+    "confirm": {
+        "type": "text",
+
+        "bounds": [60, 70, 520, 40],
+        "text": "Are you sure you wish to quit?"
+    },
+
+    "yes": {
+        "type": "button",
+
+        "bounds": [260, 160, 120, 30],
+        "text": "Yes",
+
+        "on-click": "exec-cpp QuitGame"
+    },
+
+    "no": {
+        "type": "button",
+
+        "bounds": [260, 200, 120, 30],
+        "text": "No",
+
+        "on-click": "switch $PREVIOUS"
+    }
+}

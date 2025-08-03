@@ -3,11 +3,25 @@
 #include "core/types.hpp"
 
 #include "game.hpp"
+#include "gui/gui.hpp"
 #include "nlohmann/json.hpp"
 
 #include <filesystem>
+#include <format>
 #include <fstream>
 #include <functional>
+
+void s_Registry::AddVariable(const std::string& name, f32 val) {
+    m_Variables[name] = val;
+}
+
+void s_Registry::SetValue(const std::string& name, f32 val) {
+    m_Variables[name] = val;
+}
+
+f32& s_Registry::GetValue(const std::string& name) {
+    return m_Variables.at(name);
+}
 
 void s_Registry::RegisterAllMenus() {
 	std::filesystem::path textures = std::filesystem::current_path() / "Assets" / "Gui";
@@ -37,21 +51,32 @@ void s_Registry::AddMenuFromJSON(const std::filesystem::path& json) {
         }
 
         for (auto& entries : data.at("elements")) {
-            std::cout << "\nENTRY: " << entries << " {\n";
-
             auto& entry = data.at(entries);
 
             if (entry.contains("type")) {
-                std::cout << entry.at("type") << '\n';
                 if (entry.at("type") == "button") {
                     std::array<i32, 4> dim = entry.at("bounds");
 
-                    menu.Buttons.push_back({ {(f32)dim[0], (f32)dim[1], (f32)dim[2], (f32)dim[3]}, entry.at("text"), entry.at("on-click") });
+                    menu.AddElement( Button( {(f32)dim[0], (f32)dim[1], (f32)dim[2], (f32)dim[3]}, entry.at("text"), entry.at("on-click") ) );
+
+                    // menu.Buttons.push_back({ {(f32)dim[0], (f32)dim[1], (f32)dim[2], (f32)dim[3]}, entry.at("text"), entry.at("on-click") });
+                }
+
+                if (entry.at("type") == "text") {
+                    std::array<i32, 4> dim = entry.at("bounds");
+
+                    // menu.Texts.push_back({ {(f32)dim[0], (f32)dim[1], (f32)dim[2], (f32)dim[3]}, entry.at("text") });
+                }
+
+                if (entry.at("type") == "slider") {
+                    std::array<i32, 4> dim = entry.at("bounds");
+
+                    Log(LogLevel::Info, std::format("{}", *(&GetValue(entry.at("number")))));
+
+                    // menu.Sliders.push_back({ {(f32)dim[0], (f32)dim[1], (f32)dim[2], (f32)dim[3]}, &m_Variables.at(entry.at("number")), 
+                    //                          entry.at("min"), entry.at("max"), entry.at("step") });
                 }
             }
-
-            std::cout << "}\n";
-            std::cout << "\n------------------\n";
         }
 
         AddMenu(name, menu);

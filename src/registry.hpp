@@ -1,22 +1,27 @@
 #pragma once
 
 // The registry is used to manage all of the game's assets
+// (well it does more but that's the gist of it)
 
+#include "core/types.hpp"
 #include "game.hpp"
-#include "menu.hpp"
+#include "gui/gui.hpp"
 
 #include "raylib.h"
 
 #include <functional>
 #include <unordered_map>
-#include <cstdint>
 #include <string>
 #include <filesystem>
 
-using TileID = uint8_t;
-
 class s_Registry {
 public:
+    void AddVariable(const std::string& name, f32 val);
+    void SetValue(const std::string& name, f32 val);
+    f32& GetValue(const std::string& name);
+
+    bool DoesVariableExist(const std::string& name);
+
     // menu
     void RegisterAllMenus();
     void AddMenu(const std::string& name, const Menu& menu);
@@ -44,6 +49,8 @@ private:
 	std::unordered_map<std::string, Texture> m_TileTextures;
     std::unordered_map<std::string, Menu> m_Menus;
     std::unordered_map<std::string, std::function<void(s_Game*)>> m_Functions;
+
+    std::unordered_map<std::string, f32> m_Variables;
 };
 
 inline s_Registry Registry;

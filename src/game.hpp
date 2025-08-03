@@ -2,7 +2,6 @@
 
 #include "editor/editor.hpp"
 #include "level/level.hpp"
-#include "menu.hpp"
 
 #include "raylib.h"
 
@@ -25,7 +24,6 @@ public:
     void OnRender();
 
     void SetCurrentLevel(const Level& level);
-    void SetCurrentMenu(const std::string& menu);
 
     void StartGameplay();
     void StartEditor();
@@ -81,12 +79,6 @@ private:
 
 	bool m_Paused = false;
     
-    // -- GUI -- //
-
-    // setting this to nullptr is completely safe
-    // there is a check in place
-    Menu* m_CurrentMenu = nullptr;
-
     std::array<Vector2, 9> m_Resolutions = {{
         // yes i had to write this out manually
         {640,  360}, 
@@ -122,6 +114,8 @@ private:
 
     u32 mt_ResolutionIndex = 0;
     u32 mt_Fullscreen = 0;
+
+    f32* dd = nullptr;
   
 public:
 	f32 deltaTime = 0.0f;

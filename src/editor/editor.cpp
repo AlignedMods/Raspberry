@@ -1,8 +1,8 @@
 #include "editor.hpp"
 #include "core/types.hpp"
+#include "gui/gui.hpp"
 #include "registry.hpp"
 #include "renderer/renderer.hpp"
-#include "gui/raspGui.hpp"
 #include "core/log.hpp"
 #include "game.hpp"
 
@@ -69,7 +69,6 @@ void Editor::OnUpdate() {
 
     if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_F)) {
         m_Searching = true;
-        m_Input.Text.clear();
     }
 
     // Panning (dragging doesn't affect anything)
@@ -85,7 +84,7 @@ void Editor::OnUpdate() {
     // building (dragging DOES affect)
     if (m_Mode == EditorModes::Build) {
         // currently dragging
-        if (!RaspGui::HoveringOverGui()) {
+        if (!Gui.IsHovering()) {
             if (m_State == EditorStates::Drag) {
                 if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
                     PlaceTile();
@@ -102,7 +101,7 @@ void Editor::OnUpdate() {
 
     // destroying :D
     if (m_Mode == EditorModes::Destroy) {
-        if (!RaspGui::HoveringOverGui()) {
+        if (!Gui.IsHovering()) {
             // currently dragging
             if (m_State == EditorStates::Drag) {
                 if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
@@ -119,7 +118,7 @@ void Editor::OnUpdate() {
     }
 
     if (m_Mode == EditorModes::Select) {
-        if (!RaspGui::HoveringOverGui()) {
+        if (!Gui.IsHovering()) {
             i2 worldPosition = GetWorldPosition();
 
             if (m_State == EditorStates::Click) {
@@ -147,43 +146,43 @@ void Editor::OnUpdate() {
 
     HandleSelection();
 
-    if (m_Searching) {
-        if (RaspGui::TextInput({0.3f, 0.3f, 0.4f, 0.2f}, &m_Input)) m_Searching = false;
-    } else if (!m_Input.Text.empty() ){
-        if (Registry.DoesTileExist(m_Input.Text)) {
-            m_CurrentTile = m_Input.Text;
-        } else {
-            Log(LogLevel::Error, "Tile does not exist!");
-        }
+    // if (m_Searching) {
+    //     if (RaspGui::TextInput({0.3f, 0.3f, 0.4f, 0.2f}, &m_Input)) m_Searching = false;
+    // } else if (!m_Input.Text.empty() ){
+    //     if (Registry.DoesTileExist(m_Input.Text)) {
+    //         m_CurrentTile = m_Input.Text;
+    //     } else {
+    //         Log(LogLevel::Error, "Tile does not exist!");
+    //     }
 
-        m_Input.Text.clear();
-    }
+    //     m_Input.Text.clear();
+    // }
 
-    RaspGui::Panel({0.0f, 0.8f, 1.0f, 0.2f});
+    // RaspGui::Panel({0.0f, 0.8f, 1.0f, 0.2f});
 
-    if (RaspGui::Button({0.7f, 0.1f, 0.25f, 0.8f}, "Export")) {
-        Export();
-    }
+    // if (RaspGui::Button({0.7f, 0.1f, 0.25f, 0.8f}, "Export")) {
+    //     Export();
+    // }
 
-    RaspGui::End();
+    // RaspGui::End();
 
-    RaspGui::Panel({500, 20, 130, 320});
+    // RaspGui::Panel({500, 20, 130, 320});
 
     if (!m_Selection.empty()) {
-        RaspGui::SliderFloat({10, 30, 110, 20}, &hsv.x, 0, 360);
-        RaspGui::SliderFloat({10, 60, 110, 20}, &hsv.y, 0, 1);
-        RaspGui::SliderFloat({10, 90, 110, 20}, &hsv.z, 0, 1);
+        // RaspGui::SliderFloat({10, 30, 110, 20}, &hsv.x, 0, 360);
+        // RaspGui::SliderFloat({10, 60, 110, 20}, &hsv.y, 0, 1);
+        // RaspGui::SliderFloat({10, 90, 110, 20}, &hsv.z, 0, 1);
 
         // Log(LogLevel::Info, std::format("{}, {}, {}", (i32)col.r, (i32)col.g, (i32)col.b));
 
-        RaspGui::OutlinedRectangle({10, 120, 70, 70}, 1, ColorToInt(ColorFromHSV(hsv.x, hsv.y, hsv.z)), 0xff);
+        // RaspGui::OutlinedRectangle({10, 120, 70, 70}, 1, ColorToInt(ColorFromHSV(hsv.x, hsv.y, hsv.z)), 0xff);
 
         for (auto& tile : m_Selection) {
             tile.tint = ColorToInt(ColorFromHSV(hsv.x, hsv.y, hsv.z));
         }
     }
 
-    RaspGui::End();
+    // RaspGui::End();
 }
 
 void Editor::PlaceTile() {
