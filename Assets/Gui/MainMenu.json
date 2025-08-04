@@ -1,12 +1,23 @@
 {
     "name": "Main-Menu",
     "type": "menu",
-    "elements": [ "test", "play", "editor", "settings", "quit" ],
+    "elements": [ "test", "hi", "play", "editor", "settings", "quit" ],
 
     "test": {
-        "type": "hh",
+        "type": "combobox",
 
-        "size": [40, 40]
+        "options": ["json", "toml", "yaml"]
+    },
+
+    "hi": {
+        "type": "slider",
+
+        "value": 3.0,
+        "min": -4.0,
+        "max": 1000.0,
+        "step": 40.0,
+        
+        "anchor": ["right", "top"]
     },
 
     "play": {

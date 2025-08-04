@@ -7,7 +7,6 @@
 #include "nlohmann/json.hpp"
 
 #include <filesystem>
-#include <format>
 #include <fstream>
 #include <functional>
 #include <utility>
@@ -42,6 +41,18 @@ PosInfo GetInfo(const nlohmann::json& entry) {
     }
 
     return { {(f32)bounds[0], (f32)bounds[1], (f32)bounds[2], (f32)bounds[3]}, anchor.first, anchor.second };
+}
+
+std::string GetText(const nlohmann::json& entry) {
+    std::string text;
+
+    if (!entry.contains("text")) {
+        text = "$NOTEXT";
+    } else {
+        text = entry.at("text");
+    }
+
+    return text;
 }
 
 void s_Registry::AddVariable(const std::string& name, f32 val) {
@@ -100,12 +111,6 @@ void s_Registry::AddMenuFromJSON(const std::filesystem::path& json) {
                 }
 
                 if (entry.at("type") == "button") {
-                    std::string text = "*blank*";
-
-                    if (entry.contains("text")) {
-                        text = entry.at("text");
-                    }
-
                     if (!entry.contains("on-click")) {
                         Log(LogLevel::Error, "Button doesn't specify \"on-click\" property!\n" \
                                              "If you wish to not specify an action use *nop*!");
@@ -113,22 +118,43 @@ void s_Registry::AddMenuFromJSON(const std::filesystem::path& json) {
                         return;
                     }
 
-                    menu.AddElement( Button(GetInfo(entry), text, entry.at("on-click") ) );
+                    menu.AddElement( Button(GetInfo(entry), GetText(entry), entry.at("on-click") ) );
                 }
 
                 if (entry.at("type") == "label") {
-                    std::string text = "*blank*";
-
-                    if (entry.contains("text")) {
-                        text = entry.at("text");
-                    }
-
-                    menu.AddElement( Label(GetInfo(entry), text) );
+                    menu.AddElement( Label(GetInfo(entry), GetText(entry)) );
                 }
 
-                if (entry.at("type") == "hh") {
-                    Log(LogLevel::Info, "checkbox!");
+                if (entry.at("type") == "checkbox") {
                     menu.AddElement( CheckBox(GetInfo(entry)) );
+                }
+
+                if (entry.at("type") == "slider") {
+                    // some fallback values
+                    f32 inital = 16.0f;
+                    f32 min = 0.0f;
+                    f32 max = 32.0f;
+                    f32 step = 0.001f;
+
+                    if (entry.contains("initial")) { inital = entry.at("inital"); }
+                    if (entry.contains("min")) { min = entry.at("min"); }
+                    if (entry.contains("max")) { max = entry.at("max"); }
+                    if (entry.contains("step")) { step = entry.at("step"); }
+
+                    menu.AddElement( Slider(GetInfo(entry), inital, min, max, step) );
+                }
+
+                if (entry.at("type") == "combobox") {
+                    if (!entry.contains("options")) {
+                        Log(LogLevel::Error, "ComboBox doesn't specify \"options\" property!\n" \
+                                             "At least one option has to be specified in the following format:\n" \
+                                             "\"options\": [ ... ]");
+
+                        return;
+                    }
+                    std::vector<std::string> options = entry.at("options");
+
+                    menu.AddElement( ComboBox(GetInfo(entry), options) );
                 }
             }
         }

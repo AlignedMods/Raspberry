@@ -1,10 +1,10 @@
 #pragma once
 
 #include "raylib.h"
-#include "raymath.h"
 
 #include <cstddef>
 #include <cstdint>
+#include <string>
 
 // rust style types (no i still don't like rust, although type names is something they got right)
 
@@ -25,6 +25,8 @@ using f64 = double;
 // size type
 using sz = size_t;
 
+using Hex = u32;
+
 struct IVector2 {
     i32 x;
     i32 y;
@@ -32,6 +34,12 @@ struct IVector2 {
     inline Vector2 RaylibVector() {
         return Vector2{static_cast<float>(x), static_cast<float>(y)};
     }
+};
+
+struct PosInfo {
+    Rectangle Bounds;
+    std::string AnchorX;
+    std::string AnchorY;
 };
 
 // vectors

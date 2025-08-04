@@ -60,3 +60,8 @@ void Text::OnRender() {
                                                             actual.y + actual.height / 2.0f - m_TextHeight / 2.0f}, m_FontSize, 3, GetColor(Colors::White));
     // DrawTextEx(Gui.m_Fonts.at(m_FontSize), m_Text.c_str(), {actual.x, actual.y}, m_FontSize, 3, GetColor(Colors::White));
 }
+
+void Text::ChangeText(const std::string& text) {
+    m_Text = text;
+    m_Calculated = false;
+}

@@ -26,6 +26,8 @@ ELEMENT_IMPL(Button)
 ELEMENT_IMPL(Text)
 ELEMENT_IMPL(Label)
 ELEMENT_IMPL(CheckBox)
+ELEMENT_IMPL(Slider)
+ELEMENT_IMPL(ComboBox)
 
 void s_Gui::OnUpdate() {
     m_Hovering = false;
