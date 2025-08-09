@@ -1,7 +1,7 @@
 #include "ComboBox.hpp"
 #include "gui/gui.hpp"
 
-ComboBox::ComboBox(const PosInfo& info, const std::vector<std::string>& options) :
+ComboBox::ComboBox(const GuiInfo& info, const std::vector<std::string>& options) :
     m_Options(options), m_Text(info, options.at(0))
 {
     m_Info = info;

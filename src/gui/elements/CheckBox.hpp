@@ -4,7 +4,7 @@
 
 class CheckBox : public GuiElement {
 public:
-    CheckBox(const PosInfo& info);
+    CheckBox(const GuiInfo& info);
 
     virtual void OnUpdate() override;
     virtual void OnRender() override;

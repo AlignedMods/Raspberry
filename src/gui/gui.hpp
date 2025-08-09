@@ -9,6 +9,8 @@
 #include "elements/CheckBox.hpp"
 #include "elements/Slider.hpp"
 #include "elements/ComboBox.hpp"
+#include "elements/Window.hpp"
+#include "elements/ColorPicker.hpp"
 
 #include "raylib.h"
 
@@ -19,10 +21,10 @@
 
 // funny macros
 // very useful though
-#define ELEMENT(type)    void AddElement(const type& element)
+#define ELEMENT(type)    void AddElement(const type& element, const std::string& name)
 
-#define ELEMENT_IMPL(type) void Menu::AddElement(const type& element) {\
-    m_Elements.push_back(std::make_shared<type>(element)); \
+#define ELEMENT_IMPL(type) void Menu::AddElement(const type& element, const std::string& name) {\
+    m_Elements[name] = std::make_shared<type>(element); \
 }
 
 enum class Alignment {
@@ -37,16 +39,20 @@ public:
     void OnRender();
 
     void SetName(const std::string& name);
-    //void AddElement(const Button& element);
+
     ELEMENT(Button);
     ELEMENT(Text);
     ELEMENT(Label);
     ELEMENT(CheckBox);
     ELEMENT(Slider);
     ELEMENT(ComboBox);
+    ELEMENT(Window);
+    ELEMENT(ColorPicker);
+
+    std::shared_ptr<GuiElement> GetElement(const std::string& name);
 
 private:
-    std::vector<std::shared_ptr<GuiElement>> m_Elements;
+    std::unordered_map<std::string, std::shared_ptr<GuiElement>> m_Elements;
     std::string m_Name;
 };
 
@@ -56,7 +62,7 @@ public:
     void OnRender();
 
     Vector2 GetMousePos();
-    Rectangle GetRealSize(const PosInfo& info);
+    Rectangle GetRealSize(const GuiInfo& info);
 
     bool IsHovering();
 
@@ -70,8 +76,6 @@ public:
 
 public:
     bool m_Hovering = false;
-
-    std::unordered_map<f32, Font> m_Fonts;
 
 private:
     f32 m_Scale = 1.0f;

@@ -1,19 +1,24 @@
 #include "gui.hpp"
-#include <format>
 #include "core/log.hpp"
 #include "registry.hpp"
 
 #include "raylib.h"
 
+#include <format>
+
 void Menu::OnUpdate() {
-    for (auto& element : m_Elements) {
-        element->OnUpdate();
+    for (auto&[name, element] : m_Elements) {
+        if (element->m_Info.Active) {
+            element->OnUpdate();
+        }
     }
 }
 
 void Menu::OnRender() {
-    for (auto& element : m_Elements) {
-        element->OnRender();
+    for (auto&[name, element] : m_Elements) {
+        if (element->m_Info.Active) {
+            element->OnRender();
+        }
     }
 }
 
@@ -28,6 +33,17 @@ ELEMENT_IMPL(Label)
 ELEMENT_IMPL(CheckBox)
 ELEMENT_IMPL(Slider)
 ELEMENT_IMPL(ComboBox)
+ELEMENT_IMPL(Window)
+ELEMENT_IMPL(ColorPicker)
+
+std::shared_ptr<GuiElement> Menu::GetElement(const std::string& name) {
+    if (!m_Elements.contains(name)) {
+        Log(LogLevel::Error, std::format("Element with name: {} not found!", name));
+        return nullptr;
+    }
+
+    return m_Elements.at(name);
+}
 
 void s_Gui::OnUpdate() {
     m_Hovering = false;
@@ -48,7 +64,7 @@ Vector2 s_Gui::GetMousePos() {
     return m_MousePos;
 }
 
-Rectangle s_Gui::GetRealSize(const PosInfo& info) {
+Rectangle s_Gui::GetRealSize(const GuiInfo& info) {
     Rectangle rec;
 
     rec.width = info.Bounds.width * m_Scale;
@@ -63,7 +79,7 @@ Rectangle s_Gui::GetRealSize(const PosInfo& info) {
     }
 
     if (info.AnchorX == "right") {
-        rec.x = GetScreenWidth() - rec.width + info.Bounds.x * m_Scale;
+        rec.x = GetScreenWidth() - rec.width - info.Bounds.x * m_Scale;
     }
 
     if (info.AnchorY == "top") {
@@ -170,6 +186,19 @@ void Execute(const std::string &str) {
             return;
         } else {
             Registry.CallFunction(tokens.at(1));
+        }
+    }
+
+    if (tokens.at(0) == "set-active") {
+        if (tokens.size() < 3) {
+            Log(LogLevel::Error, "Syntax: set-active <element> <active>");
+            return;
+        } else {
+            bool active = true;
+            if (tokens.at(2) == "true") { active = true; }
+            else if (tokens.at(2) == "false") { active = false; };
+
+            Gui.GetCurrentMenu()->GetElement(tokens.at(1))->m_Info.Active = active;
         }
     }
 

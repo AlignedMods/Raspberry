@@ -5,7 +5,7 @@
 
 #include <cmath>
 
-Slider::Slider(const PosInfo& info, f32 inital, f32 min, f32 max, f32 step) : 
+Slider::Slider(const GuiInfo& info, f32 inital, f32 min, f32 max, f32 step) : 
     m_Value(inital), m_Min(min), m_Max(max), m_Step(step)
 {
     m_Info = info;

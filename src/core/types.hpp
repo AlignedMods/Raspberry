@@ -36,10 +36,12 @@ struct IVector2 {
     }
 };
 
-struct PosInfo {
+struct GuiInfo {
     Rectangle Bounds;
     std::string AnchorX;
     std::string AnchorY;
+
+    bool Active;
 };
 
 // vectors

@@ -4,7 +4,7 @@
 
 class Slider : public GuiElement {
 public:
-    Slider(const PosInfo& info, f32 inital, f32 min, f32 max, f32 step);
+    Slider(const GuiInfo& info, f32 inital, f32 min, f32 max, f32 step);
 
     virtual void OnUpdate() override;
     virtual void OnRender() override;

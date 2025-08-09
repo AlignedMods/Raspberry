@@ -1,13 +1,11 @@
 #pragma once
 
-#include "collectables/collectable.hpp"
 #include "core/types.hpp"
 #include "entity/mob.hpp"
 #include "entity/player.hpp"
 #include "tile/tile.hpp"
 
 #include <vector>
-#include <filesystem>
 
 class Level {
 public:
@@ -20,21 +18,18 @@ public:
     void AddTile(Tile tile);
     std::vector<Tile>& GetAllTiles();
 
-    void AddCollectable();
-    Collectable& GetCollectable();
-
     void SetFound();
 
     bool IsCollectableFound();
 
-    bool LoadLevelFromFile(std::filesystem::path path);
+    void SetName(const std::string& name);
+    std::string& GetName();
 
 private:
     std::vector<Tile> m_Tiles;
 
     std::string m_Name;
 
-    Collectable m_Collectable;
     Player m_Player{};
 
     f32 m_Brightness = 1.0f;

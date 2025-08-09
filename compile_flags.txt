@@ -1,3 +1,5 @@
+-DRDEBUG
+
 -Ivendor/raylib/src/
 -Ivendor/raygui/src/
 -Ivendor/json/include/

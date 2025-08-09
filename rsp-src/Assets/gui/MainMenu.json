@@ -1,24 +1,7 @@
 {
     "name": "Main-Menu",
     "type": "menu",
-    "elements": [ "test", "hi", "play", "editor", "settings", "quit" ],
-
-    "test": {
-        "type": "combobox",
-
-        "options": ["json", "toml", "yaml"]
-    },
-
-    "hi": {
-        "type": "slider",
-
-        "value": 3.0,
-        "min": -4.0,
-        "max": 1000.0,
-        "step": 40.0,
-        
-        "anchor": ["right", "top"]
-    },
+    "elements": [ "play", "editor", "settings", "quit" ],
 
     "play": {
         "type": "button",
@@ -41,7 +24,7 @@
         "size": [100, 30],
         "text": "Editor",
 
-        "on-click": "nop"
+        "on-click": "exec-cpp StartEditor"
     },
 
     "settings": {
@@ -53,7 +36,7 @@
         "size": [100, 30],
         "text": "Settings",
 
-        "on-click": "exec-cpp StartGame"
+        "on-click": "set-active test true"
     },
 
     "quit": {

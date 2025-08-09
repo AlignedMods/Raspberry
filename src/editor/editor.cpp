@@ -77,7 +77,8 @@ void Editor::OnUpdate() {
             // make the camera move at the same speed even with different zoom values
     
             // TODO: improve this bullshit
-            m_Camera.target = Vector2Add(m_Camera.target, Vector2Scale(GetMouseDelta(), Game.deltaTime / m_Camera.zoom * -900));
+            // m_Camera.target = Vector2Add(m_Camera.target, Vector2Scale(GetMouseDelta(), Game.deltaTime / m_Camera.zoom * -900));
+            m_Camera.target = Vector2Add(m_Camera.target, Vector2Scale(Vector2Negate(GetMouseDelta()), 1.0f / m_Camera.zoom));
         }
     }
 
@@ -210,8 +211,8 @@ void Editor::DestroyTile() {
 
 i2 Editor::GetWorldPosition() {
     // the funny
-    return {static_cast<int32_t>(std::floor( ((GetMouseX() + (m_Camera.target.x * m_Camera.zoom - m_Camera.offset.x)) / (m_Camera.zoom * 64.0f)) )),
-            static_cast<int32_t>(std::floor( ((GetMouseY() + (m_Camera.target.y * m_Camera.zoom - m_Camera.offset.y)) / (m_Camera.zoom * 64.0f)) )) };
+    return {static_cast<int32_t>(std::floor( ((GetMouseX() + (m_Camera.target.x * m_Camera.zoom - m_Camera.offset.x)) / (m_Camera.zoom * 32.0f)) )),
+            static_cast<int32_t>(std::floor( ((GetMouseY() + (m_Camera.target.y * m_Camera.zoom - m_Camera.offset.y)) / (m_Camera.zoom * 32.0f)) )) };
 }
 
 void Editor::HandleSelection() {

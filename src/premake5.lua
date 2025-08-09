@@ -1,10 +1,14 @@
 project "Raspberry"
 	language "C++"
 	cppdialect "C++20"
-	location "../build/"
+    kind "WindowedApp"
+
+    targetdir ( "../build/bin/" .. OutputDir .. "/%{prj.name}")
+    objdir ( "../build/obj/" .. OutputDir .. "/%{prj.name}" )
+
+    ArchiverArgs = "../rsp-src/Assets/ " .. "%{cfg.targetdir}/core.rsp"
 
 	files { "**.cpp", "**.hpp" }
-	removefiles { "blueberry/**.cpp" }
 
 	includedirs { "../vendor/raylib/src/", "../vendor/raygui/src/", "../vendor/json/include/" }
 
@@ -12,5 +16,13 @@ project "Raspberry"
 
 	defines { "RAYMATH_DISABLE_CPP_OPERATORS" } -- honestly not a huge fan of those
 
-	filter "platforms:Windows"
-		links { "winmm", "gdi32" }
+    postbuildcommands { "{COPYDIR} %[../rsp-src/Assets/] %{cfg.targetdir}" }
+
+    filter "platforms:Windows"
+        links { "winmm", "gdi32" }
+
+    filter { "platforms:Windows", "configurations:Release" }
+        postbuildcommands { "../build/bin/" .. OutputDir .. "/rsp-archiver/rsp-archiver.exe " .. ArchiverArgs }
+
+    filter { "platforms:Linux", "configurations:Release" }
+        postbuildcommands { "../build/bin/" .. OutputDir .. "/rsp-archiver/rsp-archiver " .. ArchiverArgs }

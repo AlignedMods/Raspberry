@@ -33,7 +33,8 @@ public:
 
     void Quit();
 
-	Level& GetCurrentLevel();
+	Level* GetCurrentLevel();
+    Editor* GetEditor();
 
     const Camera2D& GetCamera() const;
     const Rectangle& GetViewportRect() const;
@@ -45,7 +46,7 @@ private:
     void SetFullscreen(bool yesno);
 
 private:
-	Level m_CurrentLevel;
+	Level* m_CurrentLevel = nullptr;
 	Editor* m_Editor;
 
     // -- VIEWPORTS -- //
@@ -58,7 +59,7 @@ private:
     
 	bool m_Running = true;
 
-	u32 m_TargetFPS = 60;
+	u32 m_TargetFPS = 0;
 	f32 m_CurrentFPS = 0;
 
     u32 m_PreviousWindowWidth, m_PreviousWindowHeight;
@@ -114,8 +115,6 @@ private:
 
     u32 mt_ResolutionIndex = 0;
     u32 mt_Fullscreen = 0;
-
-    f32* dd = nullptr;
   
 public:
 	f32 deltaTime = 0.0f;

@@ -8,9 +8,9 @@
 Tile::Tile(const std::string& type, const i2& position) {
 	m_Type = type;
 	m_Position = position;
-    m_RealPosition = {position.x * 64.0f, position.y * 64.0f};
+    m_RealPosition = {position.x * 32.0f, position.y * 32.0f};
 
-	m_Texture = Registry.GetTileTexture(type);
+	m_Texture = Registry.GetTexture(type);
 }
 
 void Tile::OnRender() {

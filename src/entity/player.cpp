@@ -2,19 +2,20 @@
 
 #include "player.hpp"
 #include "game.hpp"
+#include "registry.hpp"
 #include "renderer/renderer.hpp"
 #include "core/log.hpp"
 
 #include "raylib.h"
 
 void Player::InitTextures() {
-	m_Textures["IdleLeft"] = LoadTexture("Assets/entity/player_left.png");
-	m_Textures["RunningLeftUp"] = LoadTexture("Assets/entity/player_left_walk_up.png");
-	m_Textures["RunningLeftDown"] = LoadTexture("Assets/entity/player_left_walk_down.png");
+	m_Textures["IdleLeft"] = Registry.GetTexture("player_left.png");
+	m_Textures["RunningLeftUp"] = Registry.GetTexture("player_left_walk_up.png");
+	m_Textures["RunningLeftDown"] = Registry.GetTexture("player_left_walk_down.png");
 
-	m_Textures["IdleRight"] = LoadTexture("Assets/entity/player_right.png");
-	m_Textures["RunningRightUp"] = LoadTexture("Assets/entity/player_right_walk_up.png");
-	m_Textures["RunningRightDown"] = LoadTexture("Assets/entity/player_right_walk_down.png");
+	m_Textures["IdleRight"] = Registry.GetTexture("player_right.png");
+	m_Textures["RunningRightUp"] = Registry.GetTexture("player_right_walk_up.png");
+	m_Textures["RunningRightDown"] = Registry.GetTexture("player_right_walk_down.png");
 
 	m_Texture = m_Textures.at("IdleLeft");
 }

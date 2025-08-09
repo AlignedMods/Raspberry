@@ -4,7 +4,7 @@
 
 extern void Execute(const std::string &str);
 
-Button::Button(const PosInfo& info, const std::string& text, const std::string& onClick) : 
+Button::Button(const GuiInfo& info, const std::string& text, const std::string& onClick) : 
     m_OnClick(onClick), m_Text(info, text)
 {
     m_Info = info;

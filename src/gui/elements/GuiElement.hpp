@@ -50,7 +50,10 @@ public:
     virtual void OnUpdate() {}
     virtual void OnRender() {}
 
+public:
+    GuiInfo m_Info;
+    Rectangle m_Actual;
+
 protected:
-    PosInfo m_Info;
     Style m_Style;
 };

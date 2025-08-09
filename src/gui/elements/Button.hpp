@@ -5,7 +5,7 @@
 
 class Button : public GuiElement {
 public:
-    Button(const PosInfo& info, const std::string& text, const std::string& onClick);
+    Button(const GuiInfo& info, const std::string& text, const std::string& onClick);
 
     virtual void OnUpdate() override;
     virtual void OnRender() override;

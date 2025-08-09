@@ -18,7 +18,7 @@ void Mob::InitTextures() {
 }
 
 void Mob::OnUpdate() {
-	Player& player = Game.GetCurrentLevel().GetPlayer();
+	Player& player = Game.GetCurrentLevel()->GetPlayer();
 
 	if (player.GetPos().x > m_Position.x) {
 		m_WalkSpeed.x = 3.0f;

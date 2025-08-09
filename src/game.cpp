@@ -29,6 +29,8 @@ s_Game::~s_Game() {}
 
 bool s_Game::Init() {
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
+    SetConfigFlags(FLAG_WINDOW_UNDECORATED);
+    SetConfigFlags(FLAG_WINDOW_TRANSPARENT);
     SetConfigFlags(FLAG_MSAA_4X_HINT);
     InitWindow(640, 360, "Raspberry");
 
@@ -44,17 +46,15 @@ bool s_Game::Init() {
 
     Registry.AddVariable("Hello", 32);
 
-    Registry.RegisterAllTextures();
-    Registry.RegisterAllMenus();
+    // Registry.RegisterAllTextures();
+    // Registry.RegisterAllMenus();
     Registry.RegisterAllFunctions();
-
-    dd = &Registry.GetValue("Hello");
 
     SetWindowIcon(LoadImage("Assets/Textures/stone.png"));
     SetWindowMinSize(640, 360);
 
     m_Camera.target = { 0.0f, 0.0f };
-    m_Camera.offset = { GetScreenWidth() / 2.0f - 64.0f, GetScreenHeight() / 2.0f - 64.0f };
+    m_Camera.offset = { GetScreenWidth() / 2.0f - 16.0f, GetScreenHeight() / 2.0f - 16.0f };
     m_Camera.rotation = 0.0f;
     m_Camera.zoom = 1.0f;
 
@@ -76,10 +76,13 @@ bool s_Game::Init() {
 
     m_LastTime = GetTime();
 
-    m_CurrentLevel = Level();
-
     m_Viewport = {m_Camera.target.x - m_Camera.offset.x / m_Camera.zoom, m_Camera.target.y - m_Camera.offset.y / m_Camera.zoom,
                   GetScreenWidth() / m_Camera.zoom, GetScreenHeight() / m_Camera.zoom};
+
+    #ifdef RDEBUG
+        Registry.RegisterDirectory("Assets/");
+    #endif
+    Registry.RegisterArchive("core.rsp");
 
     Gui.SwitchMenu("Main-Menu");
 
@@ -121,18 +124,18 @@ void s_Game::OnUpdate() {
     m_Running = m_Running && !WindowShouldClose();
 
     // Viewport should always look the same
-    m_Camera.zoom = 0.5f / (360.0f / GetScreenHeight());
+    m_Camera.zoom = 1.0f / (360.0f / GetScreenHeight());
 
     m_Viewport = {m_Camera.target.x - m_Camera.offset.x / m_Camera.zoom, m_Camera.target.y - m_Camera.offset.y / m_Camera.zoom,
                   GetScreenWidth() / m_Camera.zoom, GetScreenHeight() / m_Camera.zoom};
+
+    // if (GetScreenWidth() % 640 || GetScreenHeight() % 360) { Log(LogLevel::Warning, "Use of unsupported window size!\nYou will likely run into issues!"); }
 
     while (GetTime() - m_TickTime > 0.0167f) {
         m_TickTime += GetTime() - m_TickTime;
 
         FixedUpdate();
     }
-
-    // RaspGui::NewCanvas();
 
     // Fullscreen keybind
     if (IsKeyPressed(KEY_F11)) {
@@ -141,14 +144,14 @@ void s_Game::OnUpdate() {
     }
 
     if (m_GameRunning) {
-        m_Camera.offset = { GetScreenWidth() / 2.0f - 32.0f * m_Camera.zoom, GetScreenHeight() / 2.0f - 32.0f * m_Camera.zoom };
+        m_Camera.offset = { GetScreenWidth() / 2.0f - 16.0f * m_Camera.zoom, GetScreenHeight() / 2.0f - 16.0f * m_Camera.zoom };
 
         if (!m_Paused) {
-            m_CurrentLevel.OnUpdate();
+            m_CurrentLevel->OnUpdate();
         }
 
-        m_Camera.target = {m_CurrentLevel.GetPlayer().GetX() * 64.0f,
-            m_CurrentLevel.GetPlayer().GetY() * 64.0f};
+        m_Camera.target = {m_CurrentLevel->GetPlayer().GetX() * 32.0f,
+                           m_CurrentLevel->GetPlayer().GetY() * 32.0f};
 
         if (IsKeyPressed(KEY_ESCAPE)) {
             Pause();
@@ -161,13 +164,11 @@ void s_Game::OnUpdate() {
     }
 
     Gui.OnUpdate();
-
-    // RaspGui::SliderEx({400, 300, 100, 50}, dd, 0.0f, 32.0f, 0.1f, RaspGui::GetPallete());
 }
 
 void s_Game::FixedUpdate() {
     if (m_GameRunning && !m_Paused) {
-        m_CurrentLevel.Tick();
+        m_CurrentLevel->Tick();
     }
 
     ticks++;
@@ -179,7 +180,7 @@ void s_Game::OnRender() {
     if (m_GameRunning) {
         BeginMode2D(m_Camera);
 
-        m_CurrentLevel.OnRender();
+        m_CurrentLevel->OnRender();
 
         EndMode2D();
     }
@@ -279,11 +280,15 @@ void s_Game::Quit() {
 }
 
 void s_Game::SetCurrentLevel(const Level& level) {
-    m_CurrentLevel = level;
+    // m_CurrentLevel = level;
 }
 
-Level& s_Game::GetCurrentLevel() {
+Level* s_Game::GetCurrentLevel() {
     return m_CurrentLevel;
+}
+
+Editor* s_Game::GetEditor() {
+    return m_Editor;
 }
 
 void s_Game::StartEditor() {
@@ -294,6 +299,8 @@ void s_Game::StartEditor() {
     m_EditorRunning = true;
 
     m_Editor = new Editor(m_EditorCamera);
+
+    Gui.SwitchMenu("Editor");
 }
 
 void s_Game::StartGameplay() {
@@ -303,10 +310,7 @@ void s_Game::StartGameplay() {
 
     m_GameRunning = true;
 
-    m_CurrentLevel.LoadLevelFromFile("hi.rsp");
-
-    m_CurrentLevel.AddCollectable();
-    m_CurrentLevel.GetCollectable().InitTextures();
+    m_CurrentLevel = &Registry.GetLevel("hi");
 
     //m_CurrentMenu = Menu::None;
 }

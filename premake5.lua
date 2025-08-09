@@ -4,6 +4,8 @@ workspace "Raspberry"
 
 	includedirs { "src/" }
 
+    OutputDir = "%{cfg.buildcfg}-%{cfg.system}"
+
 	filter "configurations:Release"
 		optimize "On"
 		kind "WindowedApp"
@@ -17,7 +19,9 @@ workspace "Raspberry"
 		language "C"
 		cdialect "C99"
 		kind "StaticLib"
-		location "build/"
+
+        targetdir("build/bin/" .. OutputDir .. "/%{prj.name}")
+        objdir("build/obj/" .. OutputDir .. "/%{prj.name}")
 
 		files { "vendor/raylib/src/*.c", "vendor/raylib/src/*.h" }
 
@@ -35,4 +39,5 @@ workspace "Raspberry"
 	-- submodules
 	--include "src/blueberry"
 	include "src/"
+	include "rsp-src/"
 	--require "src/shared"

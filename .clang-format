@@ -1,5 +1,0 @@
-BasedOnStyle: Google
-ColumnLimit: 80
-AllowShortFunctionsOnASingleLine: Inline
-DerivePointerAlignment: false
-Standard: c++20

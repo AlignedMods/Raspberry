@@ -29,8 +29,8 @@ void Entity::OffsetPositionByVelocity() {
 }
 
 void Entity::CheckCollisionsH() {
-	Level& level = Game.GetCurrentLevel();
-    auto& tiles = level.GetAllTiles();
+	Level* level = Game.GetCurrentLevel();
+    auto& tiles = level->GetAllTiles();
 
     for (auto& tile : tiles) {
 		if (CheckCollisionRecs({m_Position.x, m_Position.y + 0.1f, 1.0f, 0.9f},
@@ -48,11 +48,11 @@ void Entity::CheckCollisionsH() {
 }
 
 void Entity::CheckCollisionsV() {
-	Level& level = Game.GetCurrentLevel();
+	Level* level = Game.GetCurrentLevel();
 
 	m_Grounded = false;
 
-    for (auto& tile : level.GetAllTiles()) {
+    for (auto& tile : level->GetAllTiles()) {
 		if (CheckCollisionRecs({m_Position.x, m_Position.y + 0.1f, 1.0f, 0.9f},
 							   {tile.GetPosition().RaylibVector().x, tile.GetPosition().RaylibVector().y, 1.0f, 1.0f})) 
 		{

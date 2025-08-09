@@ -5,15 +5,20 @@
 #include "game.hpp"
 #include "gui/gui.hpp"
 #include "nlohmann/json.hpp"
+#include "raylib.h"
 
 #include <filesystem>
+#include <format>
 #include <fstream>
 #include <functional>
+#include <sstream>
+#include <string>
 #include <utility>
 
-PosInfo GetInfo(const nlohmann::json& entry) {
+GuiInfo GetInfo(const nlohmann::json& entry) {
     std::array<i32, 4> bounds;
     std::pair<std::string, std::string> anchor;
+    bool active;
 
     // you technically do not need to specify any of this info
     if (!entry.contains("offset")) {
@@ -40,7 +45,14 @@ PosInfo GetInfo(const nlohmann::json& entry) {
         anchor.second = entry.at("anchor")[1];
     }
 
-    return { {(f32)bounds[0], (f32)bounds[1], (f32)bounds[2], (f32)bounds[3]}, anchor.first, anchor.second };
+    if (!entry.contains("active")) {
+        active = true;
+    } else {
+        if (entry.at("active") == "true") { active = true; }
+        else if (entry.at("active") == "false") { active = false; }
+    }
+
+    return { {(f32)bounds[0], (f32)bounds[1], (f32)bounds[2], (f32)bounds[3]}, anchor.first, anchor.second, active };
 }
 
 std::string GetText(const nlohmann::json& entry) {
@@ -55,36 +67,113 @@ std::string GetText(const nlohmann::json& entry) {
     return text;
 }
 
-void s_Registry::AddVariable(const std::string& name, f32 val) {
-    m_Variables[name] = val;
+void s_Registry::RegisterArchive(const std::filesystem::path& archive) {
+    Log(LogLevel::Info, std::format("Adding archive {}", archive.string()));
+
+    std::ifstream file(archive, std::ios::binary);
+
+    std::stringstream contentsStream;
+    std::string contents;
+
+    std::string currentDirectory;
+    std::string name;
+    std::string data;
+    u32 size;
+
+    std::string temp;
+
+    contentsStream << file.rdbuf();
+
+    contents = contentsStream.str();
+    contentsStream.flush(); // bye buffer
+    
+    u64 index = 0;
+
+    while (index < contents.size()) {
+        while (contents.at(index) != '\n') {
+            temp += contents.at(index);
+            index++;
+        }
+
+        index++;
+        
+        currentDirectory = temp;
+        temp.clear();
+
+        while (contents.at(index) != '\n') {
+            temp += contents.at(index);
+            index++;
+        }
+
+        index++;
+
+        name = temp;
+        temp.clear();
+
+        while (contents.at(index) != '\n') {
+            temp += contents.at(index);
+            index++;
+        }
+
+        index++;
+
+        size = std::stoi(temp);
+        temp.clear();
+
+        u64 counter = 0;
+
+        while (counter < size) {
+            temp += contents.at(index + counter);
+            counter++;
+        }
+
+        index += counter;
+
+        data = temp;
+        temp.clear();
+
+        // Log(LogLevel::Info, currentDirectory);
+        // Log(LogLevel::Info, name);
+        // Log(LogLevel::Info, std::format("{}", size));
+        // Log(LogLevel::Info, data);
+
+        if (currentDirectory == "gui") {
+            AddMenuFromJSON(data);
+        }
+
+        if (currentDirectory == "textures") {
+            Image im = LoadImageFromMemory(".png", (u8*)data.c_str(), size);
+
+            AddTexture(name, LoadTextureFromImage(im));
+            UnloadImage(im);
+        }
+
+        if (currentDirectory == "fonts") {
+            m_FontData = data;
+        }
+
+        if (currentDirectory == "levels") {
+            AddLevelFromLvl(data);
+        }
+
+        index++;
+    }
 }
 
-void s_Registry::SetValue(const std::string& name, f32 val) {
-    m_Variables[name] = val;
-}
-
-f32& s_Registry::GetValue(const std::string& name) {
-    return m_Variables.at(name);
-}
-
-void s_Registry::RegisterAllMenus() {
-	std::filesystem::path textures = std::filesystem::current_path() / "Assets" / "Gui";
-
-	for (const auto& entry : std::filesystem::directory_iterator(textures)) {
-		if (entry.path().extension() != "json") {
-			Log(LogLevel::Info, entry.path().string());
-            AddMenuFromJSON(entry);
-		}
-	}
+void s_Registry::RegisterDirectory(const std::filesystem::path& directory) {
+    #ifdef RDEBUG
+        
+    #else
+        #error "Trying to call RegisterDirectory in release mode!"
+    #endif
 }
 
 void s_Registry::AddMenu(const std::string& name, const Menu& menu) {
     m_Menus[name] = menu;
 }
 
-void s_Registry::AddMenuFromJSON(const std::filesystem::path& json) {
-    std::ifstream f(json);
-    nlohmann::json data = nlohmann::json::parse(f);
+void s_Registry::AddMenuFromJSON(const std::string& json) {
+    nlohmann::json data = nlohmann::json::parse(json);
 
     Menu menu;
     std::string name;
@@ -107,7 +196,7 @@ void s_Registry::AddMenuFromJSON(const std::filesystem::path& json) {
                         text = entry.at("text");
                     }
 
-                    menu.AddElement( Text(GetInfo(entry), text) );
+                    menu.AddElement( Text(GetInfo(entry), text), entries );
                 }
 
                 if (entry.at("type") == "button") {
@@ -118,15 +207,15 @@ void s_Registry::AddMenuFromJSON(const std::filesystem::path& json) {
                         return;
                     }
 
-                    menu.AddElement( Button(GetInfo(entry), GetText(entry), entry.at("on-click") ) );
+                    menu.AddElement( Button(GetInfo(entry), GetText(entry), entry.at("on-click")), entries );
                 }
 
                 if (entry.at("type") == "label") {
-                    menu.AddElement( Label(GetInfo(entry), GetText(entry)) );
+                    menu.AddElement( Label(GetInfo(entry), GetText(entry)), entries );
                 }
 
                 if (entry.at("type") == "checkbox") {
-                    menu.AddElement( CheckBox(GetInfo(entry)) );
+                    menu.AddElement( CheckBox(GetInfo(entry)), entries );
                 }
 
                 if (entry.at("type") == "slider") {
@@ -141,7 +230,7 @@ void s_Registry::AddMenuFromJSON(const std::filesystem::path& json) {
                     if (entry.contains("max")) { max = entry.at("max"); }
                     if (entry.contains("step")) { step = entry.at("step"); }
 
-                    menu.AddElement( Slider(GetInfo(entry), inital, min, max, step) );
+                    menu.AddElement( Slider(GetInfo(entry), inital, min, max, step), entries );
                 }
 
                 if (entry.at("type") == "combobox") {
@@ -154,10 +243,20 @@ void s_Registry::AddMenuFromJSON(const std::filesystem::path& json) {
                     }
                     std::vector<std::string> options = entry.at("options");
 
-                    menu.AddElement( ComboBox(GetInfo(entry), options) );
+                    menu.AddElement( ComboBox(GetInfo(entry), options), entries );
+                }
+
+                if (entry.at("type") == "window") {
+                    menu.AddElement( Window(GetInfo(entry), "hi"), entries );
+                }
+
+                if (entry.at("type") == "colorpicker") {
+                    menu.AddElement( ColorPicker(GetInfo(entry)), entries );
                 }
             }
         }
+
+        Log(LogLevel::Info, std::format("Added menu with name: {}", name));
 
         menu.SetName(name);
 
@@ -177,51 +276,166 @@ bool s_Registry::DoesMenuExist(const std::string& name) {
     return m_Menus.contains(name);
 }
 
-void s_Registry::RegisterAllTextures() {
-	std::filesystem::path textures = std::filesystem::current_path() / "Assets" / "Textures";
-
-	for (const auto& entry : std::filesystem::directory_iterator(textures)) {
-		if (entry.path().extension() != "png") {
-			Log(LogLevel::Info, entry.path().string());
-			AddTile(entry.path().stem(), LoadTexture(entry.path().string().c_str()));
-		}
-	}
-}
-
-void s_Registry::AddTile(const std::string& name, const Texture& texture) {
-	AddTileTexture(name, texture);
-}
-
-void s_Registry::AddTileTexture(const std::string& name, const Texture& texture) {
+void s_Registry::AddTexture(const std::string& name, const Texture& texture) {
 	// will throw an exception if the tile isn't already registered
 	m_TileTextures[name] = texture;
 }
 
-Texture& s_Registry::GetTileTexture(const std::string& name) {
+Texture& s_Registry::GetTexture(const std::string& name) {
 	return m_TileTextures.at(name);
 }
 
 
-bool s_Registry::DoesTileExist(const std::string& name) {
+bool s_Registry::DoesTextureExist(const std::string& name) {
 	return m_TileTextures.contains(name);
 }
 
 void s_Registry::RegisterAllFunctions() {
     // just about the most disgusting thing i have ever seen
     // jesus christ
+    // i know i there is a better way but this is portable, the other version is NOT
 
-    // AddFunction("StartGame", [](){Game.StartGameplay();});
+    AddFunction("StartGame", [](){ Game.StartGameplay(); });
+    AddFunction("QuitGame", [](){ Game.Quit(); });
+    AddFunction("StartEditor", [](){ Game.StartEditor(); });
 
-    // nevermind, found a better way!!
-    AddFunction("StartGame", &s_Game::StartGameplay);
-    AddFunction("QuitGame", &s_Game::Quit);
+    // still gotta do this for the editor ones
+    AddFunction("ExportLevel", [](){ Game.GetEditor()->Export(); });
 }
 
-void s_Registry::AddFunction(const std::string& name, std::function<void(s_Game*)> func) {
+void s_Registry::AddFunction(const std::string& name, std::function<void()> func) {
     m_Functions[name] = func;
 }
 
 void s_Registry::CallFunction(const std::string& name) {
     // very safe
-    m_Functions.at(name)(&Game);
+    m_Functions.at(name)();
+}
+
+void s_Registry::AddFont(u32 size) {
+    m_Fonts[size] = LoadFontFromMemory( ".ttf", (u8*)(m_FontData.c_str()), m_FontData.size(), size, nullptr, 0);
+}
+
+Font& s_Registry::GetFont(u32 size) {
+    if (!m_Fonts.contains(size)) {
+        AddFont(size);
+    }
+
+    return m_Fonts.at(size);
+}
+
+void s_Registry::AddLevel(const std::string& name, const Level& level) {
+    m_Levels[name] = level;
+}
+
+void s_Registry::AddLevelFromLvl(const std::string& lvl) {
+    std::string contents;
+    Level l;
+
+    contents = lvl;
+
+    int pos = 0;
+
+    // a string used to check any string in the file
+    std::string str;
+
+    // check if the file is valid (contains RSP at the start)
+    while (pos < 3) {
+        str += contents.at(pos++);
+    }
+
+    Log(LogLevel::Info, str);
+
+    if (str != "LVL") {
+        Log(LogLevel::Warning, "Not a valid .lvl file!");
+        return;
+    }
+
+    str.clear();
+
+    // Get the size of the name
+    uint8_t nameSize = contents.at(pos++);
+
+    // Get the actual name
+    for (int i = 0; i < nameSize; i++) {
+        str += contents.at(pos);
+        pos++;
+    }
+
+    l.SetName(str);
+    str.clear();
+
+    size_t end = pos + 5;
+
+    // Get the _H_E_ string
+    while (pos < end) {
+        str += contents.at(pos++);
+    }
+
+    if (str != "_H_E_") {
+        Log(LogLevel::Warning, ".rsp File Header doesn't contain \"_H_E_\" at the correct spot!");
+        return;
+    }
+
+    str.clear();
+
+    while (pos < contents.size()) {
+        while (contents.at(pos) != ':') {
+            str += contents.at(pos);
+            pos++;
+        }
+
+        Log(LogLevel::Info, str);
+
+        // we are parsing a tile
+        if (str == "tile") {
+            // skip past the ':'
+            pos++;
+
+            std::string type;
+            int32_t x;
+            int32_t y;
+
+            while (contents.at(pos) != '\\') {
+                type.append(1, contents.at(pos));
+                pos++;
+            }
+
+            pos++;
+
+            // reassemble the number from little endian
+            x = static_cast<int32_t>((int8_t)contents.at(pos + 3) << 24 |
+                                     (int8_t)contents.at(pos + 2) << 16 |
+                                     (int8_t)contents.at(pos + 1) << 8  |
+                                     (int8_t)contents.at(pos));
+
+            pos += 4;
+
+            y = static_cast<int32_t>((int8_t)contents.at(pos + 3) << 24 |
+                                     (int8_t)contents.at(pos + 2) << 16 |
+                                     (int8_t)contents.at(pos + 1) << 8  |
+                                     (int8_t)contents.at(pos));
+
+            pos += 4;
+
+            Log(LogLevel::Info, std::format("{}, {}", x, y));
+
+            l.AddTile(Tile(type, {x, y}));
+        }
+
+        str.clear();
+    }
+
+    // m_Shader = LoadShader(nullptr, "Assets/Shaders/lighting.glsl");
+
+    //m_Mobs.push_back(Mob());
+    //m_Mobs.begin()->InitTextures();
+
+    Log(LogLevel::Info, "Successfully loaded level!");
+
+    AddLevel(l.GetName(), l);
+}
+
+Level& s_Registry::GetLevel(const std::string& name) {
+    return m_Levels.at(name);
 }

@@ -4,7 +4,7 @@
 
 class Text : public GuiElement {
 public:
-    Text(const PosInfo& info, const std::string& text);
+    Text(const GuiInfo& info, const std::string& text);
 
     virtual void OnUpdate() override;
     virtual void OnRender() override;

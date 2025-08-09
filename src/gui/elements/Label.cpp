@@ -1,6 +1,6 @@
 #include "gui/gui.hpp"
 
-Label::Label(const PosInfo& info, const std::string& text) : 
+Label::Label(const GuiInfo& info, const std::string& text) : 
     m_Text(info, text)
 {
     m_Info = info;

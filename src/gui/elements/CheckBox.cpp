@@ -1,7 +1,7 @@
 #include "gui/gui.hpp"
 #include "raylib.h"
 
-CheckBox::CheckBox(const PosInfo& info) {
+CheckBox::CheckBox(const GuiInfo& info) {
     m_Info = info;
 };
 

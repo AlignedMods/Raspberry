@@ -7,7 +7,7 @@
 
 class ComboBox : public GuiElement {
 public:
-    ComboBox(const PosInfo& info, const std::vector<std::string>& options);
+    ComboBox(const GuiInfo& info, const std::vector<std::string>& options);
 
     virtual void OnUpdate() override;
     virtual void OnRender() override;

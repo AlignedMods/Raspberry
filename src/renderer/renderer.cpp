@@ -1,9 +1,9 @@
 #include "renderer.hpp"
 #include "core/log.hpp"
+#include "gui/elements/GuiElement.hpp"
 
-#include "game.hpp"
-#include "gui/gui.hpp"
 #include "raylib.h"
+#include "rlgl.h" // i don't know if anyone actually uses this, i know it's used internally but externally i am not sure
 
 static s_Renderer* instance = nullptr;
 
@@ -22,7 +22,9 @@ void s_Renderer::RenderTexture(const Texture& texture, f32 x, f32 y, Color tint)
     } else if (texture.width % 8 != 0) {
         Log(LogLevel::Error, "Textures must be a multiple of 8x8!");
     } else {
-        DrawTextureEx(texture, {x * 64.0f, y * 64.0f}, 0.0f, 64.0f / texture.width, tint);
+	    DrawTexturePro(texture, {0.0f, 0.0f, (float)texture.width, (float)texture.height}, 
+								{x * 32.0f, y * 32.0f, 32.0f, 32.0f}, 
+                                {0.0f, 0.0f}, 0.0f, WHITE);
     }
 }
 
@@ -32,10 +34,9 @@ void s_Renderer::RenderEntity(const Texture& texture, Vector2 position) {
     } else if (texture.width % 8 != 0) {
         Log(LogLevel::Error, "Textures must be a multiple of 8x8!");
     } else {
-        //DrawTextureEx(texture, {position.x * 64.0f, position.y * 64.0f}, 0.0f, 64.0f / texture.width, WHITE);
 	    DrawTexturePro(texture, {0.0f, 0.0f, (float)texture.width, (float)texture.height}, 
-								{position.x * 64.0f, position.y * 64.0f, 64.0f, 64.0f}, 
-								{0.0f, 0.0f}, 0.0f, WHITE);
+								{position.x * 32.0f, position.y * 32.0f, 32.0f, 32.0f}, 
+                                {0.0f, 0.0f}, 0.0f, WHITE);
     }
 }
 
@@ -45,7 +46,7 @@ void s_Renderer::RenderText(const char* text, i32 x, i32 y) {
 
 void s_Renderer::Begin() {
 	BeginDrawing();
-	ClearBackground(GetColor(Colors::Black));
+	ClearBackground(GetColor(Colors::DGray));
 }
 
 void s_Renderer::End() {

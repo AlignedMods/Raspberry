@@ -27,13 +27,14 @@ public:
     void OnUpdate();
     void OnRender();
 
+    void Export();
+
 private:
     void PlaceTile();
     void DestroyTile();
 
     i2 GetWorldPosition();
     void HandleSelection();
-    void Export();
 
 private:
     std::map<i2, Tile> m_Tiles;
