@@ -1,9 +1,8 @@
 #include "renderer.hpp"
 #include "core/log.hpp"
-#include "gui/elements/GuiElement.hpp"
 
 #include "raylib.h"
-#include "rlgl.h" // i don't know if anyone actually uses this, i know it's used internally but externally i am not sure
+#include "raymath.h"
 
 static s_Renderer* instance = nullptr;
 
@@ -40,16 +39,32 @@ void s_Renderer::RenderEntity(const Texture& texture, Vector2 position) {
     }
 }
 
-void s_Renderer::RenderText(const char* text, i32 x, i32 y) {
-	DrawText(text, x, y, 40, BLACK);
+void s_Renderer::RenderText(const char* text, f2 pos, u32 fontSize) {
+    f32 spacing = fontSize/10.0f;
+    f2 dim = MeasureTextEx(GetFontDefault(), text, fontSize, spacing);
+
+    dim = Vector2Scale(dim, 0.5f);
+
+    dim = Vector2Subtract(pos, dim);
+
+    DrawTextEx(GetFontDefault(), text, {dim.x, dim.y}, fontSize, spacing, WHITE);
 }
 
 void s_Renderer::Begin() {
 	BeginDrawing();
-	ClearBackground(GetColor(Colors::DGray));
+	ClearBackground(GetColor(0x323232ff));
+
+    // this is a pretty hacky solution but i like it a lot ( not much work :) )
+    m_Internal.target = {0.0f + (GetScreenWidth() / 2.0f), 0.0f + (GetScreenHeight() / 2.0f)};
+    m_Internal.offset = { GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
+    m_Internal.zoom = 1.0f / (360.0f / GetScreenHeight());
+
+    BeginMode2D(m_Internal);
 }
 
 void s_Renderer::End() {
+    EndMode2D();
+
 	EndDrawing();
 	SwapScreenBuffer();
 }

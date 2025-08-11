@@ -1,6 +1,8 @@
 #pragma once
 
+#include "core/types.hpp"
 #include "raylib.h"
+#include "registry.hpp"
 
 inline Vector3 ConvertHSVtoRGB(Vector3 hsv)
 {
@@ -69,4 +71,11 @@ inline Vector3 ConvertHSVtoRGB(Vector3 hsv)
     }
 
     return rgb;
+}
+
+inline f2 CenterText(const char* text, u32 size, Rectangle area) {
+    f2 textSize = MeasureTextEx(GetFontDefault(), text, size, 3);
+    // f2 textSize = {50.0f, 3.0f};
+
+    return { (area.x + area.width) / 2.0f - textSize.x / 2.0f, (area.y + area.height) / 2.0f - textSize.y / 2.0f};
 }

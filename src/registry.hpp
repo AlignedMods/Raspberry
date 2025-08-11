@@ -5,7 +5,6 @@
 
 #include "core/log.hpp"
 #include "core/types.hpp"
-#include "gui/gui.hpp"
 #include "level/level.hpp"
 
 #include "raylib.h"
@@ -55,13 +54,6 @@ public:
 
     bool DoesVariableExist(const std::string& name);
 
-    // menu
-    void AddMenu(const std::string& name, const Menu& menu);
-    void AddMenuFromJSON(const std::string& json);
-
-    Menu& GetMenu(const std::string& name);
-    bool DoesMenuExist(const std::string& name);
-
     // tile related stuff
 	void AddTexture(const std::string& name, const Texture& texture); // both registers a tile AND sets the texture
     
@@ -73,8 +65,7 @@ public:
     void AddFunction(const std::string& name, std::function<void()> func);
     void CallFunction(const std::string& name); // fully safe, i assure you
 
-    void AddFont(u32 size);
-    Font& GetFont(u32 size);
+    Texture& GetFont();
 
     void AddLevel(const std::string& name, const Level& level);
     void AddLevelFromLvl(const std::string& lvl);
@@ -84,11 +75,10 @@ private:
 	// map for tiles
 	std::unordered_map<std::string, Texture> m_TileTextures;
     std::unordered_map<u32, Font> m_Fonts;
-    std::unordered_map<std::string, Menu> m_Menus;
     std::unordered_map<std::string, std::function<void()>> m_Functions;
     std::unordered_map<std::string, Level> m_Levels;
 
-    std::string m_FontData;
+    Texture m_Font;
 
     std::unordered_map<std::string, std::any> m_Variables;
 };

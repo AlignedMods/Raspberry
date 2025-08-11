@@ -1,6 +1,5 @@
 #include "editor.hpp"
 #include "core/types.hpp"
-#include "gui/gui.hpp"
 #include "registry.hpp"
 #include "renderer/renderer.hpp"
 #include "core/log.hpp"
@@ -85,7 +84,7 @@ void Editor::OnUpdate() {
     // building (dragging DOES affect)
     if (m_Mode == EditorModes::Build) {
         // currently dragging
-        if (!Gui.IsHovering()) {
+        // if (!Gui.IsHovering()) {
             if (m_State == EditorStates::Drag) {
                 if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
                     PlaceTile();
@@ -97,12 +96,12 @@ void Editor::OnUpdate() {
                     PlaceTile();
                 }
             }
-        }
+        // }
     }
 
     // destroying :D
     if (m_Mode == EditorModes::Destroy) {
-        if (!Gui.IsHovering()) {
+        // if (!Gui.IsHovering()) {
             // currently dragging
             if (m_State == EditorStates::Drag) {
                 if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
@@ -115,11 +114,11 @@ void Editor::OnUpdate() {
                     DestroyTile();
                 }
             }
-        }
+        // }
     }
 
     if (m_Mode == EditorModes::Select) {
-        if (!Gui.IsHovering()) {
+        // if (!Gui.IsHovering()) {
             i2 worldPosition = GetWorldPosition();
 
             if (m_State == EditorStates::Click) {
@@ -142,7 +141,7 @@ void Editor::OnUpdate() {
             if (m_State == EditorStates::Drag) {
                 // TODO
             }
-        }
+        // }
     }
 
     HandleSelection();

@@ -1,9 +1,8 @@
 #include "registry.hpp"
 #include "core/log.hpp"
 #include "core/types.hpp"
-
 #include "game.hpp"
-#include "gui/gui.hpp"
+
 #include "nlohmann/json.hpp"
 #include "raylib.h"
 
@@ -132,15 +131,6 @@ void s_Registry::RegisterArchive(const std::filesystem::path& archive) {
         data = temp;
         temp.clear();
 
-        // Log(LogLevel::Info, currentDirectory);
-        // Log(LogLevel::Info, name);
-        // Log(LogLevel::Info, std::format("{}", size));
-        // Log(LogLevel::Info, data);
-
-        if (currentDirectory == "gui") {
-            AddMenuFromJSON(data);
-        }
-
         if (currentDirectory == "textures") {
             Image im = LoadImageFromMemory(".png", (u8*)data.c_str(), size);
 
@@ -149,7 +139,10 @@ void s_Registry::RegisterArchive(const std::filesystem::path& archive) {
         }
 
         if (currentDirectory == "fonts") {
-            m_FontData = data;
+            Image im = LoadImageFromMemory(".png", (u8*)data.c_str(), data.size());
+            m_Font = LoadTextureFromImage(im);
+
+            UnloadImage(im);
         }
 
         if (currentDirectory == "levels") {
@@ -161,119 +154,44 @@ void s_Registry::RegisterArchive(const std::filesystem::path& archive) {
 }
 
 void s_Registry::RegisterDirectory(const std::filesystem::path& directory) {
+    std::string currentDirectory;
+    std::string data;
+
     #ifdef RDEBUG
-        
-    #else
-        #error "Trying to call RegisterDirectory in release mode!"
-    #endif
-}
 
-void s_Registry::AddMenu(const std::string& name, const Menu& menu) {
-    m_Menus[name] = menu;
-}
+    for (auto& entry : std::filesystem::recursive_directory_iterator(directory)) {
+        if (entry.is_directory()) {
+            currentDirectory = entry.path().filename().string();
+        } else {
+            std::ifstream file(entry.path(), std::ios::binary);
+            std::stringstream stream;
 
-void s_Registry::AddMenuFromJSON(const std::string& json) {
-    nlohmann::json data = nlohmann::json::parse(json);
+            stream << file.rdbuf();
 
-    Menu menu;
-    std::string name;
+            data = stream.str();
 
-    if (data.at("type") == "menu") {
-        if (data.contains("name")) {
-            name = data.at("name");
-        }
+            if (currentDirectory == "textures") {
+                AddTexture(entry.path().stem().string(), LoadTexture(entry.path().c_str()));
+            }
 
-        for (auto& entries : data.at("elements")) {
-            auto& entry = data.at(entries);
+            if (currentDirectory == "fonts") {
+                Log(LogLevel::Info, entry.path().extension().string());
+                if (entry.path().filename().string() == "raspberry.png") {
+                    m_Font = LoadTexture(entry.path().c_str());
 
-            if (entry.contains("type")) {
-                Log(LogLevel::Debug, entry.at("type"));
-
-                if (entry.at("type") == "text") {
-                    std::string text = "*blank*";
-
-                    if (entry.contains("text")) {
-                        text = entry.at("text");
-                    }
-
-                    menu.AddElement( Text(GetInfo(entry), text), entries );
-                }
-
-                if (entry.at("type") == "button") {
-                    if (!entry.contains("on-click")) {
-                        Log(LogLevel::Error, "Button doesn't specify \"on-click\" property!\n" \
-                                             "If you wish to not specify an action use *nop*!");
-
-                        return;
-                    }
-
-                    menu.AddElement( Button(GetInfo(entry), GetText(entry), entry.at("on-click")), entries );
-                }
-
-                if (entry.at("type") == "label") {
-                    menu.AddElement( Label(GetInfo(entry), GetText(entry)), entries );
-                }
-
-                if (entry.at("type") == "checkbox") {
-                    menu.AddElement( CheckBox(GetInfo(entry)), entries );
-                }
-
-                if (entry.at("type") == "slider") {
-                    // some fallback values
-                    f32 inital = 16.0f;
-                    f32 min = 0.0f;
-                    f32 max = 32.0f;
-                    f32 step = 0.001f;
-
-                    if (entry.contains("initial")) { inital = entry.at("inital"); }
-                    if (entry.contains("min")) { min = entry.at("min"); }
-                    if (entry.contains("max")) { max = entry.at("max"); }
-                    if (entry.contains("step")) { step = entry.at("step"); }
-
-                    menu.AddElement( Slider(GetInfo(entry), inital, min, max, step), entries );
-                }
-
-                if (entry.at("type") == "combobox") {
-                    if (!entry.contains("options")) {
-                        Log(LogLevel::Error, "ComboBox doesn't specify \"options\" property!\n" \
-                                             "At least one option has to be specified in the following format:\n" \
-                                             "\"options\": [ ... ]");
-
-                        return;
-                    }
-                    std::vector<std::string> options = entry.at("options");
-
-                    menu.AddElement( ComboBox(GetInfo(entry), options), entries );
-                }
-
-                if (entry.at("type") == "window") {
-                    menu.AddElement( Window(GetInfo(entry), "hi"), entries );
-                }
-
-                if (entry.at("type") == "colorpicker") {
-                    menu.AddElement( ColorPicker(GetInfo(entry)), entries );
+                    Log(LogLevel::Info, "Adding font");
                 }
             }
+
+            if (currentDirectory == "levels") {
+                AddLevelFromLvl(data);
+            }
         }
-
-        Log(LogLevel::Info, std::format("Added menu with name: {}", name));
-
-        menu.SetName(name);
-
-        AddMenu(name, menu);
-    }
-}
-
-Menu& s_Registry::GetMenu(const std::string& name) {
-    if (DoesMenuExist(name)) {
-        return m_Menus.at(name);
     }
 
-    return m_Menus.at(name);
-}
-
-bool s_Registry::DoesMenuExist(const std::string& name) {
-    return m_Menus.contains(name);
+    #else
+    #error "Trying to call RegisterDirectory in release mode!"
+    #endif
 }
 
 void s_Registry::AddTexture(const std::string& name, const Texture& texture) {
@@ -312,16 +230,8 @@ void s_Registry::CallFunction(const std::string& name) {
     m_Functions.at(name)();
 }
 
-void s_Registry::AddFont(u32 size) {
-    m_Fonts[size] = LoadFontFromMemory( ".ttf", (u8*)(m_FontData.c_str()), m_FontData.size(), size, nullptr, 0);
-}
-
-Font& s_Registry::GetFont(u32 size) {
-    if (!m_Fonts.contains(size)) {
-        AddFont(size);
-    }
-
-    return m_Fonts.at(size);
+Texture& s_Registry::GetFont() {
+    return m_Font;
 }
 
 void s_Registry::AddLevel(const std::string& name, const Level& level) {

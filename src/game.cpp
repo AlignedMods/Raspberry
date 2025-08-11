@@ -1,16 +1,14 @@
 #include "game.hpp"
 #include "core/random.hpp"
-#include "core/types.hpp"
 #include "entity/player.hpp"
 #include "core/log.hpp"
-#include "gui/gui.hpp"
 #include "registry.hpp"
 
 #include "raylib.h"
+#include "renderer/renderer.hpp"
 #include "rlgl.h"
 
 #include <cstdlib>
-#include <format>
 
 static s_Game* s_Instance = nullptr;
 
@@ -29,9 +27,7 @@ s_Game::~s_Game() {}
 
 bool s_Game::Init() {
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
-    SetConfigFlags(FLAG_WINDOW_UNDECORATED);
-    SetConfigFlags(FLAG_WINDOW_TRANSPARENT);
-    SetConfigFlags(FLAG_MSAA_4X_HINT);
+    // SetConfigFlags(FLAG_MSAA_4X_HINT);
     InitWindow(640, 360, "Raspberry");
 
     // we can't create the window
@@ -81,10 +77,12 @@ bool s_Game::Init() {
 
     #ifdef RDEBUG
         Registry.RegisterDirectory("Assets/");
+    #else
+        Registry.RegisterArchive("core.rsp");
     #endif
-    Registry.RegisterArchive("core.rsp");
 
-    Gui.SwitchMenu("Main-Menu");
+    // Gui.SwitchMenu("Main-Menu");
+    InitMenu();
 
     return true;
 }
@@ -132,7 +130,7 @@ void s_Game::OnUpdate() {
     // if (GetScreenWidth() % 640 || GetScreenHeight() % 360) { Log(LogLevel::Warning, "Use of unsupported window size!\nYou will likely run into issues!"); }
 
     while (GetTime() - m_TickTime > 0.0167f) {
-        m_TickTime += GetTime() - m_TickTime;
+        m_TickTime += 0.0167f;
 
         FixedUpdate();
     }
@@ -163,7 +161,11 @@ void s_Game::OnUpdate() {
         m_Editor->OnUpdate();
     }
 
-    Gui.OnUpdate();
+    UpdateCurrentMenu();
+
+    // Renderer.RenderText("HeLlO wOrLd!", {200.0f, 100.0f}, 20);
+
+    // Gui.OnUpdate();
 }
 
 void s_Game::FixedUpdate() {
@@ -189,7 +191,9 @@ void s_Game::OnRender() {
         m_Editor->OnRender();
     }
 
-    Gui.OnRender();
+    RenderCurrentMenu();
+
+    // Gui.OnRender();
 
     // show the current fps
     DrawText(TextFormat("FPS: %.1f", m_CurrentFPS), 10, 10, 20, GREEN);
@@ -299,8 +303,6 @@ void s_Game::StartEditor() {
     m_EditorRunning = true;
 
     m_Editor = new Editor(m_EditorCamera);
-
-    Gui.SwitchMenu("Editor");
 }
 
 void s_Game::StartGameplay() {

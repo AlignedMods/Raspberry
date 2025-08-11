@@ -2,6 +2,7 @@
 
 #include "editor/editor.hpp"
 #include "level/level.hpp"
+#include "gui/menu.hpp"
 
 #include "raylib.h"
 
@@ -59,7 +60,7 @@ private:
     
 	bool m_Running = true;
 
-	u32 m_TargetFPS = 0;
+	u32 m_TargetFPS = 144;
 	f32 m_CurrentFPS = 0;
 
     u32 m_PreviousWindowWidth, m_PreviousWindowHeight;
@@ -79,7 +80,7 @@ private:
 	bool m_EditorRunning = false;
 
 	bool m_Paused = false;
-    
+
     std::array<Vector2, 9> m_Resolutions = {{
         // yes i had to write this out manually
         {640,  360}, 
