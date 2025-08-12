@@ -79,7 +79,6 @@ private:
     // -- GAME -- //
 
 	bool m_EditorRunning = false;
-
 	bool m_Paused = false;
 
     std::array<Vector2, 9> m_Resolutions = {{
