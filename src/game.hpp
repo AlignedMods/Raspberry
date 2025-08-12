@@ -29,8 +29,7 @@ public:
     void StartGameplay();
     void StartEditor();
 
-    // Pause will automatically resume if the game is already paused
-    void Pause();
+    void SetPause(bool yes);
 
     void Quit();
 
@@ -45,6 +44,9 @@ private:
     constexpr std::string FormatResolutions();
     constexpr std::string FormatFramerates();
     void SetFullscreen(bool yesno);
+
+public:
+    bool m_GameRunning = false;
 
 private:
 	Level* m_CurrentLevel = nullptr;
@@ -76,7 +78,6 @@ private:
 
     // -- GAME -- //
 
-    bool m_GameRunning = false;
 	bool m_EditorRunning = false;
 
 	bool m_Paused = false;

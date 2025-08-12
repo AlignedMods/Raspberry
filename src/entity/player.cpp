@@ -9,20 +9,21 @@
 #include "raylib.h"
 
 void Player::InitTextures() {
-	m_Textures["IdleLeft"] = Registry.GetTexture("player_left.png");
-	m_Textures["RunningLeftUp"] = Registry.GetTexture("player_left_walk_up.png");
-	m_Textures["RunningLeftDown"] = Registry.GetTexture("player_left_walk_down.png");
+	m_Textures["IdleLeft"] = Registry.GetTexture("player_left");
+	m_Textures["RunningLeftUp"] = Registry.GetTexture("player_left_walk_up");
+	m_Textures["RunningLeftDown"] = Registry.GetTexture("player_left_walk_down");
 
-	m_Textures["IdleRight"] = Registry.GetTexture("player_right.png");
-	m_Textures["RunningRightUp"] = Registry.GetTexture("player_right_walk_up.png");
-	m_Textures["RunningRightDown"] = Registry.GetTexture("player_right_walk_down.png");
+	m_Textures["IdleRight"] = Registry.GetTexture("player_right");
+	m_Textures["RunningRightUp"] = Registry.GetTexture("player_right_walk_up");
+	m_Textures["RunningRightDown"] = Registry.GetTexture("player_right_walk_down");
 
 	m_Texture = m_Textures.at("IdleLeft");
 }
 
-
 // phyics
 void Player::OnUpdate() {
+	m_Texture = Registry.GetTexture("player_left");
+
 	m_Walking = false;
 
 	m_WalkSpeed.x = Approach(0.0f, m_WalkSpeed.x, 50.0f * Game.deltaTime);
@@ -53,6 +54,21 @@ void Player::OnUpdate() {
 			m_TimeSinceDash += 3.0;
 		}
 	}
+
+    if (IsGamepadAvailable(0)) {
+        f32 axisX = GetGamepadAxisMovement(0, GAMEPAD_AXIS_LEFT_X);
+
+        if (std::abs(axisX) > 0.1f) {
+            m_WalkSpeed.x = axisX * 5.0f;
+        }
+
+        if (IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_DOWN)) {
+			m_Velocity.y = -9.0f;
+			m_Grounded = false;
+
+		    m_JumpCooldown += 0.5f * Game.deltaTime;
+        }
+    }
 
 	m_Velocity.x = m_WalkSpeed.x + m_DashSpeed.x;
 

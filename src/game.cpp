@@ -2,6 +2,7 @@
 #include "core/random.hpp"
 #include "entity/player.hpp"
 #include "core/log.hpp"
+#include "gui/menu.hpp"
 #include "registry.hpp"
 
 #include "raylib.h"
@@ -9,6 +10,7 @@
 #include "rlgl.h"
 
 #include <cstdlib>
+#include <format>
 
 static s_Game* s_Instance = nullptr;
 
@@ -141,7 +143,7 @@ void s_Game::OnUpdate() {
         mt_Fullscreen = IsWindowFullscreen();
     }
 
-    if (m_GameRunning) {
+    if (m_GameRunning && !m_Paused) {
         m_Camera.offset = { GetScreenWidth() / 2.0f - 16.0f * m_Camera.zoom, GetScreenHeight() / 2.0f - 16.0f * m_Camera.zoom };
 
         if (!m_Paused) {
@@ -150,10 +152,6 @@ void s_Game::OnUpdate() {
 
         m_Camera.target = {m_CurrentLevel->GetPlayer().GetX() * 32.0f,
                            m_CurrentLevel->GetPlayer().GetY() * 32.0f};
-
-        if (IsKeyPressed(KEY_ESCAPE)) {
-            Pause();
-        }
     }
 
     if (m_EditorRunning) {
@@ -269,14 +267,8 @@ void s_Game::SetFullscreen(bool yesno) {
     Log(LogLevel::Info, "No condition is met!");
 }
 
-void s_Game::Pause() {
-    m_Paused = !m_Paused;
-
-    if (m_Paused) {
-        //m_CurrentMenu = Menu::Pause;
-    } else {
-        //m_CurrentMenu = Menu::None;
-    }
+void s_Game::SetPause(bool yes) {
+    m_Paused = yes;
 }
 
 void s_Game::Quit() {

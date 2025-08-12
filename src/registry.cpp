@@ -200,6 +200,10 @@ void s_Registry::AddTexture(const std::string& name, const Texture& texture) {
 }
 
 Texture& s_Registry::GetTexture(const std::string& name) {
+    if (!DoesTextureExist(name)) {
+        Log(LogLevel::Error, std::format("Texture {} doesn't exist, or hasn't been registered yet!", name));
+    }
+
 	return m_TileTextures.at(name);
 }
 
@@ -256,7 +260,7 @@ void s_Registry::AddLevelFromLvl(const std::string& lvl) {
 
     Log(LogLevel::Info, str);
 
-    if (str != "LVL") {
+    if (str != "RSP") {
         Log(LogLevel::Warning, "Not a valid .lvl file!");
         return;
     }
@@ -340,6 +344,12 @@ void s_Registry::AddLevelFromLvl(const std::string& lvl) {
 
     //m_Mobs.push_back(Mob());
     //m_Mobs.begin()->InitTextures();
+
+    l.GetPlayer().InitTextures();
+    
+    for (auto& mob : l.GetAllMobs()) {
+        mob.InitTextures();
+    }
 
     Log(LogLevel::Info, "Successfully loaded level!");
 

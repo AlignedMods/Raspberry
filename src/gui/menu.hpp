@@ -28,7 +28,7 @@ struct Menu {
 };
 
 // also not everything has to be a class, this makes more sense to me
-extern void InitMenu();
+void InitMenu();
 
 void UpdateCurrentMenu();
 void RenderCurrentMenu();

@@ -14,6 +14,7 @@ public:
     void Tick();
 
     Player& GetPlayer();
+    std::vector<Mob>& GetAllMobs();
 
     void AddTile(Tile tile);
     std::vector<Tile>& GetAllTiles();

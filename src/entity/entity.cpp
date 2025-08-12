@@ -1,4 +1,5 @@
 #include "entity/entity.hpp"
+#include "core/log.hpp"
 #include "core/types.hpp"
 #include "game.hpp"
 
@@ -83,27 +84,29 @@ float Entity::Approach(float end, float current, float interval) {
 void Entity::UpdateTextures() {
     m_Anim++;
 
-    if (m_Direction == 0) {
-        m_Texture = m_Textures.at("IdleLeft");
+    // m_Texture = m_Textures.at("IdleLeft");
 
-        if (m_Walking && m_Velocity.x < 0.0f) {
-            if (m_Anim % 10 > 5) {
-                m_Texture = m_Textures.at("RunningLeftUp");
-            } else {
-                m_Texture = m_Textures.at("RunningLeftDown");
-            }
-        }
-    }
+    // if (m_Direction == 0) {
+    //     // m_Texture = m_Textures.at("IdleLeft");
 
-    if (m_Direction == 1) {
-        m_Texture = m_Textures.at("IdleRight");
+    //     if (m_Walking && m_Velocity.x < 0.0f) {
+    //         if (m_Anim % 10 > 5) {
+    //             m_Texture = m_Textures.at("RunningLeftUp");
+    //         } else {
+    //             m_Texture = m_Textures.at("RunningLeftDown");
+    //         }
+    //     }
+    // }
 
-        if (m_Walking && m_Velocity.x > 0.0f) {
-            if (m_Anim % 10 > 5) {
-                m_Texture = m_Textures.at("RunningRightUp");
-            } else {
-                m_Texture = m_Textures.at("RunningRightDown");
-            }
-        }
-	}
+    // if (m_Direction == 1) {
+    //     // m_Texture = m_Textures.at("IdleRight");
+
+    //     if (m_Walking && m_Velocity.x > 0.0f) {
+    //         if (m_Anim % 10 > 5) {
+    //             m_Texture = m_Textures.at("RunningRightUp");
+    //         } else {
+    //             m_Texture = m_Textures.at("RunningRightDown");
+    //         }
+    //     }
+	// }
 }

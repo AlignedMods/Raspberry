@@ -1,4 +1,5 @@
 #include "mob.hpp"
+#include "registry.hpp"
 #include "renderer/renderer.hpp"
 #include "game.hpp"
 #include "core/random.hpp"
@@ -6,13 +7,13 @@
 #include "raymath.h"
 
 void Mob::InitTextures() {
-	m_Textures["IdleLeft"] = LoadTexture("Assets/Textures/brick.png");
-	m_Textures["IdleRight"] = LoadTexture("Assets/entity/player_right.png");
+	m_Textures["IdleLeft"] = Registry.GetTexture("brick");
+	m_Textures["IdleRight"] = Registry.GetTexture("brick");
 
-	m_Textures["RunningLeftUp"] = LoadTexture("Assets/entity/player_left_walk_up.png");
-	m_Textures["RunningLeftDown"] = LoadTexture("Assets/entity/player_left_walk_down.png");
-	m_Textures["RunningRightUp"] = LoadTexture("Assets/entity/player_right_walk_up.png");
-	m_Textures["RunningRightDown"] = LoadTexture("Assets/entity/player_right_walk_down.png");
+	m_Textures["RunningLeftUp"] = Registry.GetTexture("stone");
+	m_Textures["RunningLeftDown"] = Registry.GetTexture("stone");
+	m_Textures["RunningRightUp"] = Registry.GetTexture("stone");
+	m_Textures["RunningRightDown"] = Registry.GetTexture("stone");
 
 	m_Texture = m_Textures.at("IdleLeft");
 }

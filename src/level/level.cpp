@@ -4,11 +4,8 @@
 #include "tile/tile.hpp"
 #include "core/log.hpp"
 
-#include <cstdint>
 #include <format>
-#include <fstream>
 #include <string>
-#include <sstream>
 
 void Level::OnUpdate() {
     m_Player.OnUpdate();
@@ -19,15 +16,15 @@ void Level::OnUpdate() {
 }
 
 void Level::OnRender() {
-    int location = GetShaderLocation(m_Shader, "brightness");
-    SetShaderValue(m_Shader, location, (float*)&m_Brightness, SHADER_UNIFORM_FLOAT);
+    // int location = GetShaderLocation(m_Shader, "brightness");
+    // SetShaderValue(m_Shader, location, (float*)&m_Brightness, SHADER_UNIFORM_FLOAT);
 
     float v = 0.0f;
 
     i32 counter = 0;
     const Rectangle& vp = Game.GetViewportRect();
 
-    BeginShaderMode(m_Shader);
+    // BeginShaderMode(m_Shader);
 
     for (auto& tile : m_Tiles) {
         if (CheckCollisionRecs({tile.GetRealPosition().x, tile.GetRealPosition().y, 32.0f, 32.0f}, vp)) {
@@ -42,7 +39,7 @@ void Level::OnRender() {
         mob.OnRender();
     }
 
-    EndShaderMode();
+    // EndShaderMode();
 
     Log(LogLevel::Info, std::format("Rendering {} tiles", counter));
 }
@@ -53,6 +50,10 @@ void Level::Tick() {
 
 Player& Level::GetPlayer() {
     return m_Player;
+}
+
+std::vector<Mob>& Level::GetAllMobs() {
+    return m_Mobs;
 }
 
 void Level::AddTile(Tile tile) {

@@ -1,5 +1,8 @@
 #pragma once
 
+#include "raylib.h"
+#include <cstdarg>
+#include <cstdio>
 #include <iostream>
 #include <format>
 
@@ -31,7 +34,7 @@ inline void Critical(const std::string& message) {
     std::cout << "CRITICAL: " << message << std::endl;
 }
 
-inline static void Log(LogLevel level, const std::string& message) {
+inline static void Log(LogLevel level, const std::string& message, ...) {
     switch (level) {
         case LogLevel::Info:
             RInfo(message);
