@@ -2,7 +2,6 @@
 #include "core/log.hpp"
 #include "core/types.hpp"
 #include "game.hpp"
-#include "registry.hpp"
 #include "renderer/renderer.hpp"
 
 #include "raylib.h"
@@ -28,7 +27,6 @@ static void Q_Render();
 static void P_Continue();
 
 static void MoveCursor(bool up);
-static void ExecuteCallback();
 
 static MenuItem MainMenu[] = {
     {1, "Play",     M_StartGame},
@@ -97,8 +95,6 @@ void P_Continue() {
 }
 
 void MoveCursor(bool up) {
-    u16 last = current->selection;
-
     if (up) {
         if (current->items[current->selection - 1].type > 0 && current->selection > 0) {
             current->selection--;
@@ -110,15 +106,6 @@ void MoveCursor(bool up) {
             current->items[current->selection].timeSinceSelect = 0.0f;
         }
     }
-
-    if (last != current->selection) {
-        Registry.PlaySound("menu_cycle", 0.9f, 1.1f);
-    }
-}
-
-void ExecuteCallback() {
-    current->items[current->selection].callback();
-    Registry.PlaySound("menu_select", 0.8f, 1.3f);
 }
 
 void InitMenu() {
@@ -139,13 +126,9 @@ void UpdateCurrentMenu() {
             MoveCursor(true);
         }
 
-        if (key == KEY_ENTER) { 
-            ExecuteCallback();
-        }
+        if (key == KEY_ENTER) { current->items[current->selection].callback(); }
 
         // optional gamepad (controller) navigation
-        // i actually prefer it for some reason
-        // now i have a controller next to my setup always :>D
         if (IsGamepadAvailable(0)) {
             f32 axis = GetGamepadAxisMovement(0, GAMEPAD_AXIS_LEFT_Y);
 
@@ -158,7 +141,7 @@ void UpdateCurrentMenu() {
             }
 
             if (IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_DOWN)) {
-                ExecuteCallback();
+                 current->items[current->selection].callback(); 
             }
         }
     }
@@ -176,23 +159,6 @@ void UpdateCurrentMenu() {
             }
         }
     }
-
-    if (current) {
-        if (IsKeyPressed(KEY_ESCAPE)) {
-            if (current->prevMenu) {
-                SwitchMenu(current->prevMenu);
-            }
-        }
-
-        if (IsGamepadAvailable(0)) {
-            Log(LogLevel::Info, "gmapad available1");
-            if (IsGamepadButtonPressed(0, 6)) {
-                if (current->prevMenu) {
-                    SwitchMenu(current->prevMenu);
-                }
-            }
-        }
-    } // holy
 }
 
 void RenderCurrentMenu() {
@@ -223,7 +189,7 @@ void RenderCurrentMenu() {
             }
 
             Renderer.RenderText(text, {320.0f, y}, item->fontSize);
-            y += item->fontSize + 10.0f;
+            y += 50.0f;
         }
     }
 }

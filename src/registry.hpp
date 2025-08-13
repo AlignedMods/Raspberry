@@ -70,11 +70,6 @@ public:
     void AddLevel(const std::string& name, const Level& level);
     void AddLevelFromLvl(const std::string& lvl);
     Level& GetLevel(const std::string& name);
-
-    void AddSound(const std::string& name, const Sound& sound);
-    void AddSoundFromWAV(const std::string& name, const std::string& wav);
-
-    void PlaySound(const std::string& name, f32 min = 1.0f, f32 max = 1.0f);
     
 private:
 	// map for tiles
@@ -82,7 +77,6 @@ private:
     std::unordered_map<u32, Font> m_Fonts;
     std::unordered_map<std::string, std::function<void()>> m_Functions;
     std::unordered_map<std::string, Level> m_Levels;
-    std::unordered_map<std::string, Sound> m_Sounds;
 
     Texture m_Font;
 

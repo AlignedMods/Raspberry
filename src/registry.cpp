@@ -149,10 +149,6 @@ void s_Registry::RegisterArchive(const std::filesystem::path& archive) {
             AddLevelFromLvl(data);
         }
 
-        if (currentDirectory == "sounds") {
-            AddSoundFromWAV(name, data);
-        }
-
         index++;
     }
 }
@@ -189,11 +185,6 @@ void s_Registry::RegisterDirectory(const std::filesystem::path& directory) {
 
             if (currentDirectory == "levels") {
                 AddLevelFromLvl(data);
-            }
-
-            if (currentDirectory == "sounds") {
-                AddSoundFromWAV(entry.path().stem().string(), data);
-                Log(LogLevel::Info, std::format("Adding sound {}", entry.path().filename().string()));
             }
         }
     }
@@ -367,23 +358,4 @@ void s_Registry::AddLevelFromLvl(const std::string& lvl) {
 
 Level& s_Registry::GetLevel(const std::string& name) {
     return m_Levels.at(name);
-}
-
-void s_Registry::AddSound(const std::string& name, const Sound& sound) {
-    m_Sounds[name] = sound;
-}
-
-void s_Registry::AddSoundFromWAV(const std::string& name, const std::string& wav) {
-    Wave w = LoadWaveFromMemory(".wav", (u8*)wav.c_str(), wav.size());
-
-    AddSound(name, LoadSoundFromWave(w));
-
-    UnloadWave(w);
-}
-
-void s_Registry::PlaySound(const std::string& name, f32 min, f32 max) {
-    f32 pitch = GetRandomValue((f32)(min * 100), (f32)(max * 100)) / 100.0f; // hacky trick
-
-    SetSoundPitch(m_Sounds.at(name), pitch);
-    ::PlaySound(m_Sounds.at(name));
 }
