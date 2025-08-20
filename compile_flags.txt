@@ -1,9 +1,11 @@
 -DRDEBUG
 
 -Ivendor/raylib/src/
--Ivendor/raygui/src/
+-Ivendor/imgui/
+-Ivendor/rlImGui/
 -Ivendor/json/include/
 
--Isrc/
+-Iraspberry/
+-Ishared/
 
 -std=c++23

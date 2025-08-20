@@ -44,7 +44,32 @@ int main(int argc, char* argv[]) {
         if (std::filesystem::is_directory(entry)) {
             directory = entry.path().filename().string();
         } else {
-            output << directory << '\n';
+            std::string extension = entry.path().extension().string();
+
+            if (extension == ".png") {
+                output << "texture\n";
+            }
+
+            if (extension == ".wav") {
+                output << "sound\n";
+            }
+
+            if (extension == ".lvl") {
+                output << "map\n";
+            }
+
+            if (extension == ".ttf") {
+                output << "font\n";
+            }
+
+            if (extension == ".json") {
+                output << "fuck\n";
+            }
+
+            if (extension == ".glsl") {
+                output << "shader\n";
+            }
+
             output << entry.path().stem().string() << '\n';
             output << entry.file_size() << '\n';
 
