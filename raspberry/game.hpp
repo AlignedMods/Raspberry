@@ -61,7 +61,7 @@ private:
     
 	bool m_Running = true;
 
-	u32 m_TargetFPS = 144;
+	u32 m_TargetFPS = 0;
 	f32 m_CurrentFPS = 0;
 
     u32 m_PreviousWindowWidth, m_PreviousWindowHeight;

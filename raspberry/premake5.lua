@@ -1,7 +1,6 @@
 project "Raspberry"
 	language "C++"
 	cppdialect "C++20"
-    kind "WindowedApp"
 
     targetdir ( "../build/bin/" .. OutputDir .. "/%{prj.name}")
     objdir ( "../build/obj/" .. OutputDir .. "/%{prj.name}" )

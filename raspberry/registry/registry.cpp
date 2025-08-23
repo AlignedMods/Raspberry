@@ -7,18 +7,18 @@
 
 #include <filesystem>
 #include <fstream>
+#include <iostream>
 
 void s_Registry::RegisterArchive(const std::filesystem::path& archive) {
-    Log(Log::Info, "Adding archive: %s", archive.c_str());
+    Log(Log::Info, "Adding archive: %s", archive.string().c_str());
 
     if (!std::filesystem::exists(archive)) {
-        Log(Log::Critical, "Archive does NOT exist!");
+        Log(Log::Critical, "Archive does %s NOT exist!", archive.string().c_str());
     }
 
     std::ifstream file(archive, std::ios::binary);
 
-    std::stringstream contentsStream;
-    std::string contents;
+    std::string contents = {std::istreambuf_iterator<char>{file}, {}};
 
     std::string type;
     std::string name;
@@ -26,13 +26,14 @@ void s_Registry::RegisterArchive(const std::filesystem::path& archive) {
     u32 size;
 
     std::string temp;
-
-    contentsStream << file.rdbuf();
-
-    contents = contentsStream.str();
-    contentsStream.flush(); // bye buffer
     
     u64 index = 0;
+
+    // maps rely on everything else being loaded first
+    // because they need textures and sounds
+    std::unordered_map<std::string, std::string> maps;
+
+    Log(Log::Info, "Archive size: %llu bytes", contents.size());
 
     while (index < contents.size()) {
         while (contents.at(index) != '\n') {
@@ -78,7 +79,6 @@ void s_Registry::RegisterArchive(const std::filesystem::path& archive) {
         temp.clear();
 
         if (type == "texture") {
-            Log(Log::Info, "Adding texture with name: %s", name.c_str());
             RegisterTexture(name, data, size);
         }
 
@@ -86,7 +86,7 @@ void s_Registry::RegisterArchive(const std::filesystem::path& archive) {
         }
 
         if (type == "map") {
-            RegisterLevel(name, data);
+            maps[name] = data;
         }
 
         if (type == "sound") {
@@ -94,9 +94,16 @@ void s_Registry::RegisterArchive(const std::filesystem::path& archive) {
         }
 
         index++;
-    }
-}
 
+        Log(Log::Info, "Registered %s: %s (%d bytes)", type.c_str(), name.c_str(), size);
+    }
+
+    for (auto& [name, data] : maps) {
+        RegisterLevel(name, data);
+    }
+
+    Log(Log::Info, "Finished registering archive %s!", archive.string().c_str());
+}
 
 void s_Registry::RegisterTexture(const std::string& name, const std::string& pngData, const u64 size) {
     Image temp = LoadImageFromMemory(".png", (u8*)(pngData.c_str()), size);
@@ -186,6 +193,8 @@ void s_Registry::RegisterLevel(const std::string& name, const std::string& lvlDa
                                      (int8_t)contents.at(pos + 2) << 16 |
                                      (int8_t)contents.at(pos + 1) << 8  |
                                      (int8_t)contents.at(pos));
+
+            
 
             pos += 4;
 

@@ -3,6 +3,7 @@
 #include <fstream>
 #include <filesystem>
 #include <sstream>
+#include <iterator>
 
 static void PrintUsage();
 static void PrintError(const char* message);
@@ -73,12 +74,13 @@ int main(int argc, char* argv[]) {
             output << entry.path().stem().string() << '\n';
             output << entry.file_size() << '\n';
 
-            std::stringstream t;
-            std::ifstream file(entry.path());
+            std::ifstream file = std::ifstream(entry.path(), std::ios::binary);
 
-            t << file.rdbuf();
+            std::string contents(std::istreambuf_iterator<char>{file}, {});
 
-            output << t.str() << '\n';
+            output << contents << '\n';
+        
+            std::cout << "File: " << entry.path().string() << ", file size: " << entry.file_size() << "String size: " << contents.size() << '\n';
         }
     }
 

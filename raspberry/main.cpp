@@ -3,6 +3,8 @@
 #include "registry/registry.hpp"
 #include "renderer/renderer.hpp"
 
+#include <iostream>
+
 // not particuarly a huge fan of this
 // i think it's better than inline variable though
 s_Game Game;

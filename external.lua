@@ -41,8 +41,9 @@ project "rlImGui"
 
     files { "vendor/rlImGui/*.cpp", "vendor/rlImGui/*.hpp" }
 
-    includedirs { "vendor/rlImGui/" }
-    includedirs { "vendor/imgui/" }
-    includedirs { "vendor/raylib/src/" }
+    includedirs { "vendor/rlImGui/", "vendor/imgui/", "vendor/raylib/src/" }
 
     links { "imgui" }
+
+    configurations { "platform:Windows" }
+        links { "winmm", "gdi32" }
