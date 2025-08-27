@@ -10,16 +10,16 @@ s_Renderer::s_Renderer() {
     if (!instance)
         instance = this;
     else {
-        Log(Log::Critical, "More than one renderer is created!");
+        Log(Log_Critical, "More than one renderer is created!");
         exit(1);
     }
 }
 
 void s_Renderer::RenderTexture(const Texture& texture, f32 x, f32 y, Color tint) {
     if (texture.width != texture.height) {
-        Log(Log::Error, "Textures must be square!");
+        Log(Log_Error, "Textures must be square!");
     } else if (texture.width % 8 != 0) {
-        Log(Log::Error, "Textures must be a multiple of 8x8!");
+        Log(Log_Error, "Textures must be a multiple of 8x8!");
     } else {
 	    DrawTexturePro(texture, {0.0f, 0.0f, (float)texture.width, (float)texture.height}, 
 								{x * 32.0f, y * 32.0f, 32.0f, 32.0f}, 
@@ -29,9 +29,9 @@ void s_Renderer::RenderTexture(const Texture& texture, f32 x, f32 y, Color tint)
 
 void s_Renderer::RenderEntity(const Texture& texture, Vector2 position, bool flip) {
 	if (texture.width != texture.height) {
-        Log(Log::Error, "Textures must be square!");
+        Log(Log_Error, "Textures must be square!");
     } else if (texture.width % 8 != 0) {
-        Log(Log::Error, "Textures must be a multiple of 8x8!");
+        Log(Log_Error, "Textures must be a multiple of 8x8!");
     } else {
         Rectangle src = {0.0f, 0.0f, (float)texture.width, (float)texture.height};
         Rectangle dest = {position.x * 32.0f, position.y * 32.0f, 32.0f, 32.0f};

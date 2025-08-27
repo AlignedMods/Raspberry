@@ -36,20 +36,12 @@ struct IVector2 {
     }
 };
 
-struct GuiInfo {
-    Rectangle Bounds;
-    std::string AnchorX;
-    std::string AnchorY;
-
-    bool Active;
-};
-
 // vectors
 using f2 = Vector2;
 using i2 = IVector2;
 
 // operators
-inline bool operator<(const i2& f, const i2& s) {
+inline bool operator<(const i2 &f, const i2 &s) {
     if (f.x != s.x) {
         return f.x < s.x;
     }
@@ -57,7 +49,7 @@ inline bool operator<(const i2& f, const i2& s) {
     return f.y < s.y;
 }
 
-inline bool operator<(const f2& f, const f2& s) {
+inline bool operator<(const f2 &f, const f2 &s) {
     if (f.x != s.x) {
         return f.x < s.x;
     }

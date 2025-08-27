@@ -67,7 +67,7 @@ static Menu PauseMenuDef {
 };
 
 void M_StartGame() {
-    Log(Log::Info, "Pressed Play!");
+    Log(Log_Info, "Pressed Play!");
     Game.StartGameplay();
     SwitchMenu(nullptr);
 }
@@ -195,7 +195,6 @@ void UpdateCurrentMenu() {
         }
 
         if (IsGamepadAvailable(0)) {
-            Log(Log::Info, "gmapad available1");
             if (IsGamepadButtonPressed(0, 6)) {
                 if (current->prevMenu) {
                     SwitchMenu(current->prevMenu);

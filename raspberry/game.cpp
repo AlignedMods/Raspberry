@@ -17,7 +17,7 @@ s_Game::s_Game() {
     if (!s_Instance) {
         s_Instance = this;
     } else {
-        Log(Log::Critical, "There cannot be multiple game classes at once!!");
+        Log(Log_Critical, "There cannot be multiple game classes at once!!");
         exit(1);
     }
 }
@@ -32,14 +32,14 @@ bool s_Game::Init() {
     // we can't create the window
     if (!IsWindowReady()) return false;
 
-    Log(Log::Info, "Created window with name \"%s\"!", "Raspberry");
+    Log(Log_Info, "Created window with name \"%s\"!", "Raspberry");
 
     InitAudioDevice();
 
     // there won't be any audio
     if (!IsAudioDeviceReady()) return false;
 
-    Log(Log::Info, "Initialized audio device!");
+    Log(Log_Info, "Initialized audio device!");
 
     SetWindowIcon(LoadImage("Assets/Textures/stone.png"));
     SetWindowMinSize(640, 360);
@@ -223,7 +223,7 @@ void s_Game::SetFullscreen(bool yesno) {
     }
 
     if (IsWindowFullscreen()) {
-        Log(Log::Info, "Window is fullscreen!");
+        Log(Log_Info, "Window is fullscreen!");
 
         SetWindowSize(m_PreviousWindowWidth, m_PreviousWindowHeight);
 
@@ -234,7 +234,7 @@ void s_Game::SetFullscreen(bool yesno) {
 
         return;
     } else {
-        Log(Log::Info, "Window is NOT fullscreen!");
+        Log(Log_Info, "Window is NOT fullscreen!");
         m_PreviousWindowWidth = GetScreenWidth();
         m_PreviousWindowHeight = GetScreenHeight();
 

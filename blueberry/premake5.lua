@@ -8,7 +8,7 @@ project "Blueberry"
 
 	files { "**.cpp", "**.hpp" }
 
-	includedirs { "../shared", "../vendor/raylib/src/", "../vendor/imgui/", "../vendor/rlImGui/" }
+	includedirs { "../shared", "../vendor/raylib/src/", "../vendor/imgui/", "../vendor/rlImGui/", "./" }
 
 	links { "raylib", "rlImGui", "imgui" }
 

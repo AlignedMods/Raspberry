@@ -1,18 +1,19 @@
-// Blueberry - a single file Raspberry editor build using imgui and raylib
+// Blueberry - a single file Raspberry editor built using imgui and raylib
 
 #include "types.hpp"
-#include "editortile.hpp"
 
+#include "imgui.h"
 #include "raylib.h"
 #include "raymath.h"
 #include "rlImGui.h"
-#include "imgui.h"
 
+#include <cmath>
+#include <cstdio>
 #include <string>
 #include <unordered_map>
-#include <cstdio>
-#include <cmath>
 #include <vector>
+
+s_Registry Registry;
 
 enum class States {
     Pan,
@@ -52,25 +53,23 @@ static Camera2D cam{};
 static States currentState = States::Pan;
 static MouseStates currentMouseState = MouseStates::Click;
 static std::unordered_map<i32, f32> zooms = {
-    {}
-};
+    {}};
 
 static std::vector<EditorTile> tiles;
 
 class Window {
-public:
+  public:
     virtual void OnInit() = 0;
 
     virtual void OnUIRender() = 0;
 
-protected:
+  protected:
     bool m_Visible = true;
 };
 
 class OpenArchive : public Window {
-public:
+  public:
     virtual void OnInit() override {
-
     }
 
     virtual void OnUIRender() override {
@@ -103,7 +102,7 @@ public:
                         if (DirectoryExists(files.paths[i])) {
                             strcpy(m_CurrentDirectory, files.paths[i]);
                         } else if (FileExists(files.paths[i])) {
-                            // Registry.RegisterArchive(files.paths[i]);
+                            Registry.RegisterArchive(files.paths[i]);
                             state.openFileDialog = false;
                         }
                     }
@@ -118,10 +117,10 @@ public:
         }
     }
 
-private:
+  private:
     bool done = false;
 
-    std::vector<const char*> m_Files; 
+    std::vector<const char *> m_Files;
     char m_CurrentDirectory[256]{};
 };
 
@@ -133,11 +132,11 @@ static void OnUpdate(f32 deltaTime);
 static void OnUIRender(f32 deltaTime);
 static void OnRender();
 
-static void PlaceTile(const Vector2& pos);
-static void DestroyTile(const Vector2& pos);
+static void PlaceTile(const Vector2 &pos);
+static void DestroyTile(const Vector2 &pos);
 static void KILLEMALL(); // kills well, ALL of em' (tiles)
 
-static Vector2 GetPositionInWorld(const Vector2& vec);
+static Vector2 GetPositionInWorld(const Vector2 &vec);
 
 static void InitializeEditor();
 
@@ -196,12 +195,12 @@ int main() {
 }
 
 void SetupImGui() {
-    ImGuiIO& io = ImGui::GetIO();
+    ImGuiIO &io = ImGui::GetIO();
 
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
-    ImGuiStyle& style = ImGui::GetStyle();
-    ImVec4* colors = style.Colors;
+    ImGuiStyle &style = ImGui::GetStyle();
+    ImVec4 *colors = style.Colors;
 
     colors[ImGuiCol_Text] = ImVec4(0.92f, 0.93f, 0.94f, 1.00f);                  // Light grey text for readability
     colors[ImGuiCol_TextDisabled] = ImVec4(0.50f, 0.52f, 0.54f, 1.00f);          // Subtle grey for disabled text
@@ -286,22 +285,25 @@ void OnUpdate(f32 deltaTime) {
         int key = GetKeyPressed();
 
         switch (key) {
-            case KEY_ONE:
-                currentState = States::Pan;
-                break;
-            case KEY_TWO:
-                currentState = States::Place;
-                break;
-            case KEY_THREE:
-                currentState = States::Edit;
-                break;
-            case KEY_FOUR:
-                currentState = States::Destroy;
-                break;
+        case KEY_ONE:
+            currentState = States::Pan;
+            break;
+        case KEY_TWO:
+            currentState = States::Place;
+            break;
+        case KEY_THREE:
+            currentState = States::Edit;
+            break;
+        case KEY_FOUR:
+            currentState = States::Destroy;
+            break;
         }
 
-        if (IsKeyDown(KEY_LEFT_SHIFT)) { currentMouseState = MouseStates::Drag; }
-        else { currentMouseState = MouseStates::Click; }
+        if (IsKeyDown(KEY_LEFT_SHIFT)) {
+            currentMouseState = MouseStates::Drag;
+        } else {
+            currentMouseState = MouseStates::Click;
+        }
 
         if (currentState == States::Place && !ImGui::GetIO().WantCaptureMouse) {
             if (currentMouseState == MouseStates::Click && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
@@ -313,8 +315,12 @@ void OnUpdate(f32 deltaTime) {
             }
         }
 
-        if (GetMouseWheelMove() > 0.1f) { cam.zoom += 0.2f; }
-        if (GetMouseWheelMove() < -0.1f) { cam.zoom -= 0.2f; }
+        if (GetMouseWheelMove() > 0.1f) {
+            cam.zoom += 0.2f;
+        }
+        if (GetMouseWheelMove() < -0.1f) {
+            cam.zoom -= 0.2f;
+        }
 
         if (currentState == States::Pan && IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
             cam.target = Vector2Add(cam.target, Vector2Negate(GetMouseDelta()));
@@ -333,7 +339,7 @@ void OnRender() {
     if (state.current == ApplicationStates::Editor) {
         BeginMode2D(cam);
 
-        for (auto& tile : tiles) {
+        for (auto &tile : tiles) {
             tile.OnRender();
         }
 
@@ -357,10 +363,7 @@ void OnUIRender(f32 deltaTime) {
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
     // a LOT of flags
     // this is basiclly the top bar, which has things like the "File" menu and stuff
-    ImGui::Begin("Blueberry", nullptr, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoMove | 
-                                       ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | 
-                                       ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBackground | 
-                                       ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoDocking);
+    ImGui::Begin("Blueberry", nullptr, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoDocking);
     ImGui::PopStyleVar();
 
     ImGui::SetWindowSize(ImVec2(GetScreenWidth(), GetScreenHeight()));
@@ -384,8 +387,12 @@ void OnUIRender(f32 deltaTime) {
                 state.openFileDialog = true;
             }
 
-            if (ImGui::MenuItem("Save", "CTRL+S")) { printf("save"); }
-            if (ImGui::MenuItem("Close", "ALT+F4")) { state.shouldClose = true; }
+            if (ImGui::MenuItem("Save", "CTRL+S")) {
+                printf("save");
+            }
+            if (ImGui::MenuItem("Close", "ALT+F4")) {
+                state.shouldClose = true;
+            }
 
             ImGui::EndMenu();
         }
@@ -410,23 +417,25 @@ void OnUIRender(f32 deltaTime) {
     rlImGuiEnd();
 
     // alt+f4 check in case if the user isn't using alt+f4 to close windoes
-    if (IsKeyDown(KEY_LEFT_ALT) && IsKeyPressed(KEY_F4)) { state.shouldClose = true; }
+    if (IsKeyDown(KEY_LEFT_ALT) && IsKeyPressed(KEY_F4)) {
+        state.shouldClose = true;
+    }
 }
 
-void PlaceTile(const Vector2& vec) {
+void PlaceTile(const Vector2 &vec) {
     Vector2 pos = GetPositionInWorld(vec);
     tiles.push_back(EditorTile(GetPositionInWorld(vec), "hello"));
 }
 
-Vector2 GetPositionInWorld(const Vector2& vec) {
+Vector2 GetPositionInWorld(const Vector2 &vec) {
     f32 x = vec.x;
     f32 y = vec.y;
 
     // we COULD use this but i am a fan of my own formula
     // return Vector2Divide(GetScreenToWorld2D(vec, cam), {32.0f, 32.0f});
 
-    return {static_cast<f32>(std::floor( ((x + (cam.target.x * cam.zoom - cam.offset.x)) / (cam.zoom * 32.0f)) )),
-            static_cast<f32>(std::floor( ((y + (cam.target.y * cam.zoom - cam.offset.y)) / (cam.zoom * 32.0f)) )) };
+    return {static_cast<f32>(std::floor(((x + (cam.target.x * cam.zoom - cam.offset.x)) / (cam.zoom * 32.0f)))),
+            static_cast<f32>(std::floor(((y + (cam.target.y * cam.zoom - cam.offset.y)) / (cam.zoom * 32.0f))))};
 }
 
 std::vector<int> ints;

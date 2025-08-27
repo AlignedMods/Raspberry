@@ -11,10 +11,10 @@ s_Game Game;
 s_Renderer Renderer;
 s_Registry Registry;
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
     // screw RAII btw
     if (!Game.Init()) {
-        Log(Log::Critical, "Could NOT initialize the game!\nAborting...");
+        Log(Log_Critical, "Could NOT initialize the game!\nAborting...");
         return 1;
     }
 
@@ -34,5 +34,5 @@ int main(int argc, char** argv) {
 
     Game.Shutdown();
 
-	return 0;
+    return 0;
 }

@@ -4,6 +4,8 @@ workspace "Raspberry"
 
 	includedirs { "raspberry/" }
 
+	startproject "raspberry"
+
     OutputDir = "%{cfg.buildcfg}-%{cfg.system}"
 
 	filter "configurations:Release"
@@ -18,7 +20,6 @@ workspace "Raspberry"
 	-- submodules
     include "external.lua"
 
-	include "blueberry/"
+	-- include "blueberry/"
 	include "raspberry/"
-	include "rsp-src/"
-	--require "src/shared"
+	include "core/"
