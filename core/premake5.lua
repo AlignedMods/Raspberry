@@ -8,9 +8,9 @@ project "core"
 
     files { "**.cpp", "**.hpp" }
 
-    includedirs { "../core/", "../vendor/raylib/src/", "../vendor/rlImGui/", "../vendor/json/include/" }
+    includedirs { "../core/", "../vendor/raylib/src/", "../vendor/rlImGui/", "../vendor/json/include/", "../vendor/imgui/" }
 
-    links { "raylib", "rlImGui" }
+    links { "raylib", "rlImGui", "imgui" }
 
     filter "platforms:Windows"
         links { "winmm", "gdi32" }

@@ -1,0 +1,14 @@
+#include "event.hpp"
+#include "application/application.hpp"
+
+void Dispatcher::Subscribe(const SlotType& slot) {
+    m_Observers.push_back(slot);
+}
+
+void Dispatcher::Post(const Event& event) {
+    Application::Get().OnEvent(event);
+
+    for (auto&& obeserver : m_Observers) {
+        obeserver(event);
+    }
+}

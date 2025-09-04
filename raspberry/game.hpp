@@ -1,30 +1,24 @@
 #pragma once
 
-#include "level/level.hpp"
+#include "application/layer.hpp"
 #include "gui/menu.hpp"
+#include "registry/registry.hpp"
 
 #include "raylib.h"
 
 #include <array>
 
-#define DONT_BLOW_UP 0x00000001
-#define BLOW_UP      0x10000000
-
-class s_Game {
+class Game : public Layer {
 public:
-    s_Game();
-    ~s_Game();
+    Game();
+    ~Game();
 
-    bool Init();
-    void Shutdown();
-    bool Running();
-
-    void PollEvents();
-    void CalculateTiming();
-
-    void OnUpdate();
-    void FixedUpdate();
-    void OnRender();
+    virtual void OnInit() override;
+    virtual void OnUpdate(f32 ts) override;
+    virtual void OnFixedUpdate() override;
+    virtual void OnRender() override;
+    virtual void OnUIRender(f32 ts) override;
+    virtual void OnEvent(const Event& event) override;
 
     void SetCurrentLevel(const Level& level);
 
@@ -32,9 +26,7 @@ public:
 
     void SetPause(bool yes);
 
-    void Quit();
-
-	Level* GetCurrentLevel();
+    Level* GetCurrentLevel();
 
     const Camera2D& GetCamera() const;
     const Rectangle& GetViewportRect() const;
@@ -49,75 +41,49 @@ public:
     bool m_GameRunning = false;
 
 private:
-	Level* m_CurrentLevel = nullptr;
+    Level* m_CurrentLevel = nullptr;
 
     // -- VIEWPORTS -- //
-	Camera2D m_Camera;
-	Camera2D m_EditorCamera;
+    Camera2D m_Camera;
+    Camera2D m_EditorCamera;
 
     Rectangle m_Viewport;
 
-    // -- APPLICATION -- //
-    
-	bool m_Running = true;
-
-	u32 m_TargetFPS = 0;
-	f32 m_CurrentFPS = 0;
-
-    u32 m_PreviousWindowWidth, m_PreviousWindowHeight;
-
-    // -- TIMING -- //
-    
-    f64 m_CurrentTime = 0.0;
-    f64 m_LastTime = 0.0;
-    f64 m_UpdateDrawTime = 0.0;
-    f64 m_WaitTime = 0.0;
-
-    f64 m_TickTime = 0.0;
-
     // -- GAME -- //
 
-	bool m_Paused = false;
+    bool m_Paused = false;
 
     std::array<Vector2, 9> m_Resolutions = {{
         // yes i had to write this out manually
-        {640,  360}, 
-        {1280, 720}, 
-        {1920, 1080}, 
-        {2560, 1080}, 
-        {2560, 1440}, 
-        {3440, 1440}, 
+        {640, 360},
+        {1280, 720},
+        {1920, 1080},
+        {2560, 1080},
+        {2560, 1440},
+        {3440, 1440},
         {3840, 2160},
         {5120, 2160},
         {7680, 4320} // 8k resolution, i do NOT know why you would ever need this (game runs like shit on this resolution)
     }};
 
-    std::array<u32, 9> m_Framerates = {{
-        60,
-        75,
-        120,
-        144,
-        165,
-        240,
-        360,
-        480,
-        720
-    }};
+    std::array<u32, 9> m_Framerates = {{60,
+                                        75,
+                                        120,
+                                        144,
+                                        165,
+                                        240,
+                                        360,
+                                        480,
+                                        720}};
 
     std::string m_StrResolutions;
     std::string m_StrFramerates;
-    
+
     // -- TEMPORARY GUI STUFF -- //
-    
+
     u32 mt_TargetFPS = 60;
     u32 mt_FPSCap = 1;
 
     u32 mt_ResolutionIndex = 0;
     u32 mt_Fullscreen = 0;
-  
-public:
-	f32 deltaTime = 0.0f;
-    sz ticks = 0;
 };
-
-extern s_Game Game;

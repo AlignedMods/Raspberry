@@ -1,31 +1,31 @@
 #include "player.hpp"
+#include "application/application.hpp"
 #include "game.hpp"
 #include "log.hpp"
-#include "registry/registry.hpp"
-#include "renderer/renderer.hpp"
 
 #include "raylib.h"
 
 void Player::InitTextures() {
-    m_Textures["IdleLeft"] = Registry.GetTexture("player_left");
-    m_Textures["RunningLeftUp"] = Registry.GetTexture("player_left_walk_up");
-    m_Textures["RunningLeftDown"] = Registry.GetTexture("player_left_walk_down");
+    Registry& reg = Application::Get().GetRegistry();
+    m_Textures["IdleLeft"] = reg.GetTexture("player_left");
+    // m_Textures["RunningLeftUp"] = Registry.GetTexture("player_left_walk_up");
+    // m_Textures["RunningLeftDown"] = Registry.GetTexture("player_left_walk_down");
 
-    m_Textures["IdleRight"] = Registry.GetTexture("player_right");
-    m_Textures["RunningRightUp"] = Registry.GetTexture("player_right_walk_up");
-    m_Textures["RunningRightDown"] = Registry.GetTexture("player_right_walk_down");
+    // m_Textures["IdleRight"] = Registry.GetTexture("player_right");
+    // m_Textures["RunningRightUp"] = Registry.GetTexture("player_right_walk_up");
+    // m_Textures["RunningRightDown"] = Registry.GetTexture("player_right_walk_down");
 
     m_Texture = m_Textures.at("IdleLeft");
 }
 
 // phyics
 void Player::OnUpdate() {
-    m_Texture = Registry.GetTexture("player_left");
+    m_Texture = Application::Get().GetRegistry().GetTexture("player_left");
 
     m_Walking = false;
 
-    m_WalkSpeed.x = Approach(0.0f, m_WalkSpeed.x, 50.0f * Game.deltaTime);
-    m_DashSpeed.x = Approach(0.0f, m_DashSpeed.x, 50.0f * Game.deltaTime);
+    // m_WalkSpeed.x = Approach(0.0f, m_WalkSpeed.x, 50.0f * Game.deltaTime);
+    // m_DashSpeed.x = Approach(0.0f, m_DashSpeed.x, 50.0f * Game.deltaTime);
 
     if (IsKeyDown(KEY_D)) {
         m_Walking = true;
@@ -54,7 +54,7 @@ void Player::OnUpdate() {
     }
 
     if (IsKeyPressed(KEY_R)) {
-        Registry.PlaySoundFromSource("menu_cycle", {100.0f, 0.0f}, m_Position);
+        // Registry.PlaySoundFromSource("menu_cycle", {100.0f, 0.0f}, m_Position);
     }
 
     // DrawText(TextFormat("Player position is: %f, %f", m_Position.x, m_Position.y), 40, 90, 20, WHITE);
@@ -71,7 +71,7 @@ void Player::OnUpdate() {
             m_Velocity.y = -9.0f;
             m_Grounded = false;
 
-            m_JumpCooldown += 0.5f * Game.deltaTime;
+            // m_JumpCooldown += 0.5f * Game.deltaTime;
         }
     }
 
@@ -80,7 +80,7 @@ void Player::OnUpdate() {
     if (m_Grounded) {
         m_CoyoteTimeCounter = 0.15;
     } else {
-        m_CoyoteTimeCounter -= Game.deltaTime;
+        // m_CoyoteTimeCounter -= Game.deltaTime;
     }
 
     if (IsKeyPressed(KEY_SPACE)) {
@@ -100,14 +100,14 @@ void Player::OnUpdate() {
         m_Grounded = false;
 #endif
 
-        m_JumpCooldown += 0.5f * Game.deltaTime;
+        // m_JumpCooldown += 0.5f * Game.deltaTime;
     }
 
-    m_Velocity.y += m_Gravity * Game.deltaTime;
+    // m_Velocity.y += m_Gravity * Game.deltaTime;
 
     OffsetPositionByVelocity();
 }
 
 void Player::OnRender() {
-    Renderer.RenderEntity(m_Texture, m_Position, m_Flip);
+    // Renderer.RenderEntity(m_Texture, m_Position, m_Flip);
 }

@@ -1,9 +1,10 @@
 #include "menu.hpp"
+#include "application/application.hpp"
+#include "event/key_events.hpp"
+#include "game.hpp"
+#include "input/keycodes.hpp"
 #include "log.hpp"
 #include "types.hpp"
-#include "game.hpp"
-#include "registry/registry.hpp"
-#include "renderer/renderer.hpp"
 
 #include "raylib.h"
 
@@ -28,22 +29,20 @@ static void MoveCursorToIndex(u16 index);
 static void ExecuteCallback();
 
 static MenuItem MainMenu[] = {
-    {1, "Play",     M_StartGame, 'p'},
+    {1, "Play", M_StartGame, 'p'},
     {1, "Settings", M_Options, 's'},
-    {1, "Quit",     M_QuitGame, 'q'},
+    {1, "Quit", M_QuitGame, 'q'},
 };
 
-static MenuItem QuitMenu[] {
+static MenuItem QuitMenu[]{
     {0, "Are you sure you wish to quit?", nullptr, 0, 30},
-    {1, "Yes",                            Q_Quit, 0, 40},
-    {1, "No",                             Q_Return, 0, 40}
-};
+    {1, "Yes", Q_Quit, 0, 40},
+    {1, "No", Q_Return, 0, 40}};
 
-static MenuItem PauseMenu[] {
+static MenuItem PauseMenu[]{
     {0, "--PAUSED--", nullptr, 50},
-    {1, "Continue",   P_Continue, 40},
-    {1, "Quit",       M_QuitGame, 40}
-};
+    {1, "Continue", P_Continue, 40},
+    {1, "Quit", M_QuitGame, 40}};
 
 static Menu MainMenuDef = {
     3,
@@ -52,23 +51,23 @@ static Menu MainMenuDef = {
     0,
 };
 
-static Menu QuitMenuDef {
+static Menu QuitMenuDef{
     3,
     QuitMenu,
     nullptr,
-    1
-};
+    1};
 
-static Menu PauseMenuDef {
+static Menu PauseMenuDef{
     3,
     PauseMenu,
     nullptr,
-    1
-};
+    1};
 
 void M_StartGame() {
     Log(Log_Info, "Pressed Play!");
-    Game.StartGameplay();
+    Game* g = (Game*)Application::Get().GetLayerStack().GetLayer("game");
+    // Log(Log_Info, "Layer ptr: %p", g);
+    g->StartGameplay();
     SwitchMenu(nullptr);
 }
 
@@ -80,7 +79,7 @@ void M_QuitGame() {
 }
 
 void Q_Quit() {
-    Game.Quit();
+    Application::Get().Close();
 }
 
 void Q_Return() {
@@ -88,7 +87,8 @@ void Q_Return() {
 }
 
 void P_Continue() {
-    Game.SetPause(false);
+    Game* g = (Game*)Application::Get().GetLayerStack().GetLayer("game");
+    g->SetPause(false);
     SwitchMenu(nullptr);
 }
 
@@ -113,37 +113,42 @@ void MoveCursorToIndex(u16 index) {
     }
 
     if (last != current->selection) {
-        Registry.PlaySound("menu_cycle", 0.9f, 1.1f);
+        // Registry.PlaySound("menu_cycle", 0.9f, 1.1f);
     }
 }
 
 void ExecuteCallback() {
     current->items[current->selection].callback();
-    Registry.PlaySound("menu_select", 0.8f, 1.3f);
+    // Registry.PlaySound("menu_select", 0.8f, 1.3f);
 }
 
 void InitMenu() {
     SwitchMenu(&MainMenuDef);
 }
 
-void UpdateCurrentMenu() {
+void UpdateCurrentMenu(const Event& event) {
     if (current) {
-        u32 key = GetKeyPressed();
+        if (event.GetEventType() == EventType::KeyPressed) {
+            const KeyPressedEvent& pressed = EVENT_CAST(KeyPressedEvent);
+
+            KeyCode key = pressed.GetKeyCode();
+
+            if (key == KeyCode::Down || key == KeyCode::S) {
+                MoveCursor(false);
+            }
+
+            if (key == KeyCode::Up || key == KeyCode::W) {
+                MoveCursor(true);
+            }
+
+            if (key == KeyCode::Enter) {
+                ExecuteCallback();
+            }
+        }
+
         char c = GetCharPressed();
 
-        current->items[current->selection].timeSinceSelect += Game.deltaTime;
-
-        if (key == KEY_DOWN) {
-            MoveCursor(false);
-        }
-
-        if (key == KEY_UP) {
-            MoveCursor(true);
-        }
-
-        if (key == KEY_ENTER) { 
-            ExecuteCallback();
-        }
+        // current->items[current->selection].timeSinceSelect += Game.deltaTime;
 
         if (c) {
             for (u16 i = 0; i < current->numItems; i++) {
@@ -173,16 +178,18 @@ void UpdateCurrentMenu() {
         }
     }
 
-    if (Game.m_GameRunning) {
+    Game* g = (Game*)Application::Get().GetLayerStack().GetLayer("game");
+
+    if (g->m_GameRunning) {
         if (IsKeyPressed(KEY_ESCAPE)) {
             SwitchMenu(&PauseMenuDef);
-            Game.SetPause(true);
+            g->SetPause(true);
         }
 
         if (IsGamepadAvailable(0)) {
             if (IsGamepadButtonPressed(0, GAMEPAD_BUTTON_MIDDLE_RIGHT)) {
                 SwitchMenu(&PauseMenuDef);
-                Game.SetPause(true);
+                g->SetPause(true);
             }
         }
     }
@@ -219,7 +226,8 @@ void RenderCurrentMenu() {
         y = (GetScreenHeight() - height) / 2.0f;
 
         for (u16 i = 0; i < current->numItems; i++) {
-            u64 ticks = Game.ticks;
+            // u64 ticks = Game.ticks;
+            u64 ticks = 3;
 
             MenuItem* item = &current->items[i];
             const char* text = item->text;
@@ -231,7 +239,8 @@ void RenderCurrentMenu() {
                 }
             }
 
-            Renderer.RenderText(text, {GetScreenWidth() / 2.0f, y}, item->fontSize);
+            // Renderer.RenderText(text, {GetScreenWidth() / 2.0f, y}, item->fontSize);
+            DrawText(text, GetScreenWidth() / 2.0f, y, item->fontSize, WHITE);
             y += item->fontSize + 10.0f;
         }
     }

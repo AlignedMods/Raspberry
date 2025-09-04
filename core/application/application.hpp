@@ -1,9 +1,13 @@
 #pragma once
 
-#include "layer.hpp"
+#include "event/event.hpp"
 #include "layerstack.hpp"
 #include "log.hpp"
+#include "registry/registry.hpp"
 #include "types.hpp"
+
+#define GLFW_INCLUDE_NONE
+#include "external/glfw/include/GLFW/glfw3.h"
 
 struct ApplicationSpecification {
     const char* name;
@@ -13,9 +17,9 @@ struct ApplicationSpecification {
 };
 
 class CommandLineArgs {
-  public:
+public:
     inline CommandLineArgs(u32 argc, char** argv) {
-        this->argc;
+        this->argc = argc;
         this->argv = argv;
     }
 
@@ -32,48 +36,58 @@ class CommandLineArgs {
         return argc;
     }
 
-  private:
+private:
     u32 argc;
     char** argv;
 };
 
 class Application {
-  public:
+public:
     Application(const ApplicationSpecification& spec);
     ~Application();
 
     void Run();
 
-    LayerStack& GetLayerStack();
-
     void SetIcon(const Texture& texture);
     void SetIcon(const Image& image);
+
+    bool IsInitialized();
 
     void SetTargetFPS(u32 fps);
 
     void Close();
 
     static Application& Get();
+    Registry& GetRegistry() { return m_Registry; }
+    LayerStack& GetLayerStack() { return m_Stack; }
+    Dispatcher& GetDispatcher() { return m_Dispatcher; }
 
     // To be implemented by client!
     static Application* CreateApplication(const CommandLineArgs& args);
 
-  private:
+private:
     void OnUpdate();
     void OnRender();
     void OnUIRender();
+    void OnEvent(const Event& event);
 
-  private:
+private:
     ApplicationSpecification m_Specification;
-    LayerStack m_Stack;
 
     u32 m_TargetFPS;
 
     bool m_Running;
+    bool m_Initalized = false;
 
     f64 m_CurrentTime;
     f64 m_LastTime;
     f32 m_dt;
 
     f64 m_FixedUpdateTime;
+
+    LayerStack m_Stack;
+    Registry m_Registry;
+    Dispatcher m_Dispatcher;
+
+    friend class Dispatcher;
 };

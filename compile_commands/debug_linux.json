@@ -1,0 +1,163 @@
+[
+          {
+            "directory": "C:/Users/aligna/Prog/Raspberry",
+            "file": "C:/Users/aligna/Prog/Raspberry/vendor/raylib/src/raudio.c",
+            "command": "cc -MD -MP -DRDEBUG -DSUPPRESS_DEF_PLATFORM -DPLATFORM_DESKTOP -DGRAPHICS_API_OPENGL_33 -DSUPPORT_CUSTOM_FRAME_CONTROL -DSUPPORT_MODULE_RAUDIO -D_GLFW_X11 -IC:/Users/aligna/Prog/Raspberry/raspberry -IC:/Users/aligna/Prog/Raspberry/vendor/raylib/src -IC:/Users/aligna/Prog/Raspberry/vendor/raylib/src/external/glfw/include -g -std=c99  -o C:/Users/aligna/Prog/Raspberry/build/obj/Debug-linux/raylib/raudio.o -MF C:/Users/aligna/Prog/Raspberry/build/obj/Debug-linux/raylib/raudio.d -c C:/Users/aligna/Prog/Raspberry/vendor/raylib/src/raudio.c"
+          }
+,
+          {
+            "directory": "C:/Users/aligna/Prog/Raspberry",
+            "file": "C:/Users/aligna/Prog/Raspberry/vendor/raylib/src/rcore.c",
+            "command": "cc -MD -MP -DRDEBUG -DSUPPRESS_DEF_PLATFORM -DPLATFORM_DESKTOP -DGRAPHICS_API_OPENGL_33 -DSUPPORT_CUSTOM_FRAME_CONTROL -DSUPPORT_MODULE_RAUDIO -D_GLFW_X11 -IC:/Users/aligna/Prog/Raspberry/raspberry -IC:/Users/aligna/Prog/Raspberry/vendor/raylib/src -IC:/Users/aligna/Prog/Raspberry/vendor/raylib/src/external/glfw/include -g -std=c99  -o C:/Users/aligna/Prog/Raspberry/build/obj/Debug-linux/raylib/rcore.o -MF C:/Users/aligna/Prog/Raspberry/build/obj/Debug-linux/raylib/rcore.d -c C:/Users/aligna/Prog/Raspberry/vendor/raylib/src/rcore.c"
+          }
+,
+          {
+            "directory": "C:/Users/aligna/Prog/Raspberry",
+            "file": "C:/Users/aligna/Prog/Raspberry/vendor/raylib/src/rglfw.c",
+            "command": "cc -MD -MP -DRDEBUG -DSUPPRESS_DEF_PLATFORM -DPLATFORM_DESKTOP -DGRAPHICS_API_OPENGL_33 -DSUPPORT_CUSTOM_FRAME_CONTROL -DSUPPORT_MODULE_RAUDIO -D_GLFW_X11 -IC:/Users/aligna/Prog/Raspberry/raspberry -IC:/Users/aligna/Prog/Raspberry/vendor/raylib/src -IC:/Users/aligna/Prog/Raspberry/vendor/raylib/src/external/glfw/include -g -std=c99  -o C:/Users/aligna/Prog/Raspberry/build/obj/Debug-linux/raylib/rglfw.o -MF C:/Users/aligna/Prog/Raspberry/build/obj/Debug-linux/raylib/rglfw.d -c C:/Users/aligna/Prog/Raspberry/vendor/raylib/src/rglfw.c"
+          }
+,
+          {
+            "directory": "C:/Users/aligna/Prog/Raspberry",
+            "file": "C:/Users/aligna/Prog/Raspberry/vendor/raylib/src/rmodels.c",
+            "command": "cc -MD -MP -DRDEBUG -DSUPPRESS_DEF_PLATFORM -DPLATFORM_DESKTOP -DGRAPHICS_API_OPENGL_33 -DSUPPORT_CUSTOM_FRAME_CONTROL -DSUPPORT_MODULE_RAUDIO -D_GLFW_X11 -IC:/Users/aligna/Prog/Raspberry/raspberry -IC:/Users/aligna/Prog/Raspberry/vendor/raylib/src -IC:/Users/aligna/Prog/Raspberry/vendor/raylib/src/external/glfw/include -g -std=c99  -o C:/Users/aligna/Prog/Raspberry/build/obj/Debug-linux/raylib/rmodels.o -MF C:/Users/aligna/Prog/Raspberry/build/obj/Debug-linux/raylib/rmodels.d -c C:/Users/aligna/Prog/Raspberry/vendor/raylib/src/rmodels.c"
+          }
+,
+          {
+            "directory": "C:/Users/aligna/Prog/Raspberry",
+            "file": "C:/Users/aligna/Prog/Raspberry/vendor/raylib/src/rshapes.c",
+            "command": "cc -MD -MP -DRDEBUG -DSUPPRESS_DEF_PLATFORM -DPLATFORM_DESKTOP -DGRAPHICS_API_OPENGL_33 -DSUPPORT_CUSTOM_FRAME_CONTROL -DSUPPORT_MODULE_RAUDIO -D_GLFW_X11 -IC:/Users/aligna/Prog/Raspberry/raspberry -IC:/Users/aligna/Prog/Raspberry/vendor/raylib/src -IC:/Users/aligna/Prog/Raspberry/vendor/raylib/src/external/glfw/include -g -std=c99  -o C:/Users/aligna/Prog/Raspberry/build/obj/Debug-linux/raylib/rshapes.o -MF C:/Users/aligna/Prog/Raspberry/build/obj/Debug-linux/raylib/rshapes.d -c C:/Users/aligna/Prog/Raspberry/vendor/raylib/src/rshapes.c"
+          }
+,
+          {
+            "directory": "C:/Users/aligna/Prog/Raspberry",
+            "file": "C:/Users/aligna/Prog/Raspberry/vendor/raylib/src/rtext.c",
+            "command": "cc -MD -MP -DRDEBUG -DSUPPRESS_DEF_PLATFORM -DPLATFORM_DESKTOP -DGRAPHICS_API_OPENGL_33 -DSUPPORT_CUSTOM_FRAME_CONTROL -DSUPPORT_MODULE_RAUDIO -D_GLFW_X11 -IC:/Users/aligna/Prog/Raspberry/raspberry -IC:/Users/aligna/Prog/Raspberry/vendor/raylib/src -IC:/Users/aligna/Prog/Raspberry/vendor/raylib/src/external/glfw/include -g -std=c99  -o C:/Users/aligna/Prog/Raspberry/build/obj/Debug-linux/raylib/rtext.o -MF C:/Users/aligna/Prog/Raspberry/build/obj/Debug-linux/raylib/rtext.d -c C:/Users/aligna/Prog/Raspberry/vendor/raylib/src/rtext.c"
+          }
+,
+          {
+            "directory": "C:/Users/aligna/Prog/Raspberry",
+            "file": "C:/Users/aligna/Prog/Raspberry/vendor/raylib/src/rtextures.c",
+            "command": "cc -MD -MP -DRDEBUG -DSUPPRESS_DEF_PLATFORM -DPLATFORM_DESKTOP -DGRAPHICS_API_OPENGL_33 -DSUPPORT_CUSTOM_FRAME_CONTROL -DSUPPORT_MODULE_RAUDIO -D_GLFW_X11 -IC:/Users/aligna/Prog/Raspberry/raspberry -IC:/Users/aligna/Prog/Raspberry/vendor/raylib/src -IC:/Users/aligna/Prog/Raspberry/vendor/raylib/src/external/glfw/include -g -std=c99  -o C:/Users/aligna/Prog/Raspberry/build/obj/Debug-linux/raylib/rtextures.o -MF C:/Users/aligna/Prog/Raspberry/build/obj/Debug-linux/raylib/rtextures.d -c C:/Users/aligna/Prog/Raspberry/vendor/raylib/src/rtextures.c"
+          }
+,
+          {
+            "directory": "C:/Users/aligna/Prog/Raspberry",
+            "file": "C:/Users/aligna/Prog/Raspberry/vendor/raylib/src/utils.c",
+            "command": "cc -MD -MP -DRDEBUG -DSUPPRESS_DEF_PLATFORM -DPLATFORM_DESKTOP -DGRAPHICS_API_OPENGL_33 -DSUPPORT_CUSTOM_FRAME_CONTROL -DSUPPORT_MODULE_RAUDIO -D_GLFW_X11 -IC:/Users/aligna/Prog/Raspberry/raspberry -IC:/Users/aligna/Prog/Raspberry/vendor/raylib/src -IC:/Users/aligna/Prog/Raspberry/vendor/raylib/src/external/glfw/include -g -std=c99  -o C:/Users/aligna/Prog/Raspberry/build/obj/Debug-linux/raylib/utils.o -MF C:/Users/aligna/Prog/Raspberry/build/obj/Debug-linux/raylib/utils.d -c C:/Users/aligna/Prog/Raspberry/vendor/raylib/src/utils.c"
+          }
+,
+          {
+            "directory": "C:/Users/aligna/Prog/Raspberry",
+            "file": "C:/Users/aligna/Prog/Raspberry/vendor/imgui/imgui.cpp",
+            "command": "cc -MD -MP -DRDEBUG -IC:/Users/aligna/Prog/Raspberry/raspberry -IC:/Users/aligna/Prog/Raspberry/vendor/imgui -g -std=c++20 -o C:/Users/aligna/Prog/Raspberry/build/obj/Debug-linux/imgui/imgui.o -MF C:/Users/aligna/Prog/Raspberry/build/obj/Debug-linux/imgui/imgui.d -c C:/Users/aligna/Prog/Raspberry/vendor/imgui/imgui.cpp"
+          }
+,
+          {
+            "directory": "C:/Users/aligna/Prog/Raspberry",
+            "file": "C:/Users/aligna/Prog/Raspberry/vendor/imgui/imgui_demo.cpp",
+            "command": "cc -MD -MP -DRDEBUG -IC:/Users/aligna/Prog/Raspberry/raspberry -IC:/Users/aligna/Prog/Raspberry/vendor/imgui -g -std=c++20 -o C:/Users/aligna/Prog/Raspberry/build/obj/Debug-linux/imgui/imgui_demo.o -MF C:/Users/aligna/Prog/Raspberry/build/obj/Debug-linux/imgui/imgui_demo.d -c C:/Users/aligna/Prog/Raspberry/vendor/imgui/imgui_demo.cpp"
+          }
+,
+          {
+            "directory": "C:/Users/aligna/Prog/Raspberry",
+            "file": "C:/Users/aligna/Prog/Raspberry/vendor/imgui/imgui_draw.cpp",
+            "command": "cc -MD -MP -DRDEBUG -IC:/Users/aligna/Prog/Raspberry/raspberry -IC:/Users/aligna/Prog/Raspberry/vendor/imgui -g -std=c++20 -o C:/Users/aligna/Prog/Raspberry/build/obj/Debug-linux/imgui/imgui_draw.o -MF C:/Users/aligna/Prog/Raspberry/build/obj/Debug-linux/imgui/imgui_draw.d -c C:/Users/aligna/Prog/Raspberry/vendor/imgui/imgui_draw.cpp"
+          }
+,
+          {
+            "directory": "C:/Users/aligna/Prog/Raspberry",
+            "file": "C:/Users/aligna/Prog/Raspberry/vendor/imgui/imgui_tables.cpp",
+            "command": "cc -MD -MP -DRDEBUG -IC:/Users/aligna/Prog/Raspberry/raspberry -IC:/Users/aligna/Prog/Raspberry/vendor/imgui -g -std=c++20 -o C:/Users/aligna/Prog/Raspberry/build/obj/Debug-linux/imgui/imgui_tables.o -MF C:/Users/aligna/Prog/Raspberry/build/obj/Debug-linux/imgui/imgui_tables.d -c C:/Users/aligna/Prog/Raspberry/vendor/imgui/imgui_tables.cpp"
+          }
+,
+          {
+            "directory": "C:/Users/aligna/Prog/Raspberry",
+            "file": "C:/Users/aligna/Prog/Raspberry/vendor/imgui/imgui_widgets.cpp",
+            "command": "cc -MD -MP -DRDEBUG -IC:/Users/aligna/Prog/Raspberry/raspberry -IC:/Users/aligna/Prog/Raspberry/vendor/imgui -g -std=c++20 -o C:/Users/aligna/Prog/Raspberry/build/obj/Debug-linux/imgui/imgui_widgets.o -MF C:/Users/aligna/Prog/Raspberry/build/obj/Debug-linux/imgui/imgui_widgets.d -c C:/Users/aligna/Prog/Raspberry/vendor/imgui/imgui_widgets.cpp"
+          }
+,
+          {
+            "directory": "C:/Users/aligna/Prog/Raspberry",
+            "file": "C:/Users/aligna/Prog/Raspberry/vendor/rlImGui/rlImGui.cpp",
+            "command": "cc -MD -MP -DRDEBUG -IC:/Users/aligna/Prog/Raspberry/raspberry -IC:/Users/aligna/Prog/Raspberry/vendor/rlImGui -IC:/Users/aligna/Prog/Raspberry/vendor/imgui -IC:/Users/aligna/Prog/Raspberry/vendor/raylib/src -g -std=c++20 -o C:/Users/aligna/Prog/Raspberry/build/obj/Debug-linux/rlImGui/rlImGui.o -MF C:/Users/aligna/Prog/Raspberry/build/obj/Debug-linux/rlImGui/rlImGui.d -c C:/Users/aligna/Prog/Raspberry/vendor/rlImGui/rlImGui.cpp"
+          }
+,
+          {
+            "directory": "C:/Users/aligna/Prog/Raspberry/blueberry",
+            "file": "C:/Users/aligna/Prog/Raspberry/blueberry/editor.cpp",
+            "command": "cc -MD -MP -DRDEBUG -DRAYMATH_DISABLE_CPP_OPERATORS -IC:/Users/aligna/Prog/Raspberry/raspberry -IC:/Users/aligna/Prog/Raspberry/core -IC:/Users/aligna/Prog/Raspberry/vendor/raylib/src -IC:/Users/aligna/Prog/Raspberry/vendor/imgui -IC:/Users/aligna/Prog/Raspberry/vendor/rlImGui -IC:/Users/aligna/Prog/Raspberry/blueberry -g -std=c++20 -o C:/Users/aligna/Prog/Raspberry/build/obj/Debug-linux/Blueberry/editor.o -MF C:/Users/aligna/Prog/Raspberry/build/obj/Debug-linux/Blueberry/editor.d -c C:/Users/aligna/Prog/Raspberry/blueberry/editor.cpp"
+          }
+,
+          {
+            "directory": "C:/Users/aligna/Prog/Raspberry/blueberry",
+            "file": "C:/Users/aligna/Prog/Raspberry/blueberry/main.cpp",
+            "command": "cc -MD -MP -DRDEBUG -DRAYMATH_DISABLE_CPP_OPERATORS -IC:/Users/aligna/Prog/Raspberry/raspberry -IC:/Users/aligna/Prog/Raspberry/core -IC:/Users/aligna/Prog/Raspberry/vendor/raylib/src -IC:/Users/aligna/Prog/Raspberry/vendor/imgui -IC:/Users/aligna/Prog/Raspberry/vendor/rlImGui -IC:/Users/aligna/Prog/Raspberry/blueberry -g -std=c++20 -o C:/Users/aligna/Prog/Raspberry/build/obj/Debug-linux/Blueberry/main.o -MF C:/Users/aligna/Prog/Raspberry/build/obj/Debug-linux/Blueberry/main.d -c C:/Users/aligna/Prog/Raspberry/blueberry/main.cpp"
+          }
+,
+          {
+            "directory": "C:/Users/aligna/Prog/Raspberry/raspberry",
+            "file": "C:/Users/aligna/Prog/Raspberry/raspberry/entity/entity.cpp",
+            "command": "cc -MD -MP -DRDEBUG -DRAYMATH_DISABLE_CPP_OPERATORS -IC:/Users/aligna/Prog/Raspberry/raspberry -IC:/Users/aligna/Prog/Raspberry/core -IC:/Users/aligna/Prog/Raspberry/vendor/raylib/src -IC:/Users/aligna/Prog/Raspberry/vendor/raygui/src -IC:/Users/aligna/Prog/Raspberry/vendor/json/include -IC:/Users/aligna/Prog/Raspberry/vendor/imgui -g -std=c++20 -o C:/Users/aligna/Prog/Raspberry/build/obj/Debug-linux/Raspberry/entity.o -MF C:/Users/aligna/Prog/Raspberry/build/obj/Debug-linux/Raspberry/entity.d -c C:/Users/aligna/Prog/Raspberry/raspberry/entity/entity.cpp"
+          }
+,
+          {
+            "directory": "C:/Users/aligna/Prog/Raspberry/raspberry",
+            "file": "C:/Users/aligna/Prog/Raspberry/raspberry/entity/mob.cpp",
+            "command": "cc -MD -MP -DRDEBUG -DRAYMATH_DISABLE_CPP_OPERATORS -IC:/Users/aligna/Prog/Raspberry/raspberry -IC:/Users/aligna/Prog/Raspberry/core -IC:/Users/aligna/Prog/Raspberry/vendor/raylib/src -IC:/Users/aligna/Prog/Raspberry/vendor/raygui/src -IC:/Users/aligna/Prog/Raspberry/vendor/json/include -IC:/Users/aligna/Prog/Raspberry/vendor/imgui -g -std=c++20 -o C:/Users/aligna/Prog/Raspberry/build/obj/Debug-linux/Raspberry/mob.o -MF C:/Users/aligna/Prog/Raspberry/build/obj/Debug-linux/Raspberry/mob.d -c C:/Users/aligna/Prog/Raspberry/raspberry/entity/mob.cpp"
+          }
+,
+          {
+            "directory": "C:/Users/aligna/Prog/Raspberry/raspberry",
+            "file": "C:/Users/aligna/Prog/Raspberry/raspberry/entity/player.cpp",
+            "command": "cc -MD -MP -DRDEBUG -DRAYMATH_DISABLE_CPP_OPERATORS -IC:/Users/aligna/Prog/Raspberry/raspberry -IC:/Users/aligna/Prog/Raspberry/core -IC:/Users/aligna/Prog/Raspberry/vendor/raylib/src -IC:/Users/aligna/Prog/Raspberry/vendor/raygui/src -IC:/Users/aligna/Prog/Raspberry/vendor/json/include -IC:/Users/aligna/Prog/Raspberry/vendor/imgui -g -std=c++20 -o C:/Users/aligna/Prog/Raspberry/build/obj/Debug-linux/Raspberry/player.o -MF C:/Users/aligna/Prog/Raspberry/build/obj/Debug-linux/Raspberry/player.d -c C:/Users/aligna/Prog/Raspberry/raspberry/entity/player.cpp"
+          }
+,
+          {
+            "directory": "C:/Users/aligna/Prog/Raspberry/raspberry",
+            "file": "C:/Users/aligna/Prog/Raspberry/raspberry/game.cpp",
+            "command": "cc -MD -MP -DRDEBUG -DRAYMATH_DISABLE_CPP_OPERATORS -IC:/Users/aligna/Prog/Raspberry/raspberry -IC:/Users/aligna/Prog/Raspberry/core -IC:/Users/aligna/Prog/Raspberry/vendor/raylib/src -IC:/Users/aligna/Prog/Raspberry/vendor/raygui/src -IC:/Users/aligna/Prog/Raspberry/vendor/json/include -IC:/Users/aligna/Prog/Raspberry/vendor/imgui -g -std=c++20 -o C:/Users/aligna/Prog/Raspberry/build/obj/Debug-linux/Raspberry/game.o -MF C:/Users/aligna/Prog/Raspberry/build/obj/Debug-linux/Raspberry/game.d -c C:/Users/aligna/Prog/Raspberry/raspberry/game.cpp"
+          }
+,
+          {
+            "directory": "C:/Users/aligna/Prog/Raspberry/raspberry",
+            "file": "C:/Users/aligna/Prog/Raspberry/raspberry/gui/menu.cpp",
+            "command": "cc -MD -MP -DRDEBUG -DRAYMATH_DISABLE_CPP_OPERATORS -IC:/Users/aligna/Prog/Raspberry/raspberry -IC:/Users/aligna/Prog/Raspberry/core -IC:/Users/aligna/Prog/Raspberry/vendor/raylib/src -IC:/Users/aligna/Prog/Raspberry/vendor/raygui/src -IC:/Users/aligna/Prog/Raspberry/vendor/json/include -IC:/Users/aligna/Prog/Raspberry/vendor/imgui -g -std=c++20 -o C:/Users/aligna/Prog/Raspberry/build/obj/Debug-linux/Raspberry/menu.o -MF C:/Users/aligna/Prog/Raspberry/build/obj/Debug-linux/Raspberry/menu.d -c C:/Users/aligna/Prog/Raspberry/raspberry/gui/menu.cpp"
+          }
+,
+          {
+            "directory": "C:/Users/aligna/Prog/Raspberry/raspberry",
+            "file": "C:/Users/aligna/Prog/Raspberry/raspberry/main.cpp",
+            "command": "cc -MD -MP -DRDEBUG -DRAYMATH_DISABLE_CPP_OPERATORS -IC:/Users/aligna/Prog/Raspberry/raspberry -IC:/Users/aligna/Prog/Raspberry/core -IC:/Users/aligna/Prog/Raspberry/vendor/raylib/src -IC:/Users/aligna/Prog/Raspberry/vendor/raygui/src -IC:/Users/aligna/Prog/Raspberry/vendor/json/include -IC:/Users/aligna/Prog/Raspberry/vendor/imgui -g -std=c++20 -o C:/Users/aligna/Prog/Raspberry/build/obj/Debug-linux/Raspberry/main.o -MF C:/Users/aligna/Prog/Raspberry/build/obj/Debug-linux/Raspberry/main.d -c C:/Users/aligna/Prog/Raspberry/raspberry/main.cpp"
+          }
+,
+          {
+            "directory": "C:/Users/aligna/Prog/Raspberry/core",
+            "file": "C:/Users/aligna/Prog/Raspberry/core/application/application.cpp",
+            "command": "cc -MD -MP -DRDEBUG -IC:/Users/aligna/Prog/Raspberry/raspberry -IC:/Users/aligna/Prog/Raspberry/core -IC:/Users/aligna/Prog/Raspberry/vendor/raylib/src -IC:/Users/aligna/Prog/Raspberry/vendor/rlImGui -IC:/Users/aligna/Prog/Raspberry/vendor/json/include -IC:/Users/aligna/Prog/Raspberry/vendor/imgui -g -std=c++20 -o C:/Users/aligna/Prog/Raspberry/build/obj/Debug-linux/core/application.o -MF C:/Users/aligna/Prog/Raspberry/build/obj/Debug-linux/core/application.d -c C:/Users/aligna/Prog/Raspberry/core/application/application.cpp"
+          }
+,
+          {
+            "directory": "C:/Users/aligna/Prog/Raspberry/core",
+            "file": "C:/Users/aligna/Prog/Raspberry/core/application/layer.cpp",
+            "command": "cc -MD -MP -DRDEBUG -IC:/Users/aligna/Prog/Raspberry/raspberry -IC:/Users/aligna/Prog/Raspberry/core -IC:/Users/aligna/Prog/Raspberry/vendor/raylib/src -IC:/Users/aligna/Prog/Raspberry/vendor/rlImGui -IC:/Users/aligna/Prog/Raspberry/vendor/json/include -IC:/Users/aligna/Prog/Raspberry/vendor/imgui -g -std=c++20 -o C:/Users/aligna/Prog/Raspberry/build/obj/Debug-linux/core/layer.o -MF C:/Users/aligna/Prog/Raspberry/build/obj/Debug-linux/core/layer.d -c C:/Users/aligna/Prog/Raspberry/core/application/layer.cpp"
+          }
+,
+          {
+            "directory": "C:/Users/aligna/Prog/Raspberry/core",
+            "file": "C:/Users/aligna/Prog/Raspberry/core/application/layerstack.cpp",
+            "command": "cc -MD -MP -DRDEBUG -IC:/Users/aligna/Prog/Raspberry/raspberry -IC:/Users/aligna/Prog/Raspberry/core -IC:/Users/aligna/Prog/Raspberry/vendor/raylib/src -IC:/Users/aligna/Prog/Raspberry/vendor/rlImGui -IC:/Users/aligna/Prog/Raspberry/vendor/json/include -IC:/Users/aligna/Prog/Raspberry/vendor/imgui -g -std=c++20 -o C:/Users/aligna/Prog/Raspberry/build/obj/Debug-linux/core/layerstack.o -MF C:/Users/aligna/Prog/Raspberry/build/obj/Debug-linux/core/layerstack.d -c C:/Users/aligna/Prog/Raspberry/core/application/layerstack.cpp"
+          }
+,
+          {
+            "directory": "C:/Users/aligna/Prog/Raspberry/core",
+            "file": "C:/Users/aligna/Prog/Raspberry/core/event/dispatcher.cpp",
+            "command": "cc -MD -MP -DRDEBUG -IC:/Users/aligna/Prog/Raspberry/raspberry -IC:/Users/aligna/Prog/Raspberry/core -IC:/Users/aligna/Prog/Raspberry/vendor/raylib/src -IC:/Users/aligna/Prog/Raspberry/vendor/rlImGui -IC:/Users/aligna/Prog/Raspberry/vendor/json/include -IC:/Users/aligna/Prog/Raspberry/vendor/imgui -g -std=c++20 -o C:/Users/aligna/Prog/Raspberry/build/obj/Debug-linux/core/dispatcher.o -MF C:/Users/aligna/Prog/Raspberry/build/obj/Debug-linux/core/dispatcher.d -c C:/Users/aligna/Prog/Raspberry/core/event/dispatcher.cpp"
+          }
+,
+          {
+            "directory": "C:/Users/aligna/Prog/Raspberry/core",
+            "file": "C:/Users/aligna/Prog/Raspberry/core/registry/registry.cpp",
+            "command": "cc -MD -MP -DRDEBUG -IC:/Users/aligna/Prog/Raspberry/raspberry -IC:/Users/aligna/Prog/Raspberry/core -IC:/Users/aligna/Prog/Raspberry/vendor/raylib/src -IC:/Users/aligna/Prog/Raspberry/vendor/rlImGui -IC:/Users/aligna/Prog/Raspberry/vendor/json/include -IC:/Users/aligna/Prog/Raspberry/vendor/imgui -g -std=c++20 -o C:/Users/aligna/Prog/Raspberry/build/obj/Debug-linux/core/registry.o -MF C:/Users/aligna/Prog/Raspberry/build/obj/Debug-linux/core/registry.d -c C:/Users/aligna/Prog/Raspberry/core/registry/registry.cpp"
+          }
+]

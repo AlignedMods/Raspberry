@@ -1,56 +1,30 @@
 #include "game.hpp"
+#include "application/application.hpp"
 #include "entity/player.hpp"
-#include "log.hpp"
 #include "gui/menu.hpp"
+#include "log.hpp"
 #include "registry/registry.hpp"
 
 #include "raylib.h"
 #include "rlgl.h"
-
-#include <cstdlib>
-
-static s_Game* s_Instance = nullptr;
+#include "imgui.h"
 
 // no remorse
 
-s_Game::s_Game() {
-    if (!s_Instance) {
-        s_Instance = this;
-    } else {
-        Log(Log_Critical, "There cannot be multiple game classes at once!!");
-        exit(1);
-    }
+Game::Game() {
+    SetName("game");
 }
 
-s_Game::~s_Game() {}
+Game::~Game() {}
 
-bool s_Game::Init() {
-    SetTraceLogLevel(LOG_WARNING); // don't fucking display your shit ass messages (jk love you raysan :3)
-    SetConfigFlags(FLAG_WINDOW_RESIZABLE);
-    InitWindow(640, 360, "Raspberry");
-
-    // we can't create the window
-    if (!IsWindowReady()) return false;
-
-    Log(Log_Info, "Created window with name \"%s\"!", "Raspberry");
-
-    InitAudioDevice();
-
-    // there won't be any audio
-    if (!IsAudioDeviceReady()) return false;
-
-    Log(Log_Info, "Initialized audio device!");
-
-    SetWindowIcon(LoadImage("Assets/Textures/stone.png"));
-    SetWindowMinSize(640, 360);
-
-    m_Camera.target = { 0.0f, 0.0f };
-    m_Camera.offset = { GetScreenWidth() / 2.0f - 16.0f, GetScreenHeight() / 2.0f - 16.0f };
+void Game::OnInit() {
+    m_Camera.target = {0.0f, 0.0f};
+    m_Camera.offset = {GetScreenWidth() / 2.0f - 16.0f, GetScreenHeight() / 2.0f - 16.0f};
     m_Camera.rotation = 0.0f;
     m_Camera.zoom = 1.0f;
 
-    m_EditorCamera.target = { 0.0f, 0.0f };
-    m_EditorCamera.offset = { GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
+    m_EditorCamera.target = {0.0f, 0.0f};
+    m_EditorCamera.offset = {GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f};
     m_EditorCamera.rotation = 0.0f;
     m_EditorCamera.zoom = 1.0f;
 
@@ -63,52 +37,17 @@ bool s_Game::Init() {
     m_StrResolutions = FormatResolutions();
     m_StrFramerates = FormatFramerates();
 
-    m_LastTime = GetTime();
-
     m_Viewport = {m_Camera.target.x - m_Camera.offset.x / m_Camera.zoom, m_Camera.target.y - m_Camera.offset.y / m_Camera.zoom,
                   GetScreenWidth() / m_Camera.zoom, GetScreenHeight() / m_Camera.zoom};
 
-    Registry.RegisterArchive("core.rsp");
+    Application::Get().GetRegistry().AddArchive("core.rsp");
 
     InitMenu();
 
-    return true;
+    Log(Log_Info, "Game from on init: %p", this);
 }
 
-void s_Game::Shutdown() {
-    CloseAudioDevice();
-    CloseWindow();
-}
-
-bool s_Game::Running() {
-    return m_Running;
-}
-
-void s_Game::PollEvents() {
-    PollInputEvents();
-}
-
-void s_Game::CalculateTiming() {
-    m_CurrentTime = GetTime();
-
-    m_UpdateDrawTime = m_CurrentTime - m_LastTime;
-
-    if (m_TargetFPS > 0) {
-        m_WaitTime = (1.0 / static_cast<double>(m_TargetFPS)) - m_UpdateDrawTime;
-        WaitTime(m_WaitTime);
-        m_CurrentTime = GetTime();
-        deltaTime = static_cast<float>(m_CurrentTime - m_LastTime);
-    } else {
-        deltaTime = static_cast<float>(m_UpdateDrawTime);
-    }
-
-    m_LastTime = m_CurrentTime;
-}
-
-void s_Game::OnUpdate() {
-    // check if we should continue
-    m_Running = m_Running && !WindowShouldClose();
-
+void Game::OnUpdate(f32 ts) {
     // Viewport should always look the same
     m_Camera.zoom = 1.0f / (360.0f / GetScreenHeight());
 
@@ -117,12 +56,6 @@ void s_Game::OnUpdate() {
 
     // if (GetScreenWidth() % 640 || GetScreenHeight() % 360) { Log(LogLevel::Warning, "Use of unsupported window size!\nYou will likely run into issues!"); }
 
-    while (GetTime() - m_TickTime > 0.0167f) {
-        m_TickTime += 0.0167f;
-
-        FixedUpdate();
-    }
-
     // Fullscreen keybind
     if (IsKeyPressed(KEY_F11)) {
         SetFullscreen(!IsWindowFullscreen());
@@ -130,17 +63,15 @@ void s_Game::OnUpdate() {
     }
 
     if (m_GameRunning && !m_Paused) {
-        m_Camera.offset = { GetScreenWidth() / 2.0f - 16.0f * m_Camera.zoom, GetScreenHeight() / 2.0f - 16.0f * m_Camera.zoom };
+        m_Camera.offset = {GetScreenWidth() / 2.0f - 16.0f * m_Camera.zoom, GetScreenHeight() / 2.0f - 16.0f * m_Camera.zoom};
 
         if (!m_Paused) {
-            m_CurrentLevel->OnUpdate();
+            // m_CurrentLevel->OnUpdate();
         }
 
-        m_Camera.target = {m_CurrentLevel->GetPlayer().GetX() * 32.0f,
-                           m_CurrentLevel->GetPlayer().GetY() * 32.0f};
+        // m_Camera.target = {m_CurrentLevel->GetPlayer().GetX() * 32.0f,
+        //                    m_CurrentLevel->GetPlayer().GetY() * 32.0f};
     }
-
-    UpdateCurrentMenu();
 
     if (IsGamepadAvailable(0)) {
         SetGamepadVibration(0, 0.2f, 0.2f, 10.0f);
@@ -151,21 +82,26 @@ void s_Game::OnUpdate() {
     // Gui.OnUpdate();
 }
 
-void s_Game::FixedUpdate() {
+void Game::OnFixedUpdate() {
     if (m_GameRunning && !m_Paused) {
-        m_CurrentLevel->Tick();
     }
 
-    ticks++;
-
-    m_CurrentFPS = 1.0f / deltaTime;
+    // m_CurrentFPS = 1.0f / Application::Get();
 }
 
-void s_Game::OnRender() {
+void Game::OnRender() {
     if (m_GameRunning) {
+        Log(Log_Info, "Test!");
         BeginMode2D(m_Camera);
 
-        m_CurrentLevel->OnRender();
+        int i = 0;
+
+        for (auto& tile : m_CurrentLevel->tiles) {
+            DrawTexturePro(tile.texture, {0, 0, static_cast<float>(tile.texture.width), static_cast<float>(tile.texture.height)}, {tile.pos.x * 32.0f, tile.pos.y * 32.0f, 32, 32}, {0, 0}, 0.0f, WHITE);
+            i++;
+        }
+
+        Log(Log_Info, "%d", i);
 
         EndMode2D();
     }
@@ -175,19 +111,41 @@ void s_Game::OnRender() {
     // Gui.OnRender();
 
     // show the current fps
-    DrawText(TextFormat("FPS: %.1f", m_CurrentFPS), 10, 10, 20, GREEN);
-    DrawText(TextFormat("Time took to render: %.4f ms", deltaTime * 1000.0f), 10, 40, 20, GREEN);
+    // DrawText(TextFormat("FPS: %.1f", m_CurrentFPS), 10, 10, 20, GREEN);
+    // DrawText(TextFormat("Time took to render: %.4f ms", deltaTime * 1000.0f), 10, 40, 20, GREEN);
 }
 
-const Camera2D& s_Game::GetCamera() const {
+static bool doLog = false;
+
+void Game::OnUIRender(f32 ts) {
+    ImGui::Begin("nasm");
+
+    ImGui::Text("FPS: %f", 1.0f/ts);
+    if (ImGui::Button("Enable/Disable logging")) {
+        doLog = !doLog;
+    }
+
+    ImGui::End();
+
+    ImGui::ShowDemoWindow();
+}
+
+void Game::OnEvent(const Event& event) {
+    if (doLog) {
+        Log(Log_Info, event.ToString().c_str());
+    }
+    UpdateCurrentMenu(event);
+}
+
+const Camera2D& Game::GetCamera() const {
     return m_Camera;
 }
 
-const Rectangle& s_Game::GetViewportRect() const {
+const Rectangle& Game::GetViewportRect() const {
     return m_Viewport;
 }
 
-constexpr std::string s_Game::FormatResolutions() {
+constexpr std::string Game::FormatResolutions() {
     std::string buffer;
 
     for (auto& res : m_Resolutions) {
@@ -200,7 +158,7 @@ constexpr std::string s_Game::FormatResolutions() {
     return buffer;
 }
 
-constexpr std::string s_Game::FormatFramerates() {
+constexpr std::string Game::FormatFramerates() {
     std::string buffer;
 
     for (auto& fr : m_Framerates) {
@@ -211,65 +169,32 @@ constexpr std::string s_Game::FormatFramerates() {
     return buffer;
 }
 
-void s_Game::SetFullscreen(bool yesno) {
-    int monitor = GetCurrentMonitor();
-
-    // Toggling fullscreen will *NOT* automatically set the window's size
-    // so we must so it manually (using borderless windowed fixes this however)
-    if (IsWindowFullscreen() && yesno) {
-        return;
-    } else if (!IsWindowFullscreen() && !yesno) {
-        return;
-    }
-
-    if (IsWindowFullscreen()) {
-        Log(Log_Info, "Window is fullscreen!");
-
-        SetWindowSize(m_PreviousWindowWidth, m_PreviousWindowHeight);
-
-        m_PreviousWindowWidth = GetScreenWidth();
-        m_PreviousWindowHeight = GetScreenHeight();
-
-        ToggleFullscreen();
-
-        return;
-    } else {
-        Log(Log_Info, "Window is NOT fullscreen!");
-        m_PreviousWindowWidth = GetScreenWidth();
-        m_PreviousWindowHeight = GetScreenHeight();
-
-        SetWindowSize(GetMonitorWidth(monitor), GetMonitorHeight(monitor));
-
-        ToggleFullscreen();
-
-        return;
-    }
+void Game::SetFullscreen(bool yesno) {
 }
 
-void s_Game::SetPause(bool yes) {
+void Game::SetPause(bool yes) {
     m_Paused = yes;
 }
 
-void s_Game::Quit() {
-    m_Running = false;
-}
-
-void s_Game::SetCurrentLevel(const Level& level) {
+void Game::SetCurrentLevel(const Level& level) {
     // m_CurrentLevel = level;
 }
 
-Level* s_Game::GetCurrentLevel() {
+Level* Game::GetCurrentLevel() {
     return m_CurrentLevel;
 }
 
-void s_Game::StartGameplay() {
+void Game::StartGameplay() {
+    Log(Log_Info, "yeah");
     if (m_GameRunning) {
         return;
     }
 
     m_GameRunning = true;
 
-    m_CurrentLevel = &Registry.GetLevel("hi");
+    Log(Log_Info, "Game from start gay: %p", this);
 
-    //m_CurrentMenu = Menu::None;
+    m_CurrentLevel = &(Application::Get().GetRegistry().GetLevel("hi"));
+
+    // m_CurrentMenu = Menu::None;
 }

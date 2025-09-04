@@ -1,6 +1,7 @@
 #pragma once
 
 #include "types.hpp"
+#include "event/event.hpp"
 
 #include <functional>
 
@@ -31,7 +32,7 @@ struct Menu {
 // also not everything has to be a class, this makes more sense to me
 void InitMenu();
 
-void UpdateCurrentMenu();
+void UpdateCurrentMenu(const Event& event);
 void RenderCurrentMenu();
 void SwitchMenu(Menu* menu);
 

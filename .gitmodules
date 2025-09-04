@@ -1,9 +1,3 @@
-[submodule "vendor/raylib"]
-	path = vendor/raylib
-	url = https://github.com/raysan5/raylib
-[submodule "vendor/raygui"]
-	path = vendor/raygui
-	url = https://github.com/raysan5/raygui
 [submodule "vendor/json"]
 	path = vendor/json
 	url = https://github.com/nlohmann/json.git
@@ -14,3 +8,6 @@
 	path = vendor/imgui
 	url = https://github.com/ocornut/imgui.git
 	branch = docking
+[submodule "vendor/raylib"]
+	path = vendor/raylib
+	url = https://github.com/AlignedMods/raylib.git

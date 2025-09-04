@@ -1,16 +1,16 @@
 project "Blueberry"
 	language "C++"
 	cppdialect "C++20"
-    kind "WindowedApp"
+    kind "ConsoleApp"
 
     targetdir ( "../build/bin/" .. OutputDir .. "/%{prj.name}")
     objdir ( "../build/obj/" .. OutputDir .. "/%{prj.name}" )
 
 	files { "**.cpp", "**.hpp" }
 
-	includedirs { "../shared", "../vendor/raylib/src/", "../vendor/imgui/", "../vendor/rlImGui/", "./" }
+	includedirs { "../core", "../vendor/raylib/src/", "../vendor/imgui/", "../vendor/rlImGui/", "./" }
 
-	links { "raylib", "rlImGui", "imgui" }
+	links { "core", "raylib", "rlImGui", "imgui" }
 
 	defines { "RAYMATH_DISABLE_CPP_OPERATORS" } -- honestly not a huge fan of those
 

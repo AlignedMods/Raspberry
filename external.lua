@@ -10,7 +10,7 @@ project "raylib"
 
     includedirs { "vendor/raylib/src", "vendor/raylib/src/external/glfw/include" }
 
-    defines { "SUPPRESS_DEF_PLATFORM", "PLATFORM_DESKTOP", "GRAPHICS_API_OPENGL_33", "SUPPORT_CUSTOM_FRAME_CONTROL" }
+    defines { "SUPPRESS_DEF_PLATFORM", "PLATFORM_DESKTOP", "GRAPHICS_API_OPENGL_33", "SUPPORT_CUSTOM_FRAME_CONTROL", "SUPPORT_MODULE_RAUDIO" }
 
     filter "platforms:Windows"
         links { "opengl32", "shell32", "gdi32", "winmm" }

@@ -1,38 +1,15 @@
+#include "application/entrypoint.hpp"
 #include "game.hpp"
-#include "log.hpp"
-#include "registry/registry.hpp"
-#include "renderer/renderer.hpp"
 
-#include <iostream>
+Application* Application::CreateApplication(const CommandLineArgs& args) {
+    ApplicationSpecification spec = {
+        .name = "Raspberry",
+        .min_width = 640,
+        .min_height = 360,
+        .enable_audio = true,
+        .FPS = 0};
 
-// not particuarly a huge fan of this
-// i think it's better than inline variable though
-s_Game Game;
-s_Renderer Renderer;
-s_Registry Registry;
-
-int main(int argc, char **argv) {
-    // screw RAII btw
-    if (!Game.Init()) {
-        Log(Log_Critical, "Could NOT initialize the game!\nAborting...");
-        return 1;
-    }
-
-    // Main application loop
-    while (Game.Running()) {
-        Game.PollEvents();
-        Game.OnUpdate();
-
-        Renderer.Begin();
-
-        Game.OnRender();
-
-        Renderer.End();
-
-        Game.CalculateTiming();
-    }
-
-    Game.Shutdown();
-
-    return 0;
+    Application* app = new Application(spec);
+    app->GetLayerStack().PushLayer<Game>();
+    return app;
 }

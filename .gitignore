@@ -2,6 +2,7 @@
 
 build/
 .vs/
+.cache/
 
 # Files
 
@@ -9,3 +10,4 @@ Makefile
 *.sln
 *.make
 imgui.ini
+compile_commands.json

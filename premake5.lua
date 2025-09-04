@@ -20,6 +20,6 @@ workspace "Raspberry"
 	-- submodules
     include "external.lua"
 
-	-- include "blueberry/"
+	include "blueberry/"
 	include "raspberry/"
 	include "core/"

@@ -5,7 +5,7 @@
 #include <vector>
 
 class LayerStack {
-  public:
+public:
     LayerStack();
     ~LayerStack();
 
@@ -13,7 +13,9 @@ class LayerStack {
     void PushLayer() {
         static_assert(std::is_base_of<Layer, T>(), "Pushed layer is NOT a subclass of Layer!");
         m_Layers.push_back(new T);
-        m_Layers.back()->OnInit();
+        if (IsWindowReady()) {
+            m_Layers.back()->OnInit();
+        }
     }
     void PopLayer();
 
@@ -21,6 +23,6 @@ class LayerStack {
 
     std::vector<Layer*>& GetAllLayers();
 
-  private:
+private:
     std::vector<Layer*> m_Layers;
 };

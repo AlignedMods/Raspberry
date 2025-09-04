@@ -7,9 +7,10 @@ project "Raspberry"
 
 	files { "**.cpp", "**.hpp" }
 
-	includedirs { "../core/", "../vendor/raylib/src/", "../vendor/raygui/src/", "../vendor/json/include/" }
+	includedirs { "../core/", "../vendor/raylib/src/", "../vendor/raygui/src/", "../vendor/json/include/", "../vendor/imgui/" }
 
-	links { "raylib" }
+    -- IMPORTANT: we must link core before raylib because ¯\_(ツ)_/¯
+	links { "core", "raylib", "rlImGui", "imgui" }
 	
 	defines { "RAYMATH_DISABLE_CPP_OPERATORS" } -- honestly not a huge fan of those
 	
