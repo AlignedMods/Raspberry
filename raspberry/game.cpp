@@ -117,23 +117,9 @@ void Game::OnRender() {
 
 static bool doLog = false;
 
-void Game::OnUIRender(f32 ts) {
-    ImGui::Begin("nasm");
-
-    ImGui::Text("FPS: %f", 1.0f/ts);
-    if (ImGui::Button("Enable/Disable logging")) {
-        doLog = !doLog;
-    }
-
-    ImGui::End();
-
-    ImGui::ShowDemoWindow();
-}
+void Game::OnUIRender(f32 ts) {}
 
 void Game::OnEvent(const Event& event) {
-    if (doLog) {
-        Log(Log_Info, event.ToString().c_str());
-    }
     UpdateCurrentMenu(event);
 }
 

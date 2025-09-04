@@ -4,6 +4,7 @@
 #include "game.hpp"
 #include "input/keycodes.hpp"
 #include "log.hpp"
+#include "registry/registry.hpp"
 #include "types.hpp"
 
 #include "raylib.h"
@@ -113,13 +114,15 @@ void MoveCursorToIndex(u16 index) {
     }
 
     if (last != current->selection) {
-        // Registry.PlaySound("menu_cycle", 0.9f, 1.1f);
+        Registry& reg = Application::Get().GetRegistry();
+        PlaySound(reg.GetSound("menu_cycle"));
     }
 }
 
 void ExecuteCallback() {
     current->items[current->selection].callback();
-    // Registry.PlaySound("menu_select", 0.8f, 1.3f);
+    Registry& reg = Application::Get().GetRegistry();
+    PlaySound(reg.GetSound("menu_select"));
 }
 
 void InitMenu() {
