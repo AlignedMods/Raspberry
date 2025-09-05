@@ -91,17 +91,11 @@ void Game::OnFixedUpdate() {
 
 void Game::OnRender() {
     if (m_GameRunning) {
-        Log(Log_Info, "Test!");
         BeginMode2D(m_Camera);
-
-        int i = 0;
 
         for (auto& tile : m_CurrentLevel->tiles) {
             DrawTexturePro(tile.texture, {0, 0, static_cast<float>(tile.texture.width), static_cast<float>(tile.texture.height)}, {tile.pos.x * 32.0f, tile.pos.y * 32.0f, 32, 32}, {0, 0}, 0.0f, WHITE);
-            i++;
         }
-
-        Log(Log_Info, "%d", i);
 
         EndMode2D();
     }
