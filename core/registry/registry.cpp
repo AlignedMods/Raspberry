@@ -1,8 +1,6 @@
 #include "registry.hpp"
 #include "log.hpp"
 
-#include "raylib.h"
-
 #include <fstream>
 #include <sstream>
 
@@ -86,9 +84,9 @@ Texture& Registry::GetTexture(const std::string& name, const std::string& archiv
     if (!m_Textures.contains(name)) {
         std::string data = GetData(name, archive);
 
-        Image i = LoadImageFromMemory(".png", (u8*)data.c_str(), data.size());
-        m_Textures[name] = LoadTextureFromImage(i);
-        UnloadImage(i);
+        // Image i = LoadImageFromMemory(".png", (u8*)data.c_str(), data.size());
+        // m_Textures[name] = LoadTextureFromImage(i);
+        // UnloadImage(i);
     }
 
     return m_Textures.at(name);
@@ -98,10 +96,10 @@ Sound& Registry::GetSound(const std::string& name, const std::string& archive) {
     // lazy loading as i couldn't find a better way
     if (!m_Sounds.contains(name)) {
         std::string data = GetData(name, archive);
-        Wave w = LoadWaveFromMemory(".wav", (u8*)data.c_str(), data.size());
+        // Wave w = LoadWaveFromMemory(".wav", (u8*)data.c_str(), data.size());
 
-        m_Sounds[name] = LoadSoundFromWave(w);
-        UnloadWave(w);
+        // m_Sounds[name] = LoadSoundFromWave(w);
+        // UnloadWave(w);
     }
 
     return m_Sounds.at(name);

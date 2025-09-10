@@ -2,8 +2,6 @@
 
 #include "types.hpp"
 
-#include "raylib.h"
-
 #include <filesystem>
 #include <string>
 #include <unordered_map>

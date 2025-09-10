@@ -13,9 +13,9 @@ public:
     void PushLayer() {
         static_assert(std::is_base_of<Layer, T>(), "Pushed layer is NOT a subclass of Layer!");
         m_Layers.push_back(new T);
-        if (IsWindowReady()) {
-            m_Layers.back()->OnInit();
-        }
+        // if (IsWindowReady()) {
+        //     m_Layers.back()->OnInit();
+        // }
     }
     void PopLayer();
 

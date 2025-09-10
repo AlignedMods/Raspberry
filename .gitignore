@@ -1,13 +1,16 @@
 # Directories
-
 build/
 .vs/
 .cache/
 
-# Files
-
-Makefile
+# Visual Studio files
 *.sln
+*.vsxproj
+*.vsxproj.filters
+*.vsxproj.user
+
+# Makefiles
+Makefile
 *.make
+
 imgui.ini
-compile_commands.json

@@ -1,4 +1,4 @@
-project "core"
+project "Blackberry" -- The game engine
     language "C++"
     cppdialect "C++20"
     kind "StaticLib"
@@ -8,9 +8,6 @@ project "core"
 
     files { "**.cpp", "**.hpp" }
 
-    includedirs { "../core/", "../vendor/raylib/src/", "../vendor/rlImGui/", "../vendor/json/include/", "../vendor/imgui/" }
+    includedirs { "../core/", "../vendor/glfw/include/", "../vendor/imgui/", "../vendor/glad/include" }
 
-    links { "raylib", "rlImGui", "imgui" }
-
-    filter "platforms:Windows"
-        links { "winmm", "gdi32" }
+    links { "glfw", "glad", "imgui" }

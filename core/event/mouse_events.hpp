@@ -1,35 +1,36 @@
 #pragma once
 
 #include "event/event.hpp"
+#include "input/mousecodes.hpp"
 
 #include <sstream>
 
 class MouseButtonPressedEvent : public Event {
 public:
-    MouseButtonPressedEvent(const MouseButton button)
+    MouseButtonPressedEvent(const MouseCode button)
         : m_Button(button) {}
 
-    MouseButton GetButton() const { return m_Button; }
+    MouseCode GetButton() const { return m_Button; }
 
     EVENT_CLASS_CATEGORY(EventCategory_Input | EventCategory_Mouse);
     EVENT_CLASS_TYPE(MouseButtonPressed);
 
 private:
-    MouseButton m_Button;
+    MouseCode m_Button;
 };
 
 class MouseButtonReleasedEvent : public Event {
 public:
-    MouseButtonReleasedEvent(const MouseButton button)
+    MouseButtonReleasedEvent(const MouseCode button)
         : m_Button(button) {}
 
-    MouseButton GetButton() const { return m_Button; }
+    MouseCode GetButton() const { return m_Button; }
 
     EVENT_CLASS_CATEGORY(EventCategory_Input | EventCategory_Mouse);
     EVENT_CLASS_TYPE(MouseButtonReleased);
 
 private:
-    MouseButton m_Button;
+    MouseCode m_Button;
 };
 
 class MouseMovedEvent : public Event {

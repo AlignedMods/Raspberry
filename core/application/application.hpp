@@ -5,12 +5,12 @@
 #include "log.hpp"
 #include "registry/registry.hpp"
 #include "types.hpp"
-
-#define GLFW_INCLUDE_NONE
-#include "external/glfw/include/GLFW/glfw3.h"
+#include "window.hpp"
+#include "renderer.hpp"
 
 struct ApplicationSpecification {
     const char* name;
+    u32 width, height;
     u32 min_width, min_height;
     bool enable_audio;
     u32 FPS;
@@ -49,7 +49,7 @@ public:
     void Run();
 
     void SetIcon(const Texture& texture);
-    void SetIcon(const Image& image);
+    // void SetIcon(const Image& image);
 
     bool IsInitialized();
 
@@ -61,6 +61,8 @@ public:
     Registry& GetRegistry() { return m_Registry; }
     LayerStack& GetLayerStack() { return m_Stack; }
     Dispatcher& GetDispatcher() { return m_Dispatcher; }
+
+    f32 GetDeltaTime() const { return m_dt; }
 
     // To be implemented by client!
     static Application* CreateApplication(const CommandLineArgs& args);
@@ -74,20 +76,23 @@ private:
 private:
     ApplicationSpecification m_Specification;
 
-    u32 m_TargetFPS;
+    u32 m_TargetFPS = 0;
 
-    bool m_Running;
+    bool m_Running = false;
     bool m_Initalized = false;
 
-    f64 m_CurrentTime;
-    f64 m_LastTime;
-    f32 m_dt;
+    f64 m_CurrentTime = 0.0;
+    f64 m_LastTime = 0.0;
+    f32 m_dt = 0.0f;
 
-    f64 m_FixedUpdateTime;
+    f64 m_FixedUpdateTime = 0.0;
 
     LayerStack m_Stack;
     Registry m_Registry;
     Dispatcher m_Dispatcher;
+
+    Window* m_Window = nullptr;
+    Renderer* m_Renderer = nullptr;
 
     friend class Dispatcher;
 };

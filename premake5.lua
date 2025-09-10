@@ -1,25 +1,20 @@
-workspace "Raspberry"
-	configurations { "Debug", "Release" }
-	platforms { "Windows", "Linux" }
-
-	includedirs { "raspberry/" }
-
-	startproject "raspberry"
+workspace "Raspberry" -- The entire project
+    configurations { "Debug", "Release" }
 
     OutputDir = "%{cfg.buildcfg}-%{cfg.system}"
 
-	filter "configurations:Release"
-		optimize "On"
-		kind "WindowedApp"
+    defines { "_CRT_SECURE_NO_WARNINGS" }
 
-	filter "configurations:Debug"
-		symbols "On"
-		kind "ConsoleApp"
-		defines { "RDEBUG" }
+    filter "configurations:Release"
+        optimize "On"
 
-	-- submodules
+    filter "configurations:Debug"
+        symbols "On"
+        defines { "RDEBUG" }
+
+    -- submodules
     include "external.lua"
 
-	include "blueberry/"
-	include "raspberry/"
-	include "core/"
+    include "core/"
+    include "blueberry/"
+    include "raspberry/"

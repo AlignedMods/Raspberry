@@ -2,11 +2,10 @@
 
 #include "types.hpp"
 
-#include "raylib.h"
-
 #include <functional>
 #include <unordered_map>
 #include <vector>
+#include <string>
 
 // event category is NOT allowed to be an enum class because we need to be able to OR/AND them together
 enum EventCategory : u32 {

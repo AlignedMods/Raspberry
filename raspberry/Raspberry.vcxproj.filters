@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="entity">
+      <UniqueIdentifier>{C2FD7FFB-AE9F-AAD1-975A-BE25839B3122}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="gui">
+      <UniqueIdentifier>{8A78880B-F681-887C-7FFD-9E7CEB05947C}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="entity\entity.hpp">
+      <Filter>entity</Filter>
+    </ClInclude>
+    <ClInclude Include="entity\mob.hpp">
+      <Filter>entity</Filter>
+    </ClInclude>
+    <ClInclude Include="entity\player.hpp">
+      <Filter>entity</Filter>
+    </ClInclude>
+    <ClInclude Include="game.hpp" />
+    <ClInclude Include="gui\menu.hpp">
+      <Filter>gui</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="entity\entity.cpp">
+      <Filter>entity</Filter>
+    </ClCompile>
+    <ClCompile Include="entity\mob.cpp">
+      <Filter>entity</Filter>
+    </ClCompile>
+    <ClCompile Include="entity\player.cpp">
+      <Filter>entity</Filter>
+    </ClCompile>
+    <ClCompile Include="game.cpp" />
+    <ClCompile Include="gui\menu.cpp">
+      <Filter>gui</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp" />
+  </ItemGroup>
+</Project>
