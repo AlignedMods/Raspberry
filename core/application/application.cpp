@@ -197,6 +197,11 @@ void Application::OnEvent(const Event& event) {
     ImGuiIO io = ImGui::GetIO();
 
     const auto type = event.GetEventType();
+
+    if (type == EventType::WindowResize) {
+        const auto& wr = EVENT_CAST(WindowResizeEvent);
+        m_Renderer->UpdateViewport({(f32)wr.GetWidth(), (f32)wr.GetHeight()});
+    }
 }
 
 Application& Application::Get() {

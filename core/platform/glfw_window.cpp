@@ -187,7 +187,6 @@ Window_GLFW::Window_GLFW(const WindowData& data)
     glfwSetFramebufferSizeCallback(m_Handle, [](GLFWwindow* window, i32 width, i32 height) {
         DISPATCHER;
 
-        glViewport(0, 0, width, height);
         dispatcher.Post(WindowResizeEvent(width, height));
     });
 

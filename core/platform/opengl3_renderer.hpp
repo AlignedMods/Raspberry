@@ -2,6 +2,8 @@
 
 #include "application/renderer.hpp"
 
+#include "glm/glm.hpp"
+
 #include <vector>
 
 class Renderer_OpenGL3 : public Renderer {
@@ -37,7 +39,7 @@ private:
     u64 m_VertexIndex = 0;
     u64 m_CurrentVertex = 0;
 
-    Vector2 m_ScreenSize;
+    glm::mat4 m_Projection;
 
     RenderingMode m_Mode;
 };

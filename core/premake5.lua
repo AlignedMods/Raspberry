@@ -8,6 +8,6 @@ project "Blackberry" -- The game engine
 
     files { "**.cpp", "**.hpp" }
 
-    includedirs { "../core/", "../vendor/glfw/include/", "../vendor/imgui/", "../vendor/glad/include" }
+    includedirs { "../core/", "../vendor/glfw/include/", "../vendor/imgui/", "../vendor/glad/include", "../vendor/glm" }
 
     links { "glfw", "glad", "imgui" }

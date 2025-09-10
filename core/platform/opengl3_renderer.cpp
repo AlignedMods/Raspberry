@@ -3,6 +3,8 @@
 #include "log.hpp"
 
 #include "glad/glad.h"
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/type_ptr.hpp"
 
 // shaders
 static const char* VertexShaderSource = MULTILINE_STR(
@@ -13,12 +15,11 @@ static const char* VertexShaderSource = MULTILINE_STR(
     
     out vec4 col;
 
-    uniform vec3 windowSize;
+    uniform mat4 projection;
     
     void main()
     {
-        vec3 ndc = (a_Pos / windowSize) * 2.0 - 1.0;
-        gl_Position = vec4(ndc, 1.0);
+        gl_Position = projection * vec4(a_Pos, 1.0);
         col = a_Color;
     }
 );
@@ -86,8 +87,15 @@ Renderer_OpenGL3::Renderer_OpenGL3(Vector2 viewport) {
 }
 
 void Renderer_OpenGL3::UpdateViewport(Vector2 viewport) {
-    m_ScreenSize = viewport;
     glViewport(0, 0, viewport.x, viewport.y);
+
+    m_Projection = glm::ortho(
+        0.0f,            // left
+        (f32)viewport.x, // right
+        (f32)viewport.y, // bottom
+        0.0f,            // top
+        -1.0f, 1.0f      // near-far
+    );
 }
 
 void Renderer_OpenGL3::VertexV(const Vertex& v) {
@@ -150,8 +158,8 @@ void Renderer_OpenGL3::Render() {
     }
 
     glUseProgram(m_Shader);
-    u32 uni = glGetUniformLocation(m_Shader, "windowSize");
-    glUniform3f(uni, m_ScreenSize.x, m_ScreenSize.y, 1.0f);
+    u32 uni = glGetUniformLocation(m_Shader, "projection");
+    glUniformMatrix4fv(uni, 1, GL_FALSE, glm::value_ptr(m_Projection));
 
     glBindVertexArray(m_VAO);
 
