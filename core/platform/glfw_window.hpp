@@ -16,7 +16,7 @@ public:
     virtual void OnRenderFinish() override;
 
     virtual f64 GetTime() const override;
-    virtual void SleepMilli(i32 milliseconds) const override;
+    virtual void SleepSeconds(f64 seconds) const override;
 
     virtual void* GetHandle() const override;
 

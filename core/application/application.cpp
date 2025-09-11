@@ -120,7 +120,6 @@ void Application::Run() {
 
         if (m_TargetFPS > 0) {
             f64 waitTime = (1.0 / static_cast<f64>(m_TargetFPS)) - drawRenderTime;
-            // Log(Log_Info, "Sleeping for: %f", waitTime);
             m_Window->SleepSeconds(waitTime);
             m_CurrentTime = m_Window->GetTime();
             m_dt = static_cast<f32>(m_CurrentTime - m_LastTime);
@@ -163,7 +162,7 @@ void Application::OnUpdate() {
 void Application::OnRender() {
     // ClearBackground({0x19, 0x19, 0x19, 0xff});
 
-    m_Renderer->DrawTriangle({{100.0f, 500.0f}, {1.0f, 0.0f, 0.0f, 1.0f}}, {{200.0f, 100.0f}, {0.0f, 1.0f, 0.0f, 1.0f}}, {{300.0f, 500.0f}, {0.0f, 0.0f, 1.0f, 1.0f}});
+    m_Renderer->DrawTriangle({{100.0f, 500.0f}, {1.0f, 0.0f, 0.0f, 1.0f}}, {{300.0f, 100.0f}, {0.0f, 1.0f, 0.0f, 1.0f}}, {{500.0f, 500.0f}, {0.0f, 0.0f, 1.0f, 1.0f}});
 
     for (auto layer : m_Stack.GetAllLayers()) {
         layer->OnRender();

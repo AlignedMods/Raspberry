@@ -24,8 +24,8 @@ public:
     virtual void OnRenderFinish() = 0;
 
     virtual f64 GetTime() const = 0;
-    virtual void SleepMilli(i32 milliseconds) const = 0;
-    void SleepSeconds(f64 seconds) const { SleepMilli(static_cast<i32>(seconds * 1000.0)); }
+    virtual void SleepSeconds(f64 seconds) const = 0;
+    void SleepMilli(f64 milliseconds) const { SleepSeconds(milliseconds / 1000.0); }
 
     virtual void* GetHandle() const = 0;
 

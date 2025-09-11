@@ -5,9 +5,9 @@ build/
 
 # Visual Studio files
 *.sln
-*.vsxproj
-*.vsxproj.filters
-*.vsxproj.user
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
 
 # Makefiles
 Makefile

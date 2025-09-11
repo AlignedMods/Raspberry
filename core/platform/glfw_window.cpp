@@ -13,9 +13,12 @@
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
 
+#include <thread>
+#include <chrono>
+
 #define DISPATCHER Dispatcher& dispatcher = Application::Get().GetDispatcher()
 
-KeyCode GLFWKeyToRaspberry(const i32 key) {
+static KeyCode GLFWKeyToRaspberry(const i32 key) {
     switch (key) {
         // non-printable keys
         case GLFW_KEY_ESCAPE: return KeyCode::Escape;
@@ -95,7 +98,7 @@ KeyCode GLFWKeyToRaspberry(const i32 key) {
     return KeyCode::None;
 }
 
-MouseCode GLFWMouseToRaspberry(i32 button) {
+static MouseCode GLFWMouseToRaspberry(i32 button) {
     switch (button) {
         case GLFW_MOUSE_BUTTON_LEFT: return MouseCode::Left;
         case GLFW_MOUSE_BUTTON_RIGHT: return MouseCode::Right;
@@ -250,10 +253,13 @@ f64 Window_GLFW::GetTime() const {
     return glfwGetTime();
 }
 
-void Window_GLFW::SleepMilli(i32 milliseconds) const {
-    // NOTE: if milliseconds is less than 0 is will end up esentially freezing the app forever (it's an unsigned int)
-    if (milliseconds > 0) {
-        ImGui_ImplGlfw_Sleep(milliseconds);
+void Window_GLFW::SleepSeconds(f64 seconds) const {
+    // security check
+    if (seconds > 0) {
+        f64 targetTime = seconds + GetTime();
+
+        while (GetTime() < targetTime) {}
+        // std::this_thread::sleep_for(std::chrono::milliseconds(milliseconds));
     }
 }
 

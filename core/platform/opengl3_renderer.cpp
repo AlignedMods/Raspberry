@@ -96,6 +96,10 @@ void Renderer_OpenGL3::UpdateViewport(Vector2 viewport) {
         0.0f,            // top
         -1.0f, 1.0f      // near-far
     );
+
+    m_Projection = glm::scale(m_Projection, glm::vec3(0.5f, 0.5f, 1.0f));
+
+    // m_Projection = glm::rotate(m_Projection, 45.0f, glm::vec3(1.0f, 1.0f, 1.0f));
 }
 
 void Renderer_OpenGL3::VertexV(const Vertex& v) {
