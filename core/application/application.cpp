@@ -22,7 +22,7 @@ Application::Application(const ApplicationSpecification& spec)
 
     m_Window = new Window_GLFW(data); // also sets up opengl
 
-    Vector2 viewport = {data.width, data.height};
+    Vector2 viewport = {static_cast<f32>(data.width), static_cast<f32>(data.height)};
     m_Renderer = new Renderer_OpenGL3(viewport);
 
     m_TargetFPS = spec.FPS;
@@ -36,49 +36,49 @@ Application::Application(const ApplicationSpecification& spec)
     auto& colors = style.Colors;
 
     // buttons
-    colors[ImGuiCol_Button] = ImVec4(0.2, 0.2, 0.2, 1);
-    colors[ImGuiCol_ButtonHovered] = ImVec4(0.3, 0.3, 0.3, 1);
-    colors[ImGuiCol_ButtonActive] = ImVec4(0.4, 0.4, 0.4, 1);
+    colors[ImGuiCol_Button] = ImVec4(0.2f, 0.2f, 0.2f, 1.0f);
+    colors[ImGuiCol_ButtonHovered] = ImVec4(0.3f, 0.3f, 0.3f, 1.0f);
+    colors[ImGuiCol_ButtonActive] = ImVec4(0.4f, 0.4f, 0.4f, 1.0f);
 
     // headers
-    colors[ImGuiCol_Header] = ImVec4(0.2, 0.2, 0.2, 1);
-    colors[ImGuiCol_HeaderHovered] = ImVec4(0.25, 0.25, 0.25, 1);
-    colors[ImGuiCol_HeaderActive] = ImVec4(0.3, 0.3, 0.3, 1);
+    colors[ImGuiCol_Header] = ImVec4(0.2f, 0.2f, 0.2f, 1.0f);
+    colors[ImGuiCol_HeaderHovered] = ImVec4(0.25f, 0.25f, 0.25f, 1.0f);
+    colors[ImGuiCol_HeaderActive] = ImVec4(0.3f, 0.3f, 0.3f, 1.0f);
 
     // checkboxes
-    colors[ImGuiCol_CheckMark] = ImVec4(0.9, 0.2, 0.2, 1);
+    colors[ImGuiCol_CheckMark] = ImVec4(0.9f, 0.2f, 0.2f, 1.0f);
 
     // frame backgrounds (checkbox, radio)
-    colors[ImGuiCol_FrameBg] = ImVec4(0.6, 0.3, 0.3, 0.7);
-    colors[ImGuiCol_FrameBgHovered] = ImVec4(0.7, 0.3, 0.3, 0.8);
-    colors[ImGuiCol_FrameBgActive] = ImVec4(0.8, 0.4, 0.4, 0.9);
+    colors[ImGuiCol_FrameBg] = ImVec4(0.6f, 0.3f, 0.3f, 0.7f);
+    colors[ImGuiCol_FrameBgHovered] = ImVec4(0.7f, 0.3f, 0.3f, 0.8f);
+    colors[ImGuiCol_FrameBgActive] = ImVec4(0.8f, 0.4f, 0.4f, 0.9f);
 
     // sliders
-    colors[ImGuiCol_SliderGrab] = ImVec4(0.7, 0.4, 0.4, 0.7);
-    colors[ImGuiCol_SliderGrabActive] = ImVec4(0.7, 0.4, 0.4, 0.9);
+    colors[ImGuiCol_SliderGrab] = ImVec4(0.7f, 0.4f, 0.4f, 0.7f);
+    colors[ImGuiCol_SliderGrabActive] = ImVec4(0.7f, 0.4f, 0.4f, 0.9f);
 
     // docking
-    colors[ImGuiCol_DockingPreview] = ImVec4(0.6, 0.3, 0.3, 0.7);
+    colors[ImGuiCol_DockingPreview] = ImVec4(0.6f, 0.3f, 0.3f, 0.7f);
 
     // tabs
-    colors[ImGuiCol_Tab] = ImVec4(0.3, 0.1, 0.1, 0.3);
-    colors[ImGuiCol_TabHovered] = ImVec4(0.3, 0.1, 0.1, 0.5);
-    colors[ImGuiCol_TabSelected] = ImVec4(0.3, 0.1, 0.1, 0.6);
-    colors[ImGuiCol_TabSelectedOverline] = ImVec4(0.4, 0.1, 0.1, 1);
-    colors[ImGuiCol_TabDimmed] = ImVec4(0.2, 0.1, 0.1, 0.2);
-    colors[ImGuiCol_TabDimmedSelected] = ImVec4(0.2, 0.1, 0.1, 0.4);
+    colors[ImGuiCol_Tab] = ImVec4(0.3f, 0.1f, 0.1f, 0.3f);
+    colors[ImGuiCol_TabHovered] = ImVec4(0.3f, 0.1f, 0.1f, 0.5f);
+    colors[ImGuiCol_TabSelected] = ImVec4(0.3f, 0.1f, 0.1f, 0.6f);
+    colors[ImGuiCol_TabSelectedOverline] = ImVec4(0.4f, 0.1f, 0.1f, 1.0f);
+    colors[ImGuiCol_TabDimmed] = ImVec4(0.2f, 0.1f, 0.1f, 0.2f);
+    colors[ImGuiCol_TabDimmedSelected] = ImVec4(0.2f, 0.1f, 0.1f, 0.4f);
 
     // windows
-    colors[ImGuiCol_WindowBg] = ImVec4(0.05, 0.05, 0.05, 1);
-    colors[ImGuiCol_TitleBg] = ImVec4(0.5, 0.2, 0.2, 1);
-    colors[ImGuiCol_TitleBgActive] = ImVec4(0.8, 0.2, 0.2, 1);
-    colors[ImGuiCol_ResizeGrip] = ImVec4(0.4, 0.2, 0.2, 0.8);
-    colors[ImGuiCol_ResizeGripHovered] = ImVec4(0.5, 0.2, 0.2, 0.9);
-    colors[ImGuiCol_ResizeGripActive] = ImVec4(0.6, 0.2, 0.2, 1);
+    colors[ImGuiCol_WindowBg] = ImVec4(0.05f, 0.05f, 0.05f, 1.0f);
+    colors[ImGuiCol_TitleBg] = ImVec4(0.5f, 0.2f, 0.2f, 1.0f);
+    colors[ImGuiCol_TitleBgActive] = ImVec4(0.8f, 0.2f, 0.2f, 1.0f);
+    colors[ImGuiCol_ResizeGrip] = ImVec4(0.4f, 0.2f, 0.2f, 0.8f);
+    colors[ImGuiCol_ResizeGripHovered] = ImVec4(0.5f, 0.2f, 0.2f, 0.9f);
+    colors[ImGuiCol_ResizeGripActive] = ImVec4(0.6f, 0.2f, 0.2f, 1.0f);
 
     // the resize thingy on the edge on windows!
-    colors[ImGuiCol_SeparatorActive] = ImVec4(0.8, 0.25, 0.25, 1);
-    colors[ImGuiCol_SeparatorHovered] = ImVec4(0.7, 0.3, 0.3, 1);
+    colors[ImGuiCol_SeparatorActive] = ImVec4(0.8f, 0.25f, 0.25f, 1.0f);
+    colors[ImGuiCol_SeparatorHovered] = ImVec4(0.7f, 0.3f, 0.3f, 1.0f);
 
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
