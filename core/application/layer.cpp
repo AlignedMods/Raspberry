@@ -1,11 +1,15 @@
 #include "layer.hpp"
 
-Layer::Layer() : m_Name("Layer") {}
+namespace Blackberry {
 
-std::string& Layer::GetName() {
-    return m_Name;
-}
+    Layer::Layer() : m_Name("Layer") {}
 
-void Layer::SetName(const std::string& name) {
-    m_Name = name;
-}
+    std::string& Layer::GetName() {
+        return m_Name;
+    }
+
+    void Layer::SetName(const std::string& name) {
+        m_Name = name;
+    }
+
+} // namespace Blackberry

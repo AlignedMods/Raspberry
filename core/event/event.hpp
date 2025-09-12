@@ -24,38 +24,42 @@ enum class EventType {
     MouseButtonPressed, MouseButtonReleased, MouseMoved, MouseScrolled
 };
 
-#define EVENT_CAST(type) static_cast<const type&>(event)
+#define EVENT_CAST(type) static_cast<const Blackberry::type&>(event)
 
 #define EVENT_CLASS_TYPE(type) virtual EventType GetEventType() const override { return EventType::type; } \
                                virtual DiscriptorType GetName() const override { return #type; }
 
 #define EVENT_CLASS_CATEGORY(category) virtual u32 GetCategoryFlags() const override { return category; }
 
-class Event {
-public:
-    virtual ~Event() = default;
-    using DiscriptorType = const char*;
+namespace Blackberry {
 
-    virtual EventType GetEventType() const = 0;
-    virtual DiscriptorType GetName() const = 0;
+    class Event {
+    public:
+        virtual ~Event() = default;
+        using DiscriptorType = const char*;
 
-    virtual std::string ToString() const { return GetName(); };
+        virtual EventType GetEventType() const = 0;
+        virtual DiscriptorType GetName() const = 0;
 
-    virtual u32 GetCategoryFlags() const = 0;
+        virtual std::string ToString() const { return GetName(); };
 
-    bool IsInCategory(EventCategory category) {
-        return GetCategoryFlags() & category;
-    }
-};
+        virtual u32 GetCategoryFlags() const = 0;
 
-class Dispatcher {
-public:
-    using SlotType = std::function<void(const Event&)>;
+        bool IsInCategory(EventCategory category) {
+            return GetCategoryFlags() & category;
+        }
+    };
 
-    void Subscribe(const SlotType& slot);
+    class Dispatcher {
+    public:
+        using SlotType = std::function<void(const Event&)>;
 
-    void Post(const Event& event);
+        void Subscribe(const SlotType& slot);
 
-private:
-    std::vector<SlotType> m_Observers;
-};
+        void Post(const Event& event);
+
+    private:
+        std::vector<SlotType> m_Observers;
+    };
+
+} // namespace Blackberry

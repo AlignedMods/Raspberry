@@ -5,69 +5,73 @@
 
 #include <sstream>
 
-class KeyEvent : public Event {
-public:
-    KeyCode GetKeyCode() const { return m_KeyCode; }
+namespace Blackberry {
 
-    virtual std::string ToString() const override {
-        std::stringstream ss;
-        ss << GetName();
-        ss << ", Keycode: ";
-        ss << (u32)m_KeyCode;
+    class KeyEvent : public Event {
+    public:
+        KeyCode GetKeyCode() const { return m_KeyCode; }
 
-        return ss.str();
-    }
+        virtual std::string ToString() const override {
+            std::stringstream ss;
+            ss << GetName();
+            ss << ", Keycode: ";
+            ss << (u32)m_KeyCode;
 
-    EVENT_CLASS_CATEGORY(EventCategory_Input | EventCategory_Keyboard);
+            return ss.str();
+        }
 
-protected:
-    KeyEvent(const KeyCode keycode)
-        : m_KeyCode(keycode) {}
+        EVENT_CLASS_CATEGORY(EventCategory_Input | EventCategory_Keyboard);
 
-protected:
-    KeyCode m_KeyCode;
-};
+    protected:
+        KeyEvent(const KeyCode keycode)
+            : m_KeyCode(keycode) {}
 
-class KeyPressedEvent : public KeyEvent {
-public:
-    KeyPressedEvent(const KeyCode keycode, const bool repeated)
-        : KeyEvent(keycode), m_Repeated(repeated) {}
+    protected:
+        KeyCode m_KeyCode;
+    };
 
-    bool IsRepeated() const { return m_Repeated; }
+    class KeyPressedEvent : public KeyEvent {
+    public:
+        KeyPressedEvent(const KeyCode keycode, const bool repeated)
+            : KeyEvent(keycode), m_Repeated(repeated) {}
 
-    EVENT_CLASS_TYPE(KeyPressed);
+        bool IsRepeated() const { return m_Repeated; }
 
-private:
-    bool m_Repeated;
-};
+        EVENT_CLASS_TYPE(KeyPressed);
 
-class KeyReleasedEvent : public KeyEvent {
-public:
-    KeyReleasedEvent(const KeyCode keycode)
-        : KeyEvent(keycode) {}
+    private:
+        bool m_Repeated;
+    };
 
-    EVENT_CLASS_TYPE(KeyReleased);
-};
+    class KeyReleasedEvent : public KeyEvent {
+    public:
+        KeyReleasedEvent(const KeyCode keycode)
+            : KeyEvent(keycode) {}
 
-class KeyTypedEvent : public Event {
-public:
-    KeyTypedEvent(const u32 key)
-        : m_Key(key) {}
+        EVENT_CLASS_TYPE(KeyReleased);
+    };
 
-    u32 GetKey() const { return m_Key; }
+    class KeyTypedEvent : public Event {
+    public:
+        KeyTypedEvent(const u32 key)
+            : m_Key(key) {}
 
-    virtual std::string ToString() const override {
-        std::stringstream ss;
-        ss << GetName();
-        ss << ", Key pressed: ";
-        ss << m_Key;
+        u32 GetKey() const { return m_Key; }
 
-        return ss.str();
-    }
+        virtual std::string ToString() const override {
+            std::stringstream ss;
+            ss << GetName();
+            ss << ", Key pressed: ";
+            ss << m_Key;
 
-    EVENT_CLASS_TYPE(KeyTyped);
-    EVENT_CLASS_CATEGORY(EventCategory_Input | EventCategory_Keyboard);
+            return ss.str();
+        }
 
-private:
-    u32 m_Key;
-};
+        EVENT_CLASS_TYPE(KeyTyped);
+        EVENT_CLASS_CATEGORY(EventCategory_Input | EventCategory_Keyboard);
+
+    private:
+        u32 m_Key;
+    };
+
+} // namespace Blackberry

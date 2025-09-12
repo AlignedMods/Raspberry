@@ -19,9 +19,6 @@ using i64 = int64_t;
 using f32 = float;
 using f64 = double;
 
-// size type
-using sz = size_t;
-
 struct Vector2 {
     f32 x, y;
 };
@@ -34,6 +31,16 @@ struct Vertex {
     Vector2 pos;
     Color color;
 };
+
+namespace Blackberry {
+
+    struct Image {
+        const void* data;
+        i32 width, height;
+        i32 channels;
+    };
+
+} // namespace Blackberry
 
 struct Texture {
     u32 id; // OpenGL texture ID (TODO: add Vulkan support?)

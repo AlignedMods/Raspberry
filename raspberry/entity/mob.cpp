@@ -2,8 +2,6 @@
 #include "game.hpp"
 #include "registry/registry.hpp"
 
-#include "raymath.h"
-
 void Mob::InitTextures() {
     // m_Textures["IdleLeft"] = Registry.GetTexture("brick");
     // m_Textures["IdleRight"] = Registry.GetTexture("brick");

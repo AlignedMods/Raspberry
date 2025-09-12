@@ -5,67 +5,71 @@
 
 #include <sstream>
 
-class MouseButtonPressedEvent : public Event {
-public:
-    MouseButtonPressedEvent(const MouseCode button)
-        : m_Button(button) {}
+namespace Blackberry {
 
-    MouseCode GetButton() const { return m_Button; }
+    class MouseButtonPressedEvent : public Event {
+    public:
+        MouseButtonPressedEvent(const MouseCode button)
+            : m_Button(button) {}
 
-    EVENT_CLASS_CATEGORY(EventCategory_Input | EventCategory_Mouse);
-    EVENT_CLASS_TYPE(MouseButtonPressed);
+        MouseCode GetButton() const { return m_Button; }
 
-private:
-    MouseCode m_Button;
-};
+        EVENT_CLASS_CATEGORY(EventCategory_Input | EventCategory_Mouse);
+        EVENT_CLASS_TYPE(MouseButtonPressed);
 
-class MouseButtonReleasedEvent : public Event {
-public:
-    MouseButtonReleasedEvent(const MouseCode button)
-        : m_Button(button) {}
+    private:
+        MouseCode m_Button;
+    };
 
-    MouseCode GetButton() const { return m_Button; }
+    class MouseButtonReleasedEvent : public Event {
+    public:
+        MouseButtonReleasedEvent(const MouseCode button)
+            : m_Button(button) {}
 
-    EVENT_CLASS_CATEGORY(EventCategory_Input | EventCategory_Mouse);
-    EVENT_CLASS_TYPE(MouseButtonReleased);
+        MouseCode GetButton() const { return m_Button; }
 
-private:
-    MouseCode m_Button;
-};
+        EVENT_CLASS_CATEGORY(EventCategory_Input | EventCategory_Mouse);
+        EVENT_CLASS_TYPE(MouseButtonReleased);
 
-class MouseMovedEvent : public Event {
-public:
-    MouseMovedEvent(const u32 x, const u32 y)
-        : m_X(x), m_Y(y) {}
+    private:
+        MouseCode m_Button;
+    };
 
-    u32 GetX() const { return m_X; }
-    u32 GetY() const { return m_Y; }
+    class MouseMovedEvent : public Event {
+    public:
+        MouseMovedEvent(const u32 x, const u32 y)
+            : m_X(x), m_Y(y) {}
 
-    virtual std::string ToString() const override {
-        std::stringstream ss;
-        ss << GetName() << ": " << m_X << ", " << m_Y;
+        u32 GetX() const { return m_X; }
+        u32 GetY() const { return m_Y; }
 
-        return ss.str();
-    }
+        virtual std::string ToString() const override {
+            std::stringstream ss;
+            ss << GetName() << ": " << m_X << ", " << m_Y;
 
-    EVENT_CLASS_CATEGORY(EventCategory_Input | EventCategory_Mouse);
-    EVENT_CLASS_TYPE(MouseMoved);
+            return ss.str();
+        }
 
-private:
-    u32 m_X;
-    u32 m_Y;
-};
+        EVENT_CLASS_CATEGORY(EventCategory_Input | EventCategory_Mouse);
+        EVENT_CLASS_TYPE(MouseMoved);
 
-class MouseScrolledEvent : public Event {
-public:
-    MouseScrolledEvent(const f32 scroll)
-        : m_Scroll(scroll) {}
+    private:
+        u32 m_X;
+        u32 m_Y;
+    };
 
-    f32 GetScroll() const { return m_Scroll; }
+    class MouseScrolledEvent : public Event {
+    public:
+        MouseScrolledEvent(const f32 scroll)
+            : m_Scroll(scroll) {}
 
-    EVENT_CLASS_CATEGORY(EventCategory_Input | EventCategory_Mouse);
-    EVENT_CLASS_TYPE(MouseScrolled);
+        f32 GetScroll() const { return m_Scroll; }
 
-private:
-    f32 m_Scroll;
-};
+        EVENT_CLASS_CATEGORY(EventCategory_Input | EventCategory_Mouse);
+        EVENT_CLASS_TYPE(MouseScrolled);
+
+    private:
+        f32 m_Scroll;
+    };
+
+} // namespace Blackberry

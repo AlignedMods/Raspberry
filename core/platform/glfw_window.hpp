@@ -5,21 +5,25 @@
 #define GLFW_INCLUDE_NONE
 #include "GLFW/glfw3.h"
 
-class Window_GLFW : public Window {
-public:
-    Window_GLFW(const WindowData& data);
-    ~Window_GLFW();
+namespace Blackberry {
 
-    virtual bool ShouldClose() const override;
-    virtual void OnUpdate() override;
-    virtual void OnRenderStart() override;
-    virtual void OnRenderFinish() override;
+    class Window_GLFW : public Window {
+    public:
+        Window_GLFW(const WindowData& data);
+        ~Window_GLFW();
 
-    virtual f64 GetTime() const override;
-    virtual void SleepSeconds(f64 seconds) const override;
+        virtual bool ShouldClose() const override;
+        virtual void OnUpdate() override;
+        virtual void OnRenderStart() override;
+        virtual void OnRenderFinish() override;
 
-    virtual void* GetHandle() const override;
+        virtual f64 GetTime() const override;
+        virtual void SleepSeconds(f64 seconds) const override;
 
-private:
-    GLFWwindow* m_Handle;
-};
+        virtual void* GetHandle() const override;
+
+    private:
+        GLFWwindow* m_Handle;
+    };
+
+} // namespace Blackberry

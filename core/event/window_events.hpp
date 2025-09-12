@@ -2,27 +2,31 @@
 
 #include "event/event.hpp"
 
-// quite a simple one, no info to give
-class WindowCloseEvent : public Event {
-public:
-    WindowCloseEvent() {}
+namespace Blackberry {
 
-    EVENT_CLASS_CATEGORY(EventCategory_Window);
-    EVENT_CLASS_TYPE(WindowClose);
-};
+    // quite a simple one, no info to give
+    class WindowCloseEvent : public Event {
+    public:
+        WindowCloseEvent() {}
 
-class WindowResizeEvent : public Event {
-public:
-    WindowResizeEvent(const i32 width, const i32 height)
-        : m_Width(width), m_Height(height) {}
+        EVENT_CLASS_CATEGORY(EventCategory_Window);
+        EVENT_CLASS_TYPE(WindowClose);
+    };
 
-    i32 GetWidth() const { return m_Width; }
-    i32 GetHeight() const { return m_Height; }
+    class WindowResizeEvent : public Event {
+    public:
+        WindowResizeEvent(const i32 width, const i32 height)
+            : m_Width(width), m_Height(height) {}
 
-    EVENT_CLASS_CATEGORY(EventCategory_Window);
-    EVENT_CLASS_TYPE(WindowResize);
+        i32 GetWidth() const { return m_Width; }
+        i32 GetHeight() const { return m_Height; }
 
-private:
-    i32 m_Width;
-    i32 m_Height;
-};
+        EVENT_CLASS_CATEGORY(EventCategory_Window);
+        EVENT_CLASS_TYPE(WindowResize);
+
+    private:
+        i32 m_Width;
+        i32 m_Height;
+    };
+
+} // namespace Blackberry

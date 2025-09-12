@@ -8,7 +8,7 @@ project "Raspberry" -- the actual game
 
     files { "**.cpp", "**.hpp" }
 
-    includedirs { "../core/", "../vendor/json/include/", "../vendor/imgui/" }
+    includedirs { "../core/", "../vendor/json/include/", "../vendor/imgui/", "./" }
 
     links { "Blackberry" }
     links { "glfw", "opengl32", "imgui" }

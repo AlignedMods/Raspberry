@@ -3,10 +3,8 @@
 #include "game.hpp"
 #include "log.hpp"
 
-#include "raylib.h"
-
 void Player::InitTextures() {
-    Registry& reg = Application::Get().GetRegistry();
+    Registry& reg = Blackberry::Application::Get().GetRegistry();
     m_Textures["IdleLeft"] = reg.GetTexture("player_left");
     // m_Textures["RunningLeftUp"] = Registry.GetTexture("player_left_walk_up");
     // m_Textures["RunningLeftDown"] = Registry.GetTexture("player_left_walk_down");
@@ -20,12 +18,14 @@ void Player::InitTextures() {
 
 // phyics
 void Player::OnUpdate() {
-    m_Texture = Application::Get().GetRegistry().GetTexture("player_left");
+    m_Texture = Blackberry::Application::Get().GetRegistry().GetTexture("player_left");
 
     m_Walking = false;
 
     // m_WalkSpeed.x = Approach(0.0f, m_WalkSpeed.x, 50.0f * Game.deltaTime);
     // m_DashSpeed.x = Approach(0.0f, m_DashSpeed.x, 50.0f * Game.deltaTime);
+
+#if 0
 
     if (IsKeyDown(KEY_D)) {
         m_Walking = true;
@@ -103,9 +103,11 @@ void Player::OnUpdate() {
         // m_JumpCooldown += 0.5f * Game.deltaTime;
     }
 
+#endif // 0
+
     // m_Velocity.y += m_Gravity * Game.deltaTime;
 
-    OffsetPositionByVelocity();
+    // OffsetPositionByVelocity();
 }
 
 void Player::OnRender() {

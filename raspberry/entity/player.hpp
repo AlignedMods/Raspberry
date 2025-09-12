@@ -2,8 +2,6 @@
 
 #include "entity/entity.hpp"
 
-#include "raylib.h"
-
 #include <map>
 #include <string>
 

@@ -3,7 +3,7 @@
 
 #include "editor.hpp"
 
-Application* Application::CreateApplication(const CommandLineArgs& args) {
+Blackberry::Application* Blackberry::Application::CreateApplication(const CommandLineArgs& args) {
     ApplicationSpecification spec = {
         .name = "Blueberry",
         .width = 1280,

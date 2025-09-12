@@ -1,7 +1,6 @@
 #include "entity/entity.hpp"
 #include "game.hpp"
 #include "log.hpp"
-#include "raylib.h"
 #include "types.hpp"
 
 Entity Entity::operator=(const Entity& other) {

@@ -4,25 +4,29 @@
 
 #include <vector>
 
-class LayerStack {
-public:
-    LayerStack();
-    ~LayerStack();
+namespace Blackberry {
 
-    template <typename T>
-    void PushLayer() {
-        static_assert(std::is_base_of<Layer, T>(), "Pushed layer is NOT a subclass of Layer!");
-        m_Layers.push_back(new T);
-        // if (IsWindowReady()) {
-        //     m_Layers.back()->OnInit();
-        // }
-    }
-    void PopLayer();
+    class LayerStack {
+    public:
+        LayerStack();
+        ~LayerStack();
 
-    Layer* GetLayer(const std::string& name);
+        template <typename T>
+        void PushLayer() {
+            static_assert(std::is_base_of<Layer, T>(), "Pushed layer is NOT a subclass of Layer!");
+            m_Layers.push_back(new T);
+            // if (IsWindowReady()) {
+            //     m_Layers.back()->OnInit();
+            // }
+        }
+        void PopLayer();
 
-    std::vector<Layer*>& GetAllLayers();
+        Layer* GetLayer(const std::string& name);
 
-private:
-    std::vector<Layer*> m_Layers;
-};
+        std::vector<Layer*>& GetAllLayers();
+
+    private:
+        std::vector<Layer*> m_Layers;
+    };
+
+} // namespace Blackberry

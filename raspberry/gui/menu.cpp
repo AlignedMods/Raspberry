@@ -7,8 +7,6 @@
 #include "registry/registry.hpp"
 #include "types.hpp"
 
-#include "raylib.h"
-
 static Menu* current = nullptr;
 static bool pressing = false;
 
@@ -66,7 +64,7 @@ static Menu PauseMenuDef{
 
 void M_StartGame() {
     Log(Log_Info, "Pressed Play!");
-    Game* g = (Game*)Application::Get().GetLayerStack().GetLayer("game");
+    Game* g = (Game*)Blackberry::Application::Get().GetLayerStack().GetLayer("game");
     // Log(Log_Info, "Layer ptr: %p", g);
     g->StartGameplay();
     SwitchMenu(nullptr);
@@ -80,7 +78,7 @@ void M_QuitGame() {
 }
 
 void Q_Quit() {
-    Application::Get().Close();
+    Blackberry::Application::Get().Close();
 }
 
 void Q_Return() {
@@ -88,7 +86,7 @@ void Q_Return() {
 }
 
 void P_Continue() {
-    Game* g = (Game*)Application::Get().GetLayerStack().GetLayer("game");
+    Game* g = (Game*)Blackberry::Application::Get().GetLayerStack().GetLayer("game");
     g->SetPause(false);
     SwitchMenu(nullptr);
 }
@@ -114,25 +112,27 @@ void MoveCursorToIndex(u16 index) {
     }
 
     if (last != current->selection) {
-        Registry& reg = Application::Get().GetRegistry();
-        PlaySound(reg.GetSound("menu_cycle"));
+        Registry& reg = Blackberry::Application::Get().GetRegistry();
+        // PlaySound(reg.GetSound("menu_cycle"));
     }
 }
 
 void ExecuteCallback() {
     current->items[current->selection].callback();
-    Registry& reg = Application::Get().GetRegistry();
-    PlaySound(reg.GetSound("menu_select"));
+    Registry& reg = Blackberry::Application::Get().GetRegistry();
+    // PlaySound(reg.GetSound("menu_select"));
 }
 
 void InitMenu() {
     SwitchMenu(&MainMenuDef);
 }
 
-void UpdateCurrentMenu(const Event& event) {
+void UpdateCurrentMenu(const Blackberry::Event& event) {
+    Game* g = (Game*)Blackberry::Application::Get().GetLayerStack().GetLayer("game");
+
     if (current) {
         if (event.GetEventType() == EventType::KeyPressed) {
-            const KeyPressedEvent& pressed = EVENT_CAST(KeyPressedEvent);
+            const Blackberry::KeyPressedEvent& pressed = EVENT_CAST(KeyPressedEvent);
 
             KeyCode key = pressed.GetKeyCode();
 
@@ -148,70 +148,20 @@ void UpdateCurrentMenu(const Event& event) {
                 ExecuteCallback();
             }
         }
-
-        char c = GetCharPressed();
-
-        // current->items[current->selection].timeSinceSelect += Game.deltaTime;
-
-        if (c) {
-            for (u16 i = 0; i < current->numItems; i++) {
-                if (current->items[i].shortcut == c) {
-                    MoveCursorToIndex(i);
-                }
-            }
-        }
-
-        // optional gamepad (controller) navigation
-        // i actually prefer it for some reason
-        // now i have a controller next to my setup always D:
-        if (IsGamepadAvailable(0)) {
-            f32 axis = GetGamepadAxisMovement(0, GAMEPAD_AXIS_LEFT_Y);
-
-            if (IsGamepadButtonPressed(0, GAMEPAD_BUTTON_LEFT_FACE_DOWN)) {
-                MoveCursor(false);
-            }
-
-            if (IsGamepadButtonPressed(0, GAMEPAD_BUTTON_LEFT_FACE_UP)) {
-                MoveCursor(true);
-            }
-
-            if (IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_DOWN)) {
-                ExecuteCallback();
-            }
-        }
     }
 
-    Game* g = (Game*)Application::Get().GetLayerStack().GetLayer("game");
-
     if (g->m_GameRunning) {
-        if (IsKeyPressed(KEY_ESCAPE)) {
-            SwitchMenu(&PauseMenuDef);
-            g->SetPause(true);
-        }
+        if (event.GetEventType() == EventType::KeyPressed) {
+            const Blackberry::KeyPressedEvent& pressed = EVENT_CAST(KeyPressedEvent);
 
-        if (IsGamepadAvailable(0)) {
-            if (IsGamepadButtonPressed(0, GAMEPAD_BUTTON_MIDDLE_RIGHT)) {
+            KeyCode key = pressed.GetKeyCode();
+
+            if (key == KeyCode::Escape) {
                 SwitchMenu(&PauseMenuDef);
                 g->SetPause(true);
             }
         }
     }
-
-    if (current) {
-        if (IsKeyPressed(KEY_ESCAPE)) {
-            if (current->prevMenu) {
-                SwitchMenu(current->prevMenu);
-            }
-        }
-
-        if (IsGamepadAvailable(0)) {
-            if (IsGamepadButtonPressed(0, 6)) {
-                if (current->prevMenu) {
-                    SwitchMenu(current->prevMenu);
-                }
-            }
-        }
-    } // holy
 }
 
 void RenderCurrentMenu() {
@@ -226,7 +176,8 @@ void RenderCurrentMenu() {
         }
 
         // centering the menu
-        y = (GetScreenHeight() - height) / 2.0f;
+        // y = (GetScreenHeight() - height) / 2.0f;
+        y = 200.0f;
 
         for (u16 i = 0; i < current->numItems; i++) {
             // u64 ticks = Game.ticks;
@@ -238,12 +189,12 @@ void RenderCurrentMenu() {
             if (current->selection == i) {
                 // make sure that if you switch the cursor is visible no matter what for some time
                 if (ticks % 40 > 20 || item->timeSinceSelect < 0.5f) {
-                    text = TextFormat("> %s <", text);
+                    // text = TextFormat("> %s <", text);
                 }
             }
 
             // Renderer.RenderText(text, {GetScreenWidth() / 2.0f, y}, item->fontSize);
-            DrawText(text, GetScreenWidth() / 2.0f, y, item->fontSize, WHITE);
+            // DrawText(text, GetScreenWidth() / 2.0f, y, item->fontSize, WHITE);
             y += item->fontSize + 10.0f;
         }
     }

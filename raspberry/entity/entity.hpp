@@ -2,9 +2,8 @@
 
 #include "types.hpp"
 
-#include "raylib.h"
-
 #include <map>
+#include <string>
 
 class Entity {
 public:
@@ -20,7 +19,7 @@ public:
     float GetX();
     float GetY();
 
-    f2& GetPos();
+    Vector2& GetPos();
 
     void UpdateTextures();
 
@@ -33,12 +32,12 @@ protected:
     float Approach(float end, float current, float interval);
 
 protected:
-    f2 m_Velocity;
-    f2 m_Position = {0.0f, 0.0f};
+    Vector2 m_Velocity;
+    Vector2 m_Position = {0.0f, 0.0f};
 
     // vectors for individual speeds
-    f2 m_WalkSpeed;
-    f2 m_DashSpeed;
+    Vector2 m_WalkSpeed;
+    Vector2 m_DashSpeed;
 
     bool m_Grounded;
     bool m_Walking;

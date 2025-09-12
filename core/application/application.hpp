@@ -8,91 +8,97 @@
 #include "window.hpp"
 #include "renderer.hpp"
 
-struct ApplicationSpecification {
-    const char* name;
-    u32 width, height;
-    u32 min_width, min_height;
-    bool enable_audio;
-    u32 FPS;
-};
+namespace Blackberry {
 
-class CommandLineArgs {
-public:
-    inline CommandLineArgs(u32 argc, char** argv) {
-        this->argc = argc;
-        this->argv = argv;
-    }
+    struct ApplicationSpecification {
+        const char* name;
+        u32 width, height;
+        u32 min_width, min_height;
+        bool enable_audio;
+        u32 FPS;
+    };
 
-    inline const char* at(const u32 i) {
-        if (i >= argc) {
-            Log(Log_Critical, "Trying to access position in command line arguments that is out of bounds! {Position %lu, Size %lu}", i, argc);
-            exit(1);
+    class CommandLineArgs {
+    public:
+        inline CommandLineArgs(u32 argc, char** argv) {
+            this->argc = argc;
+            this->argv = argv;
         }
 
-        return argv[i];
-    }
+        inline const char* at(const u32 i) {
+            if (i >= argc) {
+                Log(Log_Critical, "Trying to access position in command line arguments that is out of bounds! {Position %lu, Size %lu}", i, argc);
+                exit(1);
+            }
 
-    inline u32 size() const {
-        return argc;
-    }
+            return argv[i];
+        }
 
-private:
-    u32 argc;
-    char** argv;
-};
+        inline u32 size() const {
+            return argc;
+        }
 
-class Application {
-public:
-    Application(const ApplicationSpecification& spec);
-    ~Application();
+    private:
+        u32 argc;
+        char** argv;
+    };
 
-    void Run();
+    class Application {
+    public:
+        Application(const ApplicationSpecification& spec);
+        ~Application();
 
-    void SetIcon(const Texture& texture);
-    // void SetIcon(const Image& image);
+        void Run();
 
-    bool IsInitialized();
+        void SetIcon(const Texture& texture);
+        // void SetIcon(const Image& image);
 
-    void SetTargetFPS(u32 fps);
+        bool IsInitialized();
 
-    void Close();
+        void SetTargetFPS(u32 fps);
+        void SetWindowIcon(const Image& image);
 
-    static Application& Get();
-    Registry& GetRegistry() { return m_Registry; }
-    LayerStack& GetLayerStack() { return m_Stack; }
-    Dispatcher& GetDispatcher() { return m_Dispatcher; }
+        void Close();
 
-    f32 GetDeltaTime() const { return m_dt; }
+        static Application& Get();
+        Registry& GetRegistry() { return m_Registry; }
+        LayerStack& GetLayerStack() { return m_Stack; }
+        Dispatcher& GetDispatcher() { return m_Dispatcher; }
+        Renderer& GetRenderer() { return *m_Renderer; }
 
-    // To be implemented by client!
-    static Application* CreateApplication(const CommandLineArgs& args);
+        f32 GetDeltaTime() const { return m_dt; }
 
-private:
-    void OnUpdate();
-    void OnRender();
-    void OnUIRender();
-    void OnEvent(const Event& event);
+        // To be implemented by client!
+        static Application* CreateApplication(const CommandLineArgs& args);
 
-private:
-    ApplicationSpecification m_Specification;
+    private:
+        void OnUpdate();
+        void OnRender();
+        void OnUIRender();
+        void OnEvent(const Event& event);
 
-    u32 m_TargetFPS = 0;
+    private:
+        ApplicationSpecification m_Specification;
 
-    bool m_Running = false;
-    bool m_Initalized = false;
+        u32 m_TargetFPS = 0;
 
-    f64 m_CurrentTime = 0.0;
-    f64 m_LastTime = 0.0;
-    f32 m_dt = 0.0f;
+        bool m_Running = false;
+        bool m_Initalized = false;
 
-    f64 m_FixedUpdateTime = 0.0;
+        f64 m_CurrentTime = 0.0;
+        f64 m_LastTime = 0.0;
+        f32 m_dt = 0.0f;
 
-    LayerStack m_Stack;
-    Registry m_Registry;
-    Dispatcher m_Dispatcher;
+        f64 m_FixedUpdateTime = 0.0;
 
-    Window* m_Window = nullptr;
-    Renderer* m_Renderer = nullptr;
+        LayerStack m_Stack;
+        Registry m_Registry;
+        Dispatcher m_Dispatcher;
 
-    friend class Dispatcher;
-};
+        Window* m_Window = nullptr;
+        Renderer* m_Renderer = nullptr;
+
+        friend class Dispatcher;
+    };
+
+} // namespace Blackberry
