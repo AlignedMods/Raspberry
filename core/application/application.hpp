@@ -50,9 +50,6 @@ namespace Blackberry {
 
         void Run();
 
-        void SetIcon(const Texture& texture);
-        // void SetIcon(const Image& image);
-
         bool IsInitialized();
 
         void SetTargetFPS(u32 fps);

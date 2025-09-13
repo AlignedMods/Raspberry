@@ -3,6 +3,7 @@
 #include "application/layer.hpp"
 #include "gui/menu.hpp"
 #include "registry/registry.hpp"
+#include "types.hpp"
 
 #include <array>
 
@@ -33,4 +34,6 @@ private:
     Level* m_CurrentLevel = nullptr;
     
     bool m_Paused = false;
+
+    Texture m_Fox;
 };

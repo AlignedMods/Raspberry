@@ -10,6 +10,7 @@
 
 #include "imgui.h"
 #include "glad/glad.h"
+#include "stb_image.h"
 
 namespace Blackberry {
 
@@ -21,6 +22,8 @@ namespace Blackberry {
         data.name = spec.name;
         data.width = spec.width;
         data.height = spec.height;
+
+        stbi_set_flip_vertically_on_load(true);
 
         m_Window = new Window_GLFW(data); // also sets up opengl
 
@@ -133,8 +136,6 @@ namespace Blackberry {
         }
     }
 
-    void Application::SetIcon(const Texture& texture) {}
-
     bool Application::IsInitialized() {
         return m_Initalized;
     }
@@ -175,14 +176,6 @@ namespace Blackberry {
 
     void Application::OnRender() {
         m_Renderer->Clear();
-
-        if (usingTex) {
-            m_Renderer->UseTexture(Texture{});
-        } else {
-            m_Renderer->StopUseTexture();
-        }
-
-        m_Renderer->DrawRectangle({100.0f, 100.0f}, {300.0f, 100.0f}, {1.0f, 0.0f, 1.0f, 0.1f});
 
         for (auto layer : m_Stack.GetAllLayers()) {
             layer->OnRender();

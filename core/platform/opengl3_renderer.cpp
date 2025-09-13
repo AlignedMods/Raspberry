@@ -8,8 +8,6 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-constexpr f32 DEG2RAD = 3.14159f/180.0f;
-
 namespace Blackberry {
 
     // shaders
@@ -25,8 +23,7 @@ namespace Blackberry {
 
         uniform mat4 projection;
     
-        void main()
-        {
+        void main() {
             gl_Position = projection * vec4(a_Pos, 1.0);
             col = a_Color;
             texCoord = a_TexCoord;
@@ -44,18 +41,18 @@ namespace Blackberry {
         uniform sampler2D sampler;
         uniform int useTexture;
 
-        void main()
-        {
+        void main() {
             if (useTexture == 1) {
-                vec4 texelColor = texture(sampler, texCoord);
+                vec2 invert = texCoord;
+                invert.y = 1.0 - invert.y;
+
+                vec4 texelColor = texture(sampler, invert);
                 FragColor = col * texelColor;
             } else {
                 FragColor = col;
             }
         }
     );
-
-    static u32 tex;
 
     Renderer_OpenGL3::Renderer_OpenGL3(Vector2 viewport) {
         UpdateViewport(viewport);
@@ -108,35 +105,6 @@ namespace Blackberry {
         // generate VAOs and VBOs
         glGenVertexArrays(1, &m_VAO);
         glGenBuffers(1, &m_VBO);
-
-        stbi_set_flip_vertically_on_load(true);
-
-        // try load tex
-
-        i32 width;
-        i32 height;
-        i32 channels;
-
-        u8* data = stbi_load("fox.jpg", & width, &height, &channels, 4);
-
-        if (!data) {
-            Log(Log_Error, "Failed to find image!");
-        }
-
-        glGenTextures(1, &tex);
-        glBindTexture(GL_TEXTURE_2D, tex);
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-
-        glBindTexture(GL_TEXTURE_2D, 0);
-
-        stbi_image_free(data);
     }
 
     void Renderer_OpenGL3::UpdateViewport(Vector2 viewport) {
@@ -184,95 +152,42 @@ namespace Blackberry {
         glClear(GL_COLOR_BUFFER_BIT);
     }
 
-    void Renderer_OpenGL3::DrawPoint(const Vertex& p) {
-        Begin(RenderingMode::Points);
-        VertexV(p);
-        End();
-    }
-
-    void Renderer_OpenGL3::DrawTriangle(const Vertex& bl, const Vertex& t, const Vertex& br) {
-        Begin(RenderingMode::Triangles);
-
-        VertexV(bl);
-        VertexV(t);
-        VertexV(br);
-
-        End();
-    }
-
-    void Renderer_OpenGL3::DrawTriangle(Vector2 bl, Vector2 t, Vector2 br, const Color& color) {
-        Begin(RenderingMode::Triangles);
-
-        SetColor(color);
-        Vertex2f(bl.x, bl.y);
-        Vertex2f(t.x, t.y);
-        Vertex2f(br.x, br.y);
-
-        End();
-    }
-
-    void Renderer_OpenGL3::DrawRectangle(const Vertex& bl, const Vertex& br, const Vertex& tr, const Vertex& tl) {
-        Begin(RenderingMode::Triangles);
-
-        // first triangle
-        VertexV(bl);
-        VertexV(tr);
-        VertexV(br);
-
-        // second triangle
-        VertexV(bl);
-        VertexV(tl);
-        VertexV(tr);
-
-        End();
-    }
-
-    void Renderer_OpenGL3::DrawRectangle(Vector2 position, Vector2 dimensions, const Color& color) {
-        Vertex bl;
-        Vertex br;
-        Vertex tr;
-        Vertex tl;
-
-        bl = {{position.x, position.y + dimensions.y}, color};
-        br = {{position.x + dimensions.x, position.y + dimensions.y}, color};
-        tr = {{position.x + dimensions.x, position.y}, color};
-        tl = {position, color};
-    
-        DrawRectangle(bl, br, tr, tl);
-    }
-
-    void Renderer_OpenGL3::DrawCircle(const Vertex& center, f32 radius, u32 segments) {
-        f32 angle = 0.0f;
-        f32 stepLength = 360.0f / (f32)segments;
-
-        Begin(RenderingMode::Triangles);
-
-        for (u32 i = 0; i < segments; i++) {
-            SetColor(center.color);
-
-            Vertex2f(center.pos.x + cosf(DEG2RAD*angle)*radius, center.pos.y + sinf(DEG2RAD*angle)*radius);
-            Vertex2f(center.pos.x + cosf(DEG2RAD*(angle + stepLength*2.0f))*radius, center.pos.y + sinf(DEG2RAD*(angle + stepLength*2.0f))*radius);
-            Vertex2f(center.pos.x, center.pos.y);
-        
-            angle += stepLength;
-        }
-
-        End();
-    }
-
     void Renderer_OpenGL3::TexCoord2f(f32 x, f32 y) {
         m_CurrentTexCoord.x = x;
         m_CurrentTexCoord.y = y;
     }
 
-    void Renderer_OpenGL3::UseTexture(const Texture& teex) {
+    void Renderer_OpenGL3::UseTexture(const Texture& tex) {
+        if (tex.id == 0) { m_UsingTexture = false; return; }
+
         m_UsingTexture = true;
 
-        glBindTexture(GL_TEXTURE_2D, tex);
+        m_CurrentTexture = &tex;
+
+        // glBindTexture(GL_TEXTURE_2D, tex.id);
     }
 
-    void Renderer_OpenGL3::StopUseTexture() {
-        m_UsingTexture = false;
+    Texture Blackberry::Renderer_OpenGL3::GenTexture(const Image& image)
+    {
+        Texture tex{};
+
+        tex.width = image.width;
+        tex.height = image.height;
+
+        glGenTextures(1, &tex.id);
+        glBindTexture(GL_TEXTURE_2D, tex.id);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, tex.width, tex.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image.data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        return tex;
     }
 
     void Renderer_OpenGL3::Render() {
@@ -292,6 +207,8 @@ namespace Blackberry {
         if (m_UsingTexture) {
             u32 useTex = glGetUniformLocation(m_Shader, "useTexture");
             glUniform1i(useTex, 1);
+
+            glBindTexture(GL_TEXTURE_2D, m_CurrentTexture->id);
         } else {
             u32 useTex = glGetUniformLocation(m_Shader, "useTexture");
             glUniform1i(useTex, 0);

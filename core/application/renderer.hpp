@@ -28,20 +28,10 @@ namespace Blackberry {
 
         void SetColor(Color color) { m_Color = color; };
 
-        virtual void DrawPoint(const Vertex& p) = 0;
-
-        virtual void DrawTriangle(const Vertex& bl, const Vertex& t, const Vertex& br) = 0;
-        virtual void DrawTriangle(Vector2 bl, Vector2 t, Vector2 br, const Color& color) = 0; // it's faster to copy these types
-        virtual void DrawTriangle(Vector2 bl, Vector2 t, Vector2 br) { DrawTriangle(bl, t, br, m_Color); }; // uses the currently set color
-
-        virtual void DrawRectangle(const Vertex& bl, const Vertex& br, const Vertex& tr, const Vertex& tl) = 0;
-        virtual void DrawRectangle(Vector2 position, Vector2 dimensions, const Color& color) = 0;
-
-        virtual void DrawCircle(const Vertex& center, f32 radius, u32 segments) = 0;
-
         virtual void TexCoord2f(f32 x, f32 y) = 0;
         virtual void UseTexture(const Texture& texture) = 0;
-        virtual void StopUseTexture() = 0;
+
+        virtual Texture GenTexture(const Image& image) = 0;
 
     protected:
         virtual void Render() = 0;
